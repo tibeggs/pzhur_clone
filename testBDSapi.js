@@ -44,25 +44,27 @@ var ViewModel = function() {
 	this.measure = ko.observable("job_creation_rate");
 
 	this.sector.subscribe( function(newValue) {
-		getBDSdata(newValue);
+		getBDSdata(newValue,self.measure());
+	})
+
+	this.measure.subscribe( function(newValue) {
+		getBDSdata(self.sector(),newValue);
 	}) 
 
-}
 
 
 
-ko.applyBindings(new ViewModel());
 
-
-
-function getBDSdata(sic1) {
+function getBDSdata(sic1,measure) {
 	
     var requestdata={
         //"get": ["sic1","job_creation_rate","fage4"],
-		"get": "job_creation_rate,fage4",
+		"get": "fage4,"+measure,
         "for": "us:*",
 		"time": "2012"
     };
+
+
 	var url="http://api.census.gov/data/bds/firms";
 
 	var geturl=url+"?";
@@ -72,21 +74,11 @@ function getBDSdata(sic1) {
 	geturl+='&sic1='+sic1;
 	console.log(geturl);
 	
-	var parsed={};
+	
 	var jsoned=[];
 
 	d3.json(geturl,function (data) {
-		// for (i in data) {
-// 			if (i==0) {
-// 				for (name in data[0]) {
-// 					parsed[data[0][name]]=[];
-// 				}
-// 			} else {
-// 				for (name in data[0]) {
-// 					parsed[data[0][name]].push(data[i][name]);
-// 				}
-// 			}
-// 		}
+
 		for (i in data) {
 			var rec={};
 			if (i>0) {
@@ -96,36 +88,22 @@ function getBDSdata(sic1) {
 				jsoned.push(rec);
 			}
 		}
-		makechart(jsoned);
-		//console.log(parsed);
+		makechart(jsoned,measure);
+		
 	   	});
 
 	return jsoned;
 	
-	// var data;
-// 	d3.json(geturl, function(error, json) {
-//
-// 	  if (error) return console.warn(error);
-// 	  data = json;
-// 	  console.log(json[0]);
-// 	  console.log(data);
-// 	 // visualizeit();
-// 	});
-// 	//debugger;
-// 	console.log(data);
+
 }
 
 
-
-var datalocal="";
-
-var data=getBDSdata(0);
-//var datajson=data.responseJSON;
-//console.log(data);
+var data=getBDSdata(0,"job_creation_rate");
 
 
-function makechart(data) {
-	var margin = {top: 20, right: 30, bottom: 30, left: 40},
+
+function makechart(data,measure) {
+	var margin = {top: 20, right: 30, bottom: 30, left: 80},
     width = 960 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
 
@@ -137,9 +115,6 @@ function makechart(data) {
 	 			.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
 	 			.attr('class', 'chart');
 	
-	//data=[[5,10],[12,20],[50,10]];
-	
-	//debugger;
 	
 	var xScale = d3.scale.ordinal()
 					.domain(['a','b','c','d','e','f','g','h','i','j','k','l','m'])
@@ -149,7 +124,7 @@ function makechart(data) {
 					 .rangeRoundBands([0, width], .1);
 					 
 	var yScale = d3.scale.linear()
-                     .domain([0, d3.max(data, function(d) { return +d['job_creation_rate']; })])
+                     .domain([0, d3.max(data, function(d) { return +d[measure]; })])
                      .range([height,0]);
 					 
 					 //debugger;
@@ -161,8 +136,8 @@ function makechart(data) {
 				.attr("fill",  "green")
 				.attr("width", xScale.rangeBand())
 				.attr("transform", function(d) {return "translate("+xScale(d['fage4'])+",1500)";}).transition().duration(1000).ease("sin-in-out")
-				.attr("height", function(d) {return height-yScale(+d['job_creation_rate'])})
-				.attr("transform", function(d) {return "translate("+xScale(d['fage4'])+","+yScale(+d['job_creation_rate'])+")";})
+				.attr("height", function(d) {return height-yScale(+d[measure])})
+				.attr("transform", function(d) {return "translate("+xScale(d['fage4'])+","+yScale(+d[measure])+")";})
 	
 	//.transition().duration(1000)				
 					 
@@ -170,10 +145,10 @@ function makechart(data) {
 			       .data(data)
 			       .enter().append("text")
 					 .attr("x",function(d) {return xScale(d['fage4'])+xScale.rangeBand()/4})
-					 .attr("y",function(d) {return yScale(+d['job_creation_rate'])+3})
+					 .attr("y",function(d) {return yScale(+d[measure])+3})
 			         .attr("dy", ".75em")
 					 .attr("fill","white")
-			         .text(function(d) { return d['job_creation_rate']; });
+			         .text(function(d) { return d[measure]; });
 					 
 					 
 	 var xAxis = d3.svg.axis()
@@ -195,3 +170,8 @@ function makechart(data) {
 
 					 
 }
+}
+
+
+
+ko.applyBindings(new ViewModel());
