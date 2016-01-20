@@ -11,10 +11,37 @@ var ViewModel = function() {
 		{"code" : 50, "acr" : "WHO", "name" : "Wholesale Trade" },
 		{"code" : 52, "acr" : "RET", "name" : "Retail Trade" },
 		{"code" : 60, "acr" : "FIRE", "name" : "Finance, Insurance, and Real Estate" },
-		{"code" : 70, "acr" : "SRV", "name" : "Services" },
+		{"code" : 70, "acr" : "SRV", "name" : "Services" }
 		]);
+		
+	this.measures = ko.observableArray([
+		{"code" : "firms", "name" : "Number of firms" },
+		{"code" : "estabs", "name" : "Number of establishments" },
+		{"code" : "emp", "name" : "Employment" },
+		{"code" : "estabs_entry", "name" : "Establishments born during the last 12 months" },
+		{"code" : "estabs_entry_rate", "name" : "Establishment birth rate" },
+		{"code" : "estabs_exit", "name" : "Establishments exiting during the last 12 months" },
+		{"code" : "estabs_exit_rate", "name" : "Establishment exit rate" },
+		{"code" : "job_creation", "name" : "Jobs created over the last 12 months" },
+		{"code" : "job_creation_births", "name" : "Jobs created by establishment births over the last 12 months" },
+		{"code" : "job_creation_continuers", "name" : "Jobs created by continuing establishments over the last 12 months" },
+		{"code" : "job_creation_rate_births", "name" : "Jobs creation rate from establishment births" },
+		{"code" : "job_creation_rate", "name" : "Job creation rate" },
+		{"code" : "job_destruction", "name" : "Jobs destroyed within the last 12 months" },
+		{"code" : "job_destruction_deaths", "name" : "Jobs destroyed by establishment exit over the last 12 months" },
+		{"code" : "job_destruction_continuer", "name" : "Jobs destroyed at continuing establishments over the last 12 months" },
+		{"code" : "job_destruction_rate_deat", "name" : "Jobs destruction rate from establishment exit" },
+		{"code" : "job_destruction_rate", "name" : "Jobs destruction rate" },
+		{"code" : "net_job_creation", "name" : "Net job creation" },
+		{"code" : "net_job_creation_rate", "name" : "Net job creation rate" },
+		{"code" : "reallocation_rate", "name" : "Reallocation rate" },
+		{"code" : "firmdeath_firms", "name" : "Number of firm exits" },
+		{"code" : "firmdeath_estabs", "name" : "Establishment exit due to firm death" },
+		{"code" : "firmdeath_emp", "name" : "Job destruction from firm exit" }
+	]);
 
 	this.sector = ko.observable(00);
+	this.measure = ko.observable("job_creation_rate");
 
 	this.sector.subscribe( function(newValue) {
 		getBDSdata(newValue);
