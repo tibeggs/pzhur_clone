@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Testing BDS API</title>
+    <!--link rel="stylesheet" href="css/style.css"-->
+</head>
+<style>
+.axis text {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+</style>
+<body>
+  Sector:<br>
+  <select data-bind="options: sectors, optionsText: 'name', optionsValue: 'code'"></select>
+
+
+  <script src="jquery.min.js"></script>
+	<script src="d3.min.js"></script>
+  <script src="knockout-3.4.0.js"></script>
+  <script src="testBDSapi.js"></script>
+</body>
+</html>	
