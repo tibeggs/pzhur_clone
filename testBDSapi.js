@@ -1,6 +1,6 @@
 var ViewModel = function() {
-	//debugger;
 	var self = this;
+
 	this.sectors = ko.observableArray([
 		{"code" : 00, "acr" : "EW", "name" : "Economy Wide" },
 		{"code" : 07, "acr" : "AGR", "name" : "Agriculture, Forestry, and Fishing" },
@@ -13,13 +13,22 @@ var ViewModel = function() {
 		{"code" : 60, "acr" : "FIRE", "name" : "Finance, Insurance, and Real Estate" },
 		{"code" : 70, "acr" : "SRV", "name" : "Services" },
 		]);
-	}
+
+	this.sector = ko.observable(00);
+
+	this.sector.subscribe( function(newValue) {
+		getBDSdata(newValue);
+	}) 
+
+}
+
+
 
 ko.applyBindings(new ViewModel());
 
 
 
-function getBDSdata() {
+function getBDSdata(sic1) {
 	
     var requestdata={
         //"get": ["sic1","job_creation_rate","fage4"],
@@ -28,11 +37,12 @@ function getBDSdata() {
 		"time": "2012"
     };
 	var url="http://api.census.gov/data/bds/firms";
-	
+
 	var geturl=url+"?";
 	for (i in requestdata) {
 		geturl+="&"+i+"="+requestdata[i]
 	}
+	geturl+='&sic1='+sic1;
 	console.log(geturl);
 	
 	var parsed={};
@@ -82,7 +92,7 @@ function getBDSdata() {
 
 var datalocal="";
 
-var data=getBDSdata();
+var data=getBDSdata(0);
 //var datajson=data.responseJSON;
 //console.log(data);
 
@@ -92,13 +102,13 @@ function makechart(data) {
     width = 960 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
 
-	var svg = d3.select("body")
-				.append("svg")
-				.attr("width", width + margin.left + margin.right)
-    			.attr("height", height + margin.top + margin.bottom)
-				.append('g')
-				.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-				.attr('class', 'chart');
+	var svgcont = d3.select("svg");
+	svgcont.selectAll("*").remove();
+	svg=svgcont.attr("width", width + margin.left + margin.right)
+     			.attr("height", height + margin.top + margin.bottom)
+	 			.append('g')
+	 			.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+	 			.attr('class', 'chart');
 	
 	//data=[[5,10],[12,20],[50,10]];
 	

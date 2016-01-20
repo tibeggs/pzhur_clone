@@ -16,12 +16,46 @@
   stroke: #000;
   shape-rendering: crispEdges;
 }
+
+#plotarea {
+  margin-top: 15px;
+  margin-bottom: 15px;
+  margin-left: 50px;
+}
 </style>
 <body>
-  Sector:<br>
-  <select data-bind="options: sectors, optionsText: 'name', optionsValue: 'code'"></select>
-
-
+  <div id="selectors">
+    Sector:<br>
+    <select data-bind="options: sectors, optionsText: 'name', optionsValue: 'code', value: sector"></select>
+    <select id="control1" name="fdata" onchange="this.form.submit();" style="">
+    <option value="firms"> Number of firms</option>
+    <option value="estabs"> Number of establishments </option>
+    <option value="emp"> Employment </option>
+    <option value="estabs_entry"> Establishments born during the last 12 months </option>
+    <option value="estabs_entry_rate"> Establishment birth rate </option>
+    <option value="estabs_exit"> Establishments exiting during the last 12 months </option>
+    <option value="estabs_exit_rate"> Establishment exit rate </option>
+    <option value="job_creation"> Jobs created over the last 12 months </option>
+    <option value="job_creation_births"> Jobs created by establishment births over the last 12 months </option>
+    <option value="job_creation_continuers"> Jobs created by continuing establishments over the last 12 months </option>
+    <option value="job_creation_rate_births"> Jobs creation rate from establishment births </option>
+    <option selected="true" value="job_creation_rate"> Job creation rate </option>
+    <option value="job_destruction"> Jobs destroyed within the last 12 months </option>
+    <option value="job_destruction_deaths"> Jobs destroyed by establishment exit over the last 12 months </option>
+    <option value="job_destruction_continuer"> Jobs destroyed at continuing establishments over the last 12 months </option>
+    <option value="job_destruction_rate_deat"> Jobs destruction rate from establishment exit</option>
+    <option value="job_destruction_rate"> Jobs destruction rate </option>
+    <option value="net_job_creation"> Net job creation </option>
+    <option value="net_job_creation_rate"> Net job creation rate </option>
+    <option value="reallocation_rate"> Reallocation rate </option>
+     <option value="firmdeath_firms"> Number of firm exits </option>
+    <option value="firmdeath_estabs"> Establishment exit due to firm death </option>
+    <option value="firmdeath_emp"> Job destruction from firm exit </option>
+  </select>
+  </div>
+  <div id="plotarea">
+    <svg></svg>
+  </div>
   <script src="jquery.min.js"></script>
 	<script src="d3.min.js"></script>
   <script src="knockout-3.4.0.js"></script>
