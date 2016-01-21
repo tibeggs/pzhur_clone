@@ -1,7 +1,21 @@
+fage=[{"code" : "a", "name" : "0" },
+{"code" : "b", "name" : "1" },
+{"code" : "c", "name" : "3" },
+{"code" : "d", "name" : "3" },
+{"code" : "e", "name" : "4" },
+{"code" : "f", "name" : "5" },
+{"code" : "g", "name" : "6-10" },
+{"code" : "h", "name" : "11-15" },
+{"code" : "i", "name" : "16-20" },
+{"code" : "j", "name" : "21-25" },
+{"code" : "k", "name" : "26+" },
+{"code" : "l", "name" : "Left Censored" },
+{"code" : "m", "name" : "All Ages (selected by default)" }];
+
 var ViewModel = function() {
 	var self = this;
 
-	this.sectors = ko.observableArray([
+	this.sectors = [
 		{"code" : 00, "acr" : "EW", "name" : "Economy Wide" },
 		{"code" : 07, "acr" : "AGR", "name" : "Agriculture, Forestry, and Fishing" },
 		{"code" : 10, "acr" : "MIN", "name" : "Mining" },
@@ -12,9 +26,9 @@ var ViewModel = function() {
 		{"code" : 52, "acr" : "RET", "name" : "Retail Trade" },
 		{"code" : 60, "acr" : "FIRE", "name" : "Finance, Insurance, and Real Estate" },
 		{"code" : 70, "acr" : "SRV", "name" : "Services" }
-		]);
+		];
 		
-	this.measures = ko.observableArray([
+	this.measures = [
 		{"code" : "firms", "name" : "Number of firms" },
 		{"code" : "estabs", "name" : "Number of establishments" },
 		{"code" : "emp", "name" : "Employment" },
@@ -38,10 +52,10 @@ var ViewModel = function() {
 		{"code" : "firmdeath_firms", "name" : "Number of firm exits" },
 		{"code" : "firmdeath_estabs", "name" : "Establishment exit due to firm death" },
 		{"code" : "firmdeath_emp", "name" : "Job destruction from firm exit" }
-	]);
+	];
 
-	this.sector = ko.observable(00);
-	this.measure = ko.observable("job_creation_rate");
+	this.sector = ko.observable(this.sectors[0]);
+	this.measure = ko.observable(this.measures[12]);
 
 	this.sector.subscribe( function(newValue) {
 		getBDSdata(newValue,self.measure());
