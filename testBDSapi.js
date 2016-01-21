@@ -1,19 +1,22 @@
-fage=[{"code" : "a", "name" : "0" },
-{"code" : "b", "name" : "1" },
-{"code" : "c", "name" : "3" },
-{"code" : "d", "name" : "3" },
-{"code" : "e", "name" : "4" },
-{"code" : "f", "name" : "5" },
-{"code" : "g", "name" : "6-10" },
-{"code" : "h", "name" : "11-15" },
-{"code" : "i", "name" : "16-20" },
-{"code" : "j", "name" : "21-25" },
-{"code" : "k", "name" : "26+" },
-{"code" : "l", "name" : "Left Censored" },
-{"code" : "m", "name" : "All Ages (selected by default)" }];
+
 
 var ViewModel = function() {
 	var self = this;
+
+	this.fage = [
+		{"code" : "a", "name" : "0" },
+		{"code" : "b", "name" : "1" },
+		{"code" : "c", "name" : "3" },
+		{"code" : "d", "name" : "3" },
+		{"code" : "e", "name" : "4" },
+		{"code" : "f", "name" : "5" },
+		{"code" : "g", "name" : "6-10" },
+		{"code" : "h", "name" : "11-15" },
+		{"code" : "i", "name" : "16-20" },
+		{"code" : "j", "name" : "21-25" },
+		{"code" : "k", "name" : "26+" },
+		{"code" : "l", "name" : "Born before '76" },
+		{"code" : "m", "name" : "All Ages" }];
 
 	this.sectors = [
 		{"code" : 00, "acr" : "EW", "name" : "Economy Wide" },
@@ -25,8 +28,7 @@ var ViewModel = function() {
 		{"code" : 50, "acr" : "WHO", "name" : "Wholesale Trade" },
 		{"code" : 52, "acr" : "RET", "name" : "Retail Trade" },
 		{"code" : 60, "acr" : "FIRE", "name" : "Finance, Insurance, and Real Estate" },
-		{"code" : 70, "acr" : "SRV", "name" : "Services" }
-		];
+		{"code" : 70, "acr" : "SRV", "name" : "Services" }];
 		
 	this.measures = [
 		{"code" : "firms", "name" : "Number of firms" },
@@ -51,11 +53,10 @@ var ViewModel = function() {
 		{"code" : "reallocation_rate", "name" : "Reallocation rate" },
 		{"code" : "firmdeath_firms", "name" : "Number of firm exits" },
 		{"code" : "firmdeath_estabs", "name" : "Establishment exit due to firm death" },
-		{"code" : "firmdeath_emp", "name" : "Job destruction from firm exit" }
-	];
+		{"code" : "firmdeath_emp", "name" : "Job destruction from firm exit" }];
 
-	this.sector = ko.observable(this.sectors[0]);
-	this.measure = ko.observable(this.measures[12]);
+	this.sector = ko.observable(this.sectors[0].code);
+	this.measure = ko.observable(this.measures[11].code);
 
 	this.sector.subscribe( function(newValue) {
 		getBDSdata(newValue,self.measure());
@@ -131,10 +132,7 @@ function makechart(data,measure) {
 	
 	
 	var xScale = d3.scale.ordinal()
-					.domain(['a','b','c','d','e','f','g','h','i','j','k','l','m'])
-					 //.domain(data.map(function(d) { return d["fage4"]; }))
-                     //.domain([0, d3.max(data, function(d) { return +d['sic1']; })])
-                     //.range([0, width]);
+					 .domain(self.fage.map(function(d) { return d["code"]; }))
 					 .rangeRoundBands([0, width], .1);
 					 
 	var yScale = d3.scale.linear()
@@ -167,6 +165,10 @@ function makechart(data,measure) {
 					 
 	 var xAxis = d3.svg.axis()
 	     .scale(xScale)
+	     .tickFormat(function(d) {
+	     	for (i in self.fage)
+	     		if (self.fage[i].code===d) return self.fage[i].name;
+	     	})
 	     .orient("bottom");
 		 
 	 var yAxis = d3.svg.axis()
