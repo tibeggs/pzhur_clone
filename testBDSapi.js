@@ -110,6 +110,7 @@ var ViewModel = function() {
 
 	this.sector = ko.observable(this.sectors[0].code);
 	this.measure = ko.observable(this.measures[11].code);
+	this.state = ko.observable(this.states[0].code);
 
 	this.sector.subscribe( function(newValue) {
 		getBDSdata(newValue,self.measure());

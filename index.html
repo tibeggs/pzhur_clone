@@ -17,22 +17,46 @@
   shape-rendering: crispEdges;
 }
 
+
+
+
 #plotarea {
   margin-top: 15px;
   margin-bottom: 15px;
-  margin-left: 50px;
+  margin-left: 0px;
 }
+
+.selectors select {
+  width: 200px;
+  margin-left: 0px;
+}
+
+
+.selectors h4 {
+  display:inline-block;
+  font-weight: normal;
+  width: 100px;
+  margin: 5px;
+}
+
 </style>
+
+
 <body>
-  <div id="selectors">
-    Sector:
-    <select data-bind="options: sectors, optionsText: 'name', optionsValue: 'code', value: sector"></select>
-	Measure:
-    <select data-bind="options: measures, optionsText: 'name', optionsValue: 'code', value: measure"></select>
-  </div>
   <div id="plotarea">
     <svg></svg>
   </div>
+  <div class="selectors">
+
+        <h4>Sectors:</h4><select data-bind="options: sectors, optionsText: 'name', optionsValue: 'code', value: sector"></select><br>
+
+        <h4>Measures:</h4><select data-bind="options: measures, optionsText: 'name', optionsValue: 'code', value: measure"></select><br>
+
+        <h4>States:</h4><select data-bind="options: states, optionsText: 'name', optionsValue: 'code', value: state"></select><br>
+
+  </div>
+
+  
  
 	<script src="d3.min.js"></script>
   <script src="knockout-3.4.0.js"></script>
