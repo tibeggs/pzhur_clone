@@ -111,28 +111,37 @@ var ViewModel = function() {
 	this.sector = ko.observable(this.sectors[0].code);
 	this.measure = ko.observable(this.measures[11].code);
 	this.state = ko.observable(this.states[0].code);
+	this.SelectedStates = ko.observableArray([this.states[0].code]);
 
 	this.sector.subscribe( function(newValue) {
-		getBDSdata(newValue,self.measure());
+		getBDSdata(newValue,self.measure(), self.SelectedStates());
 	})
 
 	this.measure.subscribe( function(newValue) {
-		getBDSdata(self.sector(),newValue);
+		getBDSdata(self.sector(),newValue,self.SelectedStates());
+	})
+
+	this.SelectedStates.subscribe( function(newValue) {
+		getBDSdata(self.sector(),self.measure(),newValue);
 	}) 
 
 
 
 
 
-function getBDSdata(sic1,measure) {
+function getBDSdata(sic1,measure,states) {
 	
     var requestdata={
         //"get": ["sic1","job_creation_rate","fage4"],
 		"get": "fage4,"+measure,
-        "for": "us:*",
+        "for": "",
 		"time": "2012"
     };
 
+    requestdata["for"]="state:";
+    for (var i in states) 
+    	requestdata["for"]+=states[i]+',';
+    requestdata["for"]=requestdata["for"].slice(0,-1);
 
 	var url="http://api.census.gov/data/bds/firms";
 
@@ -157,7 +166,7 @@ function getBDSdata(sic1,measure) {
 				jsoned.push(rec);
 			}
 		}
-		makechart(jsoned,measure);
+		makechart(jsoned,measure,states);
 		
 	   	});
 
@@ -167,11 +176,11 @@ function getBDSdata(sic1,measure) {
 }
 
 
-var data=getBDSdata(0,"job_creation_rate");
+var data=getBDSdata(0,"job_creation_rate",["01"]);
 
 
 
-function makechart(data,measure) {
+function makechart(data,measure,states) {
 	var margin = {top: 20, right: 30, bottom: 30, left: 80},
     width = 960 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
@@ -194,26 +203,44 @@ function makechart(data,measure) {
                      .range([height,0]);
 					 
 					 //debugger;
+	var colors=['red','orange','yellow','green','cyan','blue'];
+
+	var nbars=states.length;
+	var barwidth= xScale.rangeBand()/nbars;
+
+	for (var i in data) {
+		for (var j in states) {
+			if (states[j]==data[i]['state'])
+				data[i]['istate']=j
+		}	
+	}
 					 
 	var chart = svg.selectAll("rect")
 			       .data(data)
 			       .enter().append("rect")
 				   //.attr("transform", function(d) {return "translate("+xScale(d['fage4'])+","+height+")";})  
-				.attr("fill",  "green")
-				.attr("width", xScale.rangeBand())
+				.attr("fill",  function(d) {
+					return colors[+d['istate']]
+				})
+				.attr("width", barwidth)
 				.attr("transform", function(d) {return "translate("+xScale(d['fage4'])+",1500)";}).transition().duration(1000).ease("sin-in-out")
 				.attr("height", function(d) {return height-yScale(+d[measure])})
-				.attr("transform", function(d) {return "translate("+xScale(d['fage4'])+","+yScale(+d[measure])+")";})
+				.attr("transform", function(d) {return "translate("+(xScale(d['fage4'])+barwidth*d.istate)+","+yScale(+d[measure])+")";})
 	
 	//.transition().duration(1000)				
 					 
 			   svg.selectAll("text")
 			       .data(data)
 			       .enter().append("text")
-					 .attr("x",function(d) {return xScale(d['fage4'])+xScale.rangeBand()/4})
-					 .attr("y",function(d) {return yScale(+d[measure])+3})
+					 .attr("x",function(d) {return (xScale(d['fage4'])+barwidth*d.istate)+barwidth/4})
+					 .attr("y",function(d) {return yScale(+d[measure])-15})
 			         .attr("dy", ".75em")
-					 .attr("fill","white")
+					 .attr("fill","black")
+					 .attr("font-size", function() {
+					 	return d3.min(data, function(d) { 
+					 		return 1.5*barwidth/d[measure].length; 
+					 	})
+					 	})
 			         .text(function(d) { return d[measure]; });
 					 
 					 
