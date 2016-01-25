@@ -1,9 +1,8 @@
 
-
 var ViewModel = function() {
 	var self = this;
 	this.states= [
-		{"code" : "00", "name" : "United States", "st":"US"},
+		//{"code" : "00", "name" : "United States", "st":"US"},
 		{"code" : "01", "name" : "Alabama", "st" : "AL" },
 		{"code" : "02", "name" : "Alaska", "st" : "AK" },
 		{"code" : "04", "name" : "Arizona", "st" : "AZ" },
@@ -108,10 +107,20 @@ var ViewModel = function() {
 		{"code" : "firmdeath_estabs", "name" : "Establishment exit due to firm death" },
 		{"code" : "firmdeath_emp", "name" : "Job destruction from firm exit" }];
 
+	this.data = ko.observableArray();
+
+	this.ShowData = ko.observable(0);
+	
+	self.toggleshowdata = function () {
+		if (self.ShowData()) {self.ShowData(0)} else (self.ShowData(1));
+	}
+
 	this.sector = ko.observable(this.sectors[0].code);
-	this.measure = ko.observable(this.measures[11].code);
+	this.measure = ko.observable(this.measures[18].code);
 	this.state = ko.observable(this.states[0].code);
-	this.SelectedStates = ko.observableArray([this.states[0].code]);
+	this.SelectedStates = ko.observableArray([this.states[02].code]);
+
+	getBDSdata(this.sector(),this.measure(),this.SelectedStates());
 
 	this.sector.subscribe( function(newValue) {
 		getBDSdata(newValue,self.measure(), self.SelectedStates());
@@ -166,19 +175,16 @@ function getBDSdata(sic1,measure,states) {
 				jsoned.push(rec);
 			}
 		}
+		updateBDSdata(jsoned);
 		makechart(jsoned,measure,states);
 		
 	   	});
 
-	return jsoned;
-	
-
 }
 
-
-var data=getBDSdata(0,"job_creation_rate",["01"]);
-
-
+function updateBDSdata(data) {
+	self.data(data);
+}
 
 function makechart(data,measure,states) {
 	var margin = {top: 20, right: 30, bottom: 30, left: 80},
@@ -197,14 +203,11 @@ function makechart(data,measure,states) {
 	var xScale = d3.scale.ordinal()
 					 .domain(self.fage.map(function(d) { return d["code"]; }))
 					 .rangeRoundBands([0, width], .1);
-					 
 	var yScale = d3.scale.linear()
-                     .domain([0, d3.max(data, function(d) { return +d[measure]; })])
-                     .range([height,0]);
-					 
-					 //debugger;
-	var colors=['red','orange','yellow','green','cyan','blue'];
-
+                     .domain([Math.min(0,d3.min(data, function(d) { return +d[measure]; })), d3.max(data, function(d) { return +d[measure]; })])
+                     .range([height,0]); 	  
+	var colors=['green','red','orange','cyan','purple','blue','magenta'];
+	//["#000000","#265DAB","#DF5C24","#059748","#E5126F","#9D722A","#7B3A96","#C7B42E","#CB2027","#4D4D4D","#5DA5DA","#FAA43A","#60BD68","#F17CB0","#B2912F","#B276B2","#DECF3F","#F15854","#8C8C8C","#8ABDE6","#FBB258","#90CD97","#F6AAC9","#BFA554","#BC99C7","#EDDD46","#F07E6E"];
 	var nbars=states.length;
 	var barwidth= xScale.rangeBand()/nbars;
 
@@ -223,25 +226,25 @@ function makechart(data,measure,states) {
 					return colors[+d['istate']]
 				})
 				.attr("width", barwidth)
-				.attr("transform", function(d) {return "translate("+xScale(d['fage4'])+",1500)";}).transition().duration(1000).ease("sin-in-out")
-				.attr("height", function(d) {return height-yScale(+d[measure])})
-				.attr("transform", function(d) {return "translate("+(xScale(d['fage4'])+barwidth*d.istate)+","+yScale(+d[measure])+")";})
+				.attr("transform", function(d) {return "translate("+xScale(d['fage4'])+",1500)";}).transition().duration(500).ease("sin-in-out")
+				.attr("height", function(d) {return Math.abs(yScale(0)-yScale(+d[measure]))})
+				.attr("transform", function(d) {return "translate("+(xScale(d['fage4'])+barwidth*d.istate)+","+yScale(Math.max(0,+d[measure]))+")";})
 	
 	//.transition().duration(1000)				
 					 
-			   svg.selectAll("text")
-			       .data(data)
-			       .enter().append("text")
-					 .attr("x",function(d) {return (xScale(d['fage4'])+barwidth*d.istate)+barwidth/4})
-					 .attr("y",function(d) {return yScale(+d[measure])-15})
-			         .attr("dy", ".75em")
-					 .attr("fill","black")
-					 .attr("font-size", function() {
-					 	return d3.min(data, function(d) { 
-					 		return 1.5*barwidth/d[measure].length; 
-					 	})
-					 	})
-			         .text(function(d) { return d[measure]; });
+   svg.selectAll("text")
+       .data(data)
+       .enter().append("text")
+		 .attr("x",function(d) {return (xScale(d['fage4'])+barwidth*d.istate)+barwidth/4})
+		 .attr("y",function(d) {return yScale(+d[measure])-8-7*Math.sign(d[measure])})
+         .attr("dy", ".75em")
+		 .attr("fill","#eeeeee")
+		 .attr("font-size", function() {
+		 	return d3.min(data, function(d) { 
+		 		return 1.5*barwidth/d[measure].length; 
+		 	})
+		 	})
+         .text(function(d) { return d[measure]; });
 					 
 					 
 	 var xAxis = d3.svg.axis()
@@ -258,14 +261,41 @@ function makechart(data,measure,states) {
 	 
 	 svg.append("g")
 	     .attr("class", "x axis")
-	     .attr("transform", "translate(0," + height + ")")
+	     .attr("transform", "translate(0," + yScale(0) + ")")
 	     .call(xAxis);	
 		 
 	 svg.append("g")
 		 .attr("class", "y axis")
 		 .call(yAxis); 
 
-					 
+	//Making Legend
+	var legendsvg=d3.select("#legend")
+	legendsvg
+		.selectAll("*")
+		.remove();
+
+	var symbolsize=Math.max(Math.min(barwidth,20),15);
+
+	legendsvg.selectAll("rect")
+		.data(data)
+		.enter()
+		.append("rect")
+		.attr("fill",  function(d) {
+					return colors[+d['istate']]
+		})
+		.attr("width",symbolsize).attr("height",symbolsize)
+		.attr("transform",function(d) {return "translate(0,"+(symbolsize+5)*d.istate+")";});
+
+	legendsvg.selectAll("text")
+		.data(data)
+		.enter()
+		.append("text")
+		.attr("fill","black")
+		.attr("transform",function(d) {return "translate("+(symbolsize+5)+","+(15+(symbolsize+5)*d.istate)+")";})
+		.text(function(d) {
+			for (i in self.states)
+	     		if (self.states[i].code===d.state) return self.states[i].name;
+	     });
 }
 }
 
