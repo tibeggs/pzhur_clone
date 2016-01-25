@@ -25,12 +25,15 @@
   margin-bottom: 15px;
   margin-left: 0px;
 }
+.selectors {
+  float:left;
+  margin-right: 50px;
+}
 
 .selectors select {
   width: 200px;
   margin-left: 0px;
 }
-
 
 .selectors h4 {
   display:inline-block;
@@ -46,16 +49,39 @@
   <div id="plotarea">
     <svg></svg>
   </div>
-  <div class="selectors">
+  <span class="selectors">
 
         <h4>Sectors:</h4><select data-bind="options: sectors, optionsText: 'name', optionsValue: 'code', value: sector"></select><br>
 
         <h4>Measures:</h4><select data-bind="options: measures, optionsText: 'name', optionsValue: 'code', value: measure"></select><br>
 
-        <h4>States:</h4><select data-bind="options: states, optionsText: 'name', optionsValue: 'code', selectedOptions: SelectedStates" multiple="true"></select><br>
+        <h4>States:</h4><select data-bind="options: states, optionsText: 'name', optionsValue: 'code', selectedOptions: SelectedStates" multiple="true" size=10></select><br>
 
-  </div>
+  </span>
 
+  <span>
+  Legend:<br>
+  <svg id="legend"></svg>
+  </span>
+<br>
+  <span style="float:left">
+  <button data-bind="click: toggleshowdata">Show Data:</button>
+
+
+  <table data-bind="visible: ShowData">
+    <thead>
+        <tr><th>Sector</th><th>Firm Age</th><th>State</th></tr>
+    </thead>
+    <tbody data-bind="foreach: data">
+        <tr>
+            <td data-bind="text: sic1"></td>
+            <td data-bind="text: fage4"></td>
+            <td data-bind="text: state"></td>
+            <td data-bind="text: state"></td>
+        </tr>
+    </tbody>
+</table>
+</span>
   
  
 	<script src="d3.min.js"></script>
