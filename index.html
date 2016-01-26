@@ -51,11 +51,11 @@
   </div>
   <span class="selectors">
 
-        <h4>Sectors:</h4><select data-bind="options: sectors, optionsText: 'name', optionsValue: 'code', value: sector"></select><br>
+        <h4>Sectors:</h4><select data-bind="options: model.sectors, optionsText: 'name', optionsValue: 'code', value: sector"></select><br>
 
-        <h4>Measures:</h4><select data-bind="options: measures, optionsText: 'name', optionsValue: 'code', value: measure"></select><br>
+        <h4>Measures:</h4><select data-bind="options: model.measures, optionsText: 'name', optionsValue: 'code', value: measure"></select><br>
 
-        <h4>States:</h4><select data-bind="options: states, optionsText: 'name', optionsValue: 'code', selectedOptions: SelectedStates" multiple="true" style="height: 150px"></select><br>
+        <h4>States:</h4><select data-bind="options: model.states, optionsText: 'name', optionsValue: 'code', selectedOptions: SelectedStates" multiple="true" style="height: 150px"></select><br>
 
   </span>
 

@@ -1,7 +1,5 @@
-
-var ViewModel = function() {
-	var self = this;
-	this.states= [
+var BDSVisModel = {
+	states : [
 		//{"code" : "00", "name" : "United States", "st":"US"},
 		{"code" : "01", "name" : "Alabama", "st" : "AL" },
 		{"code" : "02", "name" : "Alaska", "st" : "AK" },
@@ -53,9 +51,8 @@ var ViewModel = function() {
 		{"code" : "53", "name" : "Washington", "st" : "WA" },
 		{"code" : "54", "name" : "West Virginia", "st" : "WV" },
 		{"code" : "55", "name" : "Wisconsin", "st" : "WI" },
-		{"code" : "56", "name" : "Wyoming", "st" : "WY" }];
-
-	this.fage = [
+		{"code" : "56", "name" : "Wyoming", "st" : "WY" }],
+	fage : [
 		{"code" : "a", "name" : "0" },
 		{"code" : "b", "name" : "1" },
 		{"code" : "c", "name" : "2" },
@@ -68,9 +65,9 @@ var ViewModel = function() {
 		{"code" : "j", "name" : "21-25" },
 		{"code" : "k", "name" : "26+" },
 		{"code" : "l", "name" : "Born before '76" },
-		{"code" : "m", "name" : "All Ages" }];
+		{"code" : "m", "name" : "All Ages" }],
 
-	this.fsize = [
+	fsize : [
 		{"code" : "a", "name" : "1-4" },
 		{"code" : "b", "name" : "5-9" },
 		{"code" : "c", "name" : "10-19" },
@@ -83,9 +80,9 @@ var ViewModel = function() {
 		{"code" : "j", "name" : "2500-4999" },
 		{"code" : "k", "name" : "5000-9999" },
 		{"code" : "l", "name" : "10000+" },
-		{"code" : "m", "name" : "All Sizes" }];
+		{"code" : "m", "name" : "All Sizes" }],
 
-	this.sectors = [
+	sectors : [
 		{"code" : 00, "acr" : "EW", "name" : "Economy Wide" },
 		{"code" : 07, "acr" : "AGR", "name" : "Agriculture, Forestry, and Fishing" },
 		{"code" : 10, "acr" : "MIN", "name" : "Mining" },
@@ -95,9 +92,9 @@ var ViewModel = function() {
 		{"code" : 50, "acr" : "WHO", "name" : "Wholesale Trade" },
 		{"code" : 52, "acr" : "RET", "name" : "Retail Trade" },
 		{"code" : 60, "acr" : "FIRE", "name" : "Finance, Insurance, and Real Estate" },
-		{"code" : 70, "acr" : "SRV", "name" : "Services" }];
+		{"code" : 70, "acr" : "SRV", "name" : "Services" }],
 		
-	this.measures = [
+	measures : [
 		{"code" : "firms", "name" : "Number of firms" },
 		{"code" : "estabs", "name" : "Number of establishments" },
 		{"code" : "emp", "name" : "Employment" },
@@ -120,7 +117,20 @@ var ViewModel = function() {
 		{"code" : "reallocation_rate", "name" : "Reallocation rate" },
 		{"code" : "firmdeath_firms", "name" : "Number of firm exits" },
 		{"code" : "firmdeath_estabs", "name" : "Establishment exit due to firm death" },
-		{"code" : "firmdeath_emp", "name" : "Job destruction from firm exit" }];
+		{"code" : "firmdeath_emp", "name" : "Job destruction from firm exit" }],
+
+	InitModel : function() {
+		
+	}
+
+};
+
+
+
+var ViewModel = function() {
+	var self = this;
+
+	this.model = BDSVisModel;
 
 	this.measlookup={}; this.statelookup={};this.fagelookup={};this.fsizelookup={};
 
@@ -133,39 +143,41 @@ var ViewModel = function() {
 		if (self.ShowData()) {self.ShowData(0)} else (self.ShowData(1));
 	}
 
-	this.sector = ko.observable(this.sectors[0].code);
-	this.measure = ko.observable(this.measures[18].code);
-	this.state = ko.observable(this.states[0].code);
-	this.SelectedStates = ko.observableArray([this.states[02].code]);
+	this.sector = ko.observable(this.model.sectors[0].code);
+	this.measure = ko.observable(this.model.measures[18].code);
+	this.state = ko.observable(this.model.states[0].code);
+	this.SelectedStates = ko.observableArray([this.model.states[02].code]);
+
+	//Subscribe to input changes
+	self.sector.subscribe( function(newValue) {
+		getBDSdata(newValue,self.measure(), self.SelectedStates());
+	})
+
+	self.measure.subscribe( function(newValue) {
+		getBDSdata(self.sector(),newValue,self.SelectedStates());
+	})
+
+	self.SelectedStates.subscribe( function(newValue) {
+		getBDSdata(self.sector(),self.measure(),newValue);
+	}) 
+
+	//Initial request and plot
+	getBDSdata(self.sector(),self.measure(),self.SelectedStates());
 	
 
 	var InitVM = function () {
 
 		//Create dictionaries/hashmaps to lookup names of categorical variable values
-		for (var i in self.states)
-			self.statelookup[self.states[i].code]=self.states[i].name;
-		for (var i in self.measures)
-			self.measlookup[self.measures[i].code]=self.measures[i].name;
-		for (var i in self.fage)
-			self.fagelookup[self.fage[i].code]=self.fage[i].name;
-		for (var i in self.fsize)
-			self.fsizelookup[self.fsize[i].code]=self.fsize[i].name;
+		for (var i in self.model.states)
+			self.statelookup[self.model.states[i].code]=self.model.states[i].name;
+		for (var i in self.model.measures)
+			self.measlookup[self.model.measures[i].code]=self.model.measures[i].name;
+		for (var i in self.model.fage)
+			self.fagelookup[self.model.fage[i].code]=self.model.fage[i].name;
+		for (var i in self.model.fsize)
+			self.fsizelookup[self.model.fsize[i].code]=self.model.fsize[i].name;
 
-		//Subscribe to input changes
-		self.sector.subscribe( function(newValue) {
-			getBDSdata(newValue,self.measure(), self.SelectedStates());
-		})
-
-		self.measure.subscribe( function(newValue) {
-			getBDSdata(self.sector(),newValue,self.SelectedStates());
-		})
-
-		self.SelectedStates.subscribe( function(newValue) {
-			getBDSdata(self.sector(),self.measure(),newValue);
-		}) 
-
-		//Initial request and plot
-		getBDSdata(self.sector(),self.measure(),self.SelectedStates());
+		
 	}
 
 	InitVM();
@@ -241,7 +253,7 @@ var ViewModel = function() {
 		
 		
 		var xScale = d3.scale.ordinal()
-		.domain(self.fage.map(function(d) { return d["name"]; }))
+		.domain(self.model.fage.map(function(d) { return d["name"]; }))
 		.rangeRoundBands([0, width], .1);
 		var yScale = d3.scale.linear()
 		.domain([Math.min(0,d3.min(data, function(d) { return +d[measure]; })), d3.max(data, function(d) { return +d[measure]; })])
@@ -255,17 +267,14 @@ var ViewModel = function() {
 		var chart = svg.selectAll("rect")
 			.data(data)
 			.enter().append("rect")
-		   	.attr("fill",  function(d) {
-		   		return colors[+d['istate']]
-		   	})
+		   	.attr("fill",  function(d) {return colors[+d['istate']]})
 		   	.attr("width", barwidth)
 		   	.attr("x",function(d) {return xScale(d['fage4'])+barwidth*d.istate})
 		   	.attr("y",function(d) {return yScale(0)})
-		   	.attr("height",0).transition().duration(500).ease("sin-in-out")
+		   	.attr("height",0).transition()
+		   	.duration(500).ease("sin-in-out")
 		   	.attr("y",function(d) {return yScale(Math.max(0,+d[measure]))})
 		   	.attr("height", function(d) {return Math.abs(yScale(0)-yScale(+d[measure]))})
-
-		//.transition().duration(1000)				
 
 		svg.selectAll("text")
 			.data(data)
