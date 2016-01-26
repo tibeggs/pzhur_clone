@@ -55,11 +55,11 @@
 
         <h4>Measures:</h4><select data-bind="options: measures, optionsText: 'name', optionsValue: 'code', value: measure"></select><br>
 
-        <h4>States:</h4><select data-bind="options: states, optionsText: 'name', optionsValue: 'code', selectedOptions: SelectedStates" multiple="true" size=10></select><br>
+        <h4>States:</h4><select data-bind="options: states, optionsText: 'name', optionsValue: 'code', selectedOptions: SelectedStates" multiple="true" style="height: 150px"></select><br>
 
   </span>
 
-  <span>
+  <span style="display:block; overflow:auto; height: 200px; width:300px">
   Legend:<br>
   <svg id="legend"></svg>
   </span>
@@ -70,13 +70,12 @@
 
   <table data-bind="visible: ShowData">
     <thead>
-        <tr><th>Sector</th><th>Firm Age</th><th>State</th></tr>
+        <tr><th>Firm Age</th><th>Measure</th><th>State</th></tr>
     </thead>
     <tbody data-bind="foreach: data">
         <tr>
-            <td data-bind="text: sic1"></td>
             <td data-bind="text: fage4"></td>
-            <td data-bind="text: state"></td>
+            <td style="text-align: center" data-bind="text: value"></td>
             <td data-bind="text: state"></td>
         </tr>
     </tbody>

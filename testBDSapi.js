@@ -58,7 +58,7 @@ var ViewModel = function() {
 	this.fage = [
 		{"code" : "a", "name" : "0" },
 		{"code" : "b", "name" : "1" },
-		{"code" : "c", "name" : "3" },
+		{"code" : "c", "name" : "2" },
 		{"code" : "d", "name" : "3" },
 		{"code" : "e", "name" : "4" },
 		{"code" : "f", "name" : "5" },
@@ -69,6 +69,21 @@ var ViewModel = function() {
 		{"code" : "k", "name" : "26+" },
 		{"code" : "l", "name" : "Born before '76" },
 		{"code" : "m", "name" : "All Ages" }];
+
+	this.fsize = [
+		{"code" : "a", "name" : "1-4" },
+		{"code" : "b", "name" : "5-9" },
+		{"code" : "c", "name" : "10-19" },
+		{"code" : "d", "name" : "20-49" },
+		{"code" : "e", "name" : "50-99" },
+		{"code" : "f", "name" : "100-249" },
+		{"code" : "g", "name" : "250-499" },
+		{"code" : "h", "name" : "500-999" },
+		{"code" : "i", "name" : "1000-2499" },
+		{"code" : "j", "name" : "2500-4999" },
+		{"code" : "k", "name" : "5000-9999" },
+		{"code" : "l", "name" : "10000+" },
+		{"code" : "m", "name" : "All Sizes" }];
 
 	this.sectors = [
 		{"code" : 00, "acr" : "EW", "name" : "Economy Wide" },
@@ -107,10 +122,12 @@ var ViewModel = function() {
 		{"code" : "firmdeath_estabs", "name" : "Establishment exit due to firm death" },
 		{"code" : "firmdeath_emp", "name" : "Job destruction from firm exit" }];
 
+	this.measlookup={}; this.statelookup={};this.fagelookup={};this.fsizelookup={};
+
 	this.data = ko.observableArray();
 
 	this.ShowData = ko.observable(0);
-	
+
 	self.toggleshowdata = function () {
 		if (self.ShowData()) {self.ShowData(0)} else (self.ShowData(1));
 	}
@@ -119,184 +136,201 @@ var ViewModel = function() {
 	this.measure = ko.observable(this.measures[18].code);
 	this.state = ko.observable(this.states[0].code);
 	this.SelectedStates = ko.observableArray([this.states[02].code]);
-
-	getBDSdata(this.sector(),this.measure(),this.SelectedStates());
-
-	this.sector.subscribe( function(newValue) {
-		getBDSdata(newValue,self.measure(), self.SelectedStates());
-	})
-
-	this.measure.subscribe( function(newValue) {
-		getBDSdata(self.sector(),newValue,self.SelectedStates());
-	})
-
-	this.SelectedStates.subscribe( function(newValue) {
-		getBDSdata(self.sector(),self.measure(),newValue);
-	}) 
-
-
-
-
-
-function getBDSdata(sic1,measure,states) {
 	
-    var requestdata={
-        //"get": ["sic1","job_creation_rate","fage4"],
-		"get": "fage4,"+measure,
-        "for": "",
-		"time": "2012"
-    };
 
-    requestdata["for"]="state:";
-    for (var i in states) 
-    	requestdata["for"]+=states[i]+',';
-    requestdata["for"]=requestdata["for"].slice(0,-1);
+	var InitVM = function () {
 
-	var url="http://api.census.gov/data/bds/firms";
+		//Create dictionaries/hashmaps to lookup names of categorical variable values
+		for (var i in self.states)
+			self.statelookup[self.states[i].code]=self.states[i].name;
+		for (var i in self.measures)
+			self.measlookup[self.measures[i].code]=self.measures[i].name;
+		for (var i in self.fage)
+			self.fagelookup[self.fage[i].code]=self.fage[i].name;
+		for (var i in self.fsize)
+			self.fsizelookup[self.fsize[i].code]=self.fsize[i].name;
 
-	var geturl=url+"?";
-	for (i in requestdata) {
-		geturl+="&"+i+"="+requestdata[i]
-	}
-	geturl+='&sic1='+sic1;
-	console.log(geturl);
-	
-	
-	var jsoned=[];
-
-	d3.json(geturl,function (data) {
-
-		for (i in data) {
-			var rec={};
-			if (i>0) {
-				for (name in data[0]) {
-					rec[data[0][name]]=data[i][name];
-				}
-				jsoned.push(rec);
-			}
-		}
-		updateBDSdata(jsoned);
-		makechart(jsoned,measure,states);
-		
-	   	});
-
-}
-
-function updateBDSdata(data) {
-	self.data(data);
-}
-
-function makechart(data,measure,states) {
-	var margin = {top: 20, right: 30, bottom: 30, left: 80},
-    width = 960 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
-
-	var svgcont = d3.select("svg");
-	svgcont.selectAll("*").remove();
-	svg=svgcont.attr("width", width + margin.left + margin.right)
-     			.attr("height", height + margin.top + margin.bottom)
-	 			.append('g')
-	 			.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-	 			.attr('class', 'chart');
-	
-	
-	var xScale = d3.scale.ordinal()
-					 .domain(self.fage.map(function(d) { return d["code"]; }))
-					 .rangeRoundBands([0, width], .1);
-	var yScale = d3.scale.linear()
-                     .domain([Math.min(0,d3.min(data, function(d) { return +d[measure]; })), d3.max(data, function(d) { return +d[measure]; })])
-                     .range([height,0]); 	  
-	var colors=['green','red','orange','cyan','purple','blue','magenta'];
-	//["#000000","#265DAB","#DF5C24","#059748","#E5126F","#9D722A","#7B3A96","#C7B42E","#CB2027","#4D4D4D","#5DA5DA","#FAA43A","#60BD68","#F17CB0","#B2912F","#B276B2","#DECF3F","#F15854","#8C8C8C","#8ABDE6","#FBB258","#90CD97","#F6AAC9","#BFA554","#BC99C7","#EDDD46","#F07E6E"];
-	var nbars=states.length;
-	var barwidth= xScale.rangeBand()/nbars;
-
-	for (var i in data) {
-		for (var j in states) {
-			if (states[j]==data[i]['state'])
-				data[i]['istate']=j
-		}	
-	}
-					 
-	var chart = svg.selectAll("rect")
-			       .data(data)
-			       .enter().append("rect")
-				   //.attr("transform", function(d) {return "translate("+xScale(d['fage4'])+","+height+")";})  
-				.attr("fill",  function(d) {
-					return colors[+d['istate']]
-				})
-				.attr("width", barwidth)
-				.attr("transform", function(d) {return "translate("+xScale(d['fage4'])+",1500)";}).transition().duration(500).ease("sin-in-out")
-				.attr("height", function(d) {return Math.abs(yScale(0)-yScale(+d[measure]))})
-				.attr("transform", function(d) {return "translate("+(xScale(d['fage4'])+barwidth*d.istate)+","+yScale(Math.max(0,+d[measure]))+")";})
-	
-	//.transition().duration(1000)				
-					 
-   svg.selectAll("text")
-       .data(data)
-       .enter().append("text")
-		 .attr("x",function(d) {return (xScale(d['fage4'])+barwidth*d.istate)+barwidth/4})
-		 .attr("y",function(d) {return yScale(+d[measure])-8-7*Math.sign(d[measure])})
-         .attr("dy", ".75em")
-		 .attr("fill","#eeeeee")
-		 .attr("font-size", function() {
-		 	return d3.min(data, function(d) { 
-		 		return 1.5*barwidth/d[measure].length; 
-		 	})
-		 	})
-         .text(function(d) { return d[measure]; });
-					 
-					 
-	 var xAxis = d3.svg.axis()
-	     .scale(xScale)
-	     .tickFormat(function(d) {
-	     	for (i in self.fage)
-	     		if (self.fage[i].code===d) return self.fage[i].name;
-	     	})
-	     .orient("bottom");
-		 
-	 var yAxis = d3.svg.axis()
-	     .scale(yScale)
-	     .orient("left");
-	 
-	 svg.append("g")
-	     .attr("class", "x axis")
-	     .attr("transform", "translate(0," + yScale(0) + ")")
-	     .call(xAxis);	
-		 
-	 svg.append("g")
-		 .attr("class", "y axis")
-		 .call(yAxis); 
-
-	//Making Legend
-	var legendsvg=d3.select("#legend")
-	legendsvg
-		.selectAll("*")
-		.remove();
-
-	var symbolsize=Math.max(Math.min(barwidth,20),15);
-
-	legendsvg.selectAll("rect")
-		.data(data)
-		.enter()
-		.append("rect")
-		.attr("fill",  function(d) {
-					return colors[+d['istate']]
+		//Subscribe to input changes
+		self.sector.subscribe( function(newValue) {
+			getBDSdata(newValue,self.measure(), self.SelectedStates());
 		})
-		.attr("width",symbolsize).attr("height",symbolsize)
-		.attr("transform",function(d) {return "translate(0,"+(symbolsize+5)*d.istate+")";});
 
-	legendsvg.selectAll("text")
-		.data(data)
-		.enter()
-		.append("text")
-		.attr("fill","black")
-		.attr("transform",function(d) {return "translate("+(symbolsize+5)+","+(15+(symbolsize+5)*d.istate)+")";})
-		.text(function(d) {
-			for (i in self.states)
-	     		if (self.states[i].code===d.state) return self.states[i].name;
-	     });
-}
+		self.measure.subscribe( function(newValue) {
+			getBDSdata(self.sector(),newValue,self.SelectedStates());
+		})
+
+		self.SelectedStates.subscribe( function(newValue) {
+			getBDSdata(self.sector(),self.measure(),newValue);
+		}) 
+
+		//Initial request and plot
+		getBDSdata(self.sector(),self.measure(),self.SelectedStates());
+	}
+
+	InitVM();
+
+
+	function getBDSdata(sic1,measure,states) {
+
+		var requestdata={
+    		//"get": ["sic1","job_creation_rate","fage4"],
+    		"get": "fage4,"+measure,
+    		"for": "",
+    		"time": "2012"
+		};
+
+	    requestdata["for"]="state:";
+	    for (var i in states) 
+	    	requestdata["for"]+=states[i]+',';
+	    requestdata["for"]=requestdata["for"].slice(0,-1);
+
+	    var url="http://api.census.gov/data/bds/firms";
+
+	    var geturl=url+"?";
+	    for (i in requestdata) {
+	    	geturl+="&"+i+"="+requestdata[i]
+	    }
+	    geturl+='&sic1='+sic1;
+	    console.log(geturl);
+	    var jsoned=[];
+	    d3.json(geturl,function (data) {
+	    	for (i in data) {
+	    		var rec={};
+	    		if (i>0) {
+	    			for (name in data[0])
+	    				rec[data[0][name]]=data[i][name];
+	    			jsoned.push(rec);
+	    		}
+	    	}
+	    	updateBDSdata(jsoned,measure,states);
+	    });
+	}
+
+	function updateBDSdata(data,measure,states) {
+
+		for (var i in data) {
+			data[i].fage4=self.fagelookup[data[i].fage4];
+			for (var j in states) {
+				if (states[j]==data[i]['state'])
+					data[i]['istate']=j
+			}
+			data[i].state=self.statelookup[data[i].state];
+			data[i].value=data[i][measure];
+		}
+
+		self.data(data);
+
+		makeBarChart(self.data(),measure,states);
+	}
+
+	function makeBarChart(data,measure,states) {
+		var margin = {top: 20, right: 30, bottom: 30, left: 80},
+		width = 960 - margin.left - margin.right,
+		height = 500 - margin.top - margin.bottom;
+
+		var svgcont = d3.select("svg");
+		svgcont.selectAll("*").remove();
+		svg=svgcont.attr("width", width + margin.left + margin.right)
+		.attr("height", height + margin.top + margin.bottom)
+		.append('g')
+		.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+		.attr('class', 'chart');
+		
+		
+		var xScale = d3.scale.ordinal()
+		.domain(self.fage.map(function(d) { return d["name"]; }))
+		.rangeRoundBands([0, width], .1);
+		var yScale = d3.scale.linear()
+		.domain([Math.min(0,d3.min(data, function(d) { return +d[measure]; })), d3.max(data, function(d) { return +d[measure]; })])
+		.range([height,0]); 	  
+		var colors=['green','red','orange','cyan','purple','blue','magenta','green','red','orange','cyan','purple','blue','magenta'];
+		//["#000000","#265DAB","#DF5C24","#059748","#E5126F","#9D722A","#7B3A96","#C7B42E","#CB2027","#4D4D4D","#5DA5DA","#FAA43A","#60BD68","#F17CB0","#B2912F","#B276B2","#DECF3F","#F15854","#8C8C8C","#8ABDE6","#FBB258","#90CD97","#F6AAC9","#BFA554","#BC99C7","#EDDD46","#F07E6E"];
+		var nbars=states.length;
+		var barwidth= xScale.rangeBand()/nbars;
+
+		var chart = svg.selectAll("rect")
+			.data(data)
+			.enter().append("rect")
+		   //.attr("transform", function(d) {return "translate("+xScale(d['fage4'])+","+height+")";})  
+		   .attr("fill",  function(d) {
+		   	return colors[+d['istate']]
+		   })
+		   .attr("width", barwidth)
+		   .attr("transform", function(d) {return "translate("+xScale(d['fage4'])+",1500)";}).transition().duration(500).ease("sin-in-out")
+		   .attr("height", function(d) {return Math.abs(yScale(0)-yScale(+d[measure]))})
+		   .attr("transform", function(d) {return "translate("+(xScale(d['fage4'])+barwidth*d.istate)+","+yScale(Math.max(0,+d[measure]))+")";})
+
+		//.transition().duration(1000)				
+
+		svg.selectAll("text")
+			.data(data)
+			.enter().append("text")
+			.attr("x",function(d) {return (xScale(d['fage4'])+barwidth*d.istate)+barwidth/4})
+			.attr("y",function(d) {return yScale(+d[measure])-8-7*Math.sign(d[measure])})
+			.attr("dy", ".75em")
+			.attr("fill","#eeeeee")
+			.attr("font-size", function() {
+				return d3.min(data, function(d) { 
+					return 1.5*barwidth/d[measure].length; 
+				})
+			})
+			.text(function(d) { return d[measure]; });
+
+
+		var xAxis = d3.svg.axis()
+			.scale(xScale)
+			.orient("bottom");
+
+		var xAxis0 = d3.svg.axis()
+			.scale(xScale)
+			.tickFormat("")
+			.orient("bottom");
+
+		var yAxis = d3.svg.axis()
+			.scale(yScale)
+			.orient("left");
+
+		svg.append("g")
+			.attr("class", "x axis")
+			.attr("transform", "translate(0," + yScale(0) + ")")
+			.call(xAxis0);
+
+		svg.append("g")
+			.attr("class", "x axis")
+			.attr("transform", "translate(0," + height + ")")
+			.call(xAxis);
+
+
+		svg.append("g")
+		.attr("class", "y axis")
+		.call(yAxis); 
+
+		//Making Legend
+		var legendsvg=d3.select("#legend")
+		legendsvg.selectAll("*").remove();
+
+		var symbolsize=Math.max(Math.min(barwidth,20),15);
+
+		legendsvg.attr("height",(symbolsize+5)*states.length)
+				.attr("width",200);
+		legendsvg.selectAll("rect")
+			.data(states)
+			.enter()
+			.append("rect")
+			.attr("fill",  function(d,i) {
+				return colors[i]
+			})
+			.attr("width",symbolsize).attr("height",symbolsize)
+			.attr("transform",function(d,i) {return "translate(0,"+(symbolsize+5)*i+")";});
+
+		legendsvg.selectAll("text")
+			.data(states)
+			.enter()
+			.append("text")
+			.attr("fill","black")
+			.attr("transform",function(d,i) {return "translate("+(symbolsize+5)+","+(15+(symbolsize+5)*i)+")";})
+			.text(function(d) { return self.statelookup[d];});
+	}
 }
 
 
