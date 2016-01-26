@@ -125,6 +125,7 @@ var ViewModel = function() {
 	this.measlookup={}; this.statelookup={};this.fagelookup={};this.fsizelookup={};
 
 	this.data = ko.observableArray();
+	this.data2show = ko.observableArray();
 
 	this.ShowData = ko.observable(0);
 
@@ -208,6 +209,8 @@ var ViewModel = function() {
 
 	function updateBDSdata(data,measure,states) {
 
+		var data2show=[];
+
 		for (var i in data) {
 			data[i].fage4=self.fagelookup[data[i].fage4];
 			for (var j in states) {
@@ -242,23 +245,25 @@ var ViewModel = function() {
 		.rangeRoundBands([0, width], .1);
 		var yScale = d3.scale.linear()
 		.domain([Math.min(0,d3.min(data, function(d) { return +d[measure]; })), d3.max(data, function(d) { return +d[measure]; })])
-		.range([height,0]); 	  
-		var colors=['green','red','orange','cyan','purple','blue','magenta','green','red','orange','cyan','purple','blue','magenta'];
-		//["#000000","#265DAB","#DF5C24","#059748","#E5126F","#9D722A","#7B3A96","#C7B42E","#CB2027","#4D4D4D","#5DA5DA","#FAA43A","#60BD68","#F17CB0","#B2912F","#B276B2","#DECF3F","#F15854","#8C8C8C","#8ABDE6","#FBB258","#90CD97","#F6AAC9","#BFA554","#BC99C7","#EDDD46","#F07E6E"];
+		.range([height,0]);
+		var colors=//['green','red','orange','cyan','purple','blue','magenta','green','red','orange','cyan','purple','blue','magenta'];
+		["#265DAB","#DF5C24","#059748","#E5126F","#9D722A","#7B3A96","#C7B42E","#CB2027","#4D4D4D","#5DA5DA","#FAA43A","#60BD68","#F17CB0","#B2912F","#B276B2","#DECF3F","#F15854","#8C8C8C","#8ABDE6","#FBB258","#90CD97","#F6AAC9","#BFA554","#BC99C7","#EDDD46","#F07E6E","#000000",
+		 "#265DAB","#DF5C24","#059748","#E5126F","#9D722A","#7B3A96","#C7B42E","#CB2027","#4D4D4D","#5DA5DA","#FAA43A","#60BD68","#F17CB0","#B2912F","#B276B2","#DECF3F","#F15854","#8C8C8C","#8ABDE6","#FBB258","#90CD97","#F6AAC9","#BFA554","#BC99C7","#EDDD46","#F07E6E","#000000"];
 		var nbars=states.length;
 		var barwidth= xScale.rangeBand()/nbars;
 
 		var chart = svg.selectAll("rect")
 			.data(data)
 			.enter().append("rect")
-		   //.attr("transform", function(d) {return "translate("+xScale(d['fage4'])+","+height+")";})  
-		   .attr("fill",  function(d) {
-		   	return colors[+d['istate']]
-		   })
-		   .attr("width", barwidth)
-		   .attr("transform", function(d) {return "translate("+xScale(d['fage4'])+",1500)";}).transition().duration(500).ease("sin-in-out")
-		   .attr("height", function(d) {return Math.abs(yScale(0)-yScale(+d[measure]))})
-		   .attr("transform", function(d) {return "translate("+(xScale(d['fage4'])+barwidth*d.istate)+","+yScale(Math.max(0,+d[measure]))+")";})
+		   	.attr("fill",  function(d) {
+		   		return colors[+d['istate']]
+		   	})
+		   	.attr("width", barwidth)
+		   	.attr("x",function(d) {return xScale(d['fage4'])+barwidth*d.istate})
+		   	.attr("y",function(d) {return yScale(0)})
+		   	.attr("height",0).transition().duration(500).ease("sin-in-out")
+		   	.attr("y",function(d) {return yScale(Math.max(0,+d[measure]))})
+		   	.attr("height", function(d) {return Math.abs(yScale(0)-yScale(+d[measure]))})
 
 		//.transition().duration(1000)				
 
@@ -321,14 +326,14 @@ var ViewModel = function() {
 				return colors[i]
 			})
 			.attr("width",symbolsize).attr("height",symbolsize)
-			.attr("transform",function(d,i) {return "translate(0,"+(symbolsize+5)*i+")";});
+			.attr("y",function(d,i) {return (symbolsize+5)*i;});
 
 		legendsvg.selectAll("text")
 			.data(states)
 			.enter()
 			.append("text")
 			.attr("fill","black")
-			.attr("transform",function(d,i) {return "translate("+(symbolsize+5)+","+(15+(symbolsize+5)*i)+")";})
+			.attr("x",(symbolsize+5)).attr("y",function(d,i) {return 15+(symbolsize+5)*i;})
 			.text(function(d) { return self.statelookup[d];});
 	}
 }
