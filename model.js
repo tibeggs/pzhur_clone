@@ -146,6 +146,28 @@ var BDSVisModel = {
 		//Create list of years
 		for (var i=1977; i<2014; i++)
 			this.years.push(i);
-	}
+	},
+
+	GetDomain : function(v) {
+		if (v==="fage4")
+			return this.fage.map(function(d) { return d.name; }) 
+		else if ((v==="fsize") || (v==="ifsize"))
+			return this.fsize.map(function(d) { return d.name; })
+		else
+			return this[v].map(function(d) { return d.name; });
+	},
+
+	NameLookUp : function(d,v) {
+		if (v==="fage4")
+			return this.fagelookup[d]
+		else if ((v==="fsize") || (v==="ifsize"))
+			return this.fsizelookup[d]
+		else if (v==="measure")
+			return this.measurelookup[d]
+		else if (v==="state")
+			return this.statelookup[d]
+		else return "Variable is not among: fage4,fsize,ifsize,measure,state"
+
+	},
 
 };

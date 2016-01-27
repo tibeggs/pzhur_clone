@@ -25,22 +25,31 @@ var ViewModel = function() {
 	this.SelectedYears = ko.observableArray([this.year()]);
 	this.SelectedFchar = ko.observableArray([this.fchar()]);
 
-	this.StateAsLegend = ko.observable(true);
-	this.MeasureAsLegend = ko.observable(false);
-	this.SectorAsLegend = ko.observable(false);
-	this.YearAsLegend = ko.observable(false);
-	this.FirmCharAsLegend = ko.observable(false);
+	//this.xvar = ko.computed(function () {return self.fchar();});
+	this.yvar = ko.observable(this.measure());
+	this.cvar = ko.observable("state");
+
+	this.StateAsLegend = ko.computed( function () {return self.cvar()=="state";});
+	this.MeasureAsLegend = ko.computed( function () {return self.cvar()=="measure";});
+	this.SectorAsLegend = ko.computed( function () {return self.cvar()=="sector";});
+	this.YearAsLegend = ko.computed( function () {return self.cvar()=="year";});
+	this.FirmCharAsLegend = ko.computed( function () {return self.cvar()=="fchar";});
+
 
 	this.APIrequest = ko.computed( function  () {
 		return {
 			sector : self.sector(),
 			states : self.SelectedStates(),
-			measure : self.measure()
+			measure : self.measure(),
+			fchar : self.fchar(),
+			year : self.year(),
+			xvar : self.fchar(),
+			cvar : self.cvar()
 		}
 	});
 
 	//Subscribe to input changes
-	this.APIrequest.subscribe(function  () {
+	this.APIrequest.subscribe(function() {
 		self.getBDSdata();
 	})
 
@@ -52,13 +61,12 @@ var ViewModel = function() {
 
 	    var url="http://api.census.gov/data/bds/firms";
 
-	    var geturl=url+"?get="+"fage4"+","+request.measure+
+	    var geturl=url+"?get="+request.fchar+","+request.measure+
 	    				"&for="+"state:"+request.states.join(",")+
-	    				"&year2="+"2012"+
-	    				"&sic1="+request.sector;
+	    				"&year2="+request.year+
+	    				"&sic1="+request.sector+
+	    				"&key=93beeef146cec68880fccbd72e455fcd7135228f";
 
-	    
-	    geturl+='&sic1='+request.sector;
 	    console.log(geturl);
 
 	    var jsoned=[];
@@ -83,18 +91,19 @@ var ViewModel = function() {
 		var data2show=[];
 
 		for (var i in data) {
-			data[i].fage4=self.model.fagelookup[data[i].fage4];
+			data[i][request.xvar]=self.model.NameLookUp(data[i][request.xvar],request.xvar);
 			for (var j in request.states) {
 				if (request.states[j]==data[i]['state'])
 					data[i]['istate']=j
 			}
 			data[i].state=self.model.statelookup[data[i].state];
 			data[i].value=data[i][request.measure];
-		}
+			data[i].category=data[i][request.xvar];
+		}		
 
 		self.data(data);
 
-		self.makeBarChart(self.data(),request.measure,request.states);
+		self.makeBarChart(self.data());
 	}
 
 	
@@ -112,11 +121,10 @@ var ViewModel = function() {
 		.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
 		.attr('class', 'chart');
 		
-
 		var request=self.APIrequest();
 		
 		var xScale = d3.scale.ordinal()
-		.domain(self.model.fage.map(function(d) { return d["name"]; }))
+		.domain(self.model.GetDomain(request.xvar))
 		.rangeRoundBands([0, width], .1);
 		var yScale = d3.scale.linear()
 		.domain([Math.min(0,d3.min(data, function(d) { return +d[request.measure]; })), d3.max(data, function(d) { return +d[request.measure]; })])
@@ -132,25 +140,25 @@ var ViewModel = function() {
 			.enter().append("rect")
 		   	.attr("fill",  function(d) {return colors[+d['istate']]})
 		   	.attr("width", barwidth)
-		   	.attr("x",function(d) {return xScale(d['fage4'])+barwidth*d.istate})
+		   	.attr("x",function(d) {return xScale(d[request.xvar])+barwidth*d.istate})
 		   	.attr("y",function(d) {return yScale(0)})
 		   	.attr("height",0).transition()
 		   	.duration(500).ease("sin-in-out")
 		   	.attr("y",function(d) {return yScale(Math.max(0,+d[request.measure]))})
 		   	.attr("height", function(d) {return Math.abs(yScale(0)-yScale(+d[request.measure]))})
 
+		 var fontsize= d3.min(data, function(d,i) {
+					return 1.5*barwidth/d[request.measure].length; 
+				});
+
 		svg.selectAll("text")
 			.data(data)
 			.enter().append("text")
-			.attr("x",function(d) {return (xScale(d['fage4'])+barwidth*d.istate)+barwidth/4})
+			.attr("x",function(d) {return (xScale(d[request.xvar])+barwidth*d.istate)+barwidth/4})
 			.attr("y",function(d) {return yScale(+d[request.measure])-8-7*Math.sign(d[request.measure])})
 			.attr("dy", ".75em")
 			.attr("fill","#eeeeee")
-			.attr("font-size", function() {
-				return d3.min(data, function(d) { 
-					return 1.5*barwidth/d[request.measure].length; 
-				})
-			})
+			.attr("font-size", fontsize)
 			.text(function(d) { return d[request.measure]; });
 
 
@@ -208,9 +216,6 @@ var ViewModel = function() {
 			.attr("x",(symbolsize+5)).attr("y",function(d,i) {return 15+(symbolsize+5)*i;})
 			.text(function(d) { return self.model.statelookup[d];});
 	}
-
-//Initial request and plot
-	this.getBDSdata(self.sector(),self.measure(),self.SelectedStates());
 }
 
 ko.applyBindings(new ViewModel());
