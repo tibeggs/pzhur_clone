@@ -51,11 +51,15 @@
   </div>
   <span class="selectors">
 
-        <h4>Sectors:</h4><select data-bind="options: model.sectors, optionsText: 'name', optionsValue: 'code', value: sector,attr: {multiple: SectorAsLegend}"></select><br>
+        <h4>Sectors:</h4><select data-bind="options: model.sectors, optionsText: 'name', optionsValue: 'code', value: sector, selectedOptions: SelectedSectors, attr: {multiple: SectorAsLegend}"></select><br>
 
-        <h4>Measures:</h4><select data-bind="options: model.measures, optionsText: 'name', optionsValue: 'code', value: measure, attr: {multiple: MeasureAsLegend}"></select><br>
+        <h4>Measures:</h4><select data-bind="options: model.measures, optionsText: 'name', optionsValue: 'code', value: measure, selectedOptions: SelectedMeasures, attr: {multiple: MeasureAsLegend}"></select><br>
 
         <h4>States:</h4><select data-bind="options: model.states, optionsText: 'name', optionsValue: 'code', value: state, selectedOptions: SelectedStates, attr: {multiple: StateAsLegend}" ></select><br>
+
+        <h4>Years:</h4><select data-bind="options: model.years, optionsText: $data, optionsValue: $data, value: year, selectedOptions: SelectedYears, attr: {multiple: YearAsLegend}" ></select><br>
+
+        <h4>Firm Characteristic:</h4><select data-bind="options: model.fchar, optionsText: 'name', optionsValue: 'code', value: fchar, selectedOptions: SelectedFchar, attr: {multiple: FirmCharAsLegend}" ></select><br>
 
   </span>
 

@@ -119,12 +119,20 @@ var BDSVisModel = {
 		{"code" : "firmdeath_estabs", "name" : "Establishment exit due to firm death" },
 		{"code" : "firmdeath_emp", "name" : "Job destruction from firm exit" }],
 
+	fchar : [
+		{"code" : "fage4", "name" : "Firm age"},
+		{"code" : "fsize", "name" : "Firm size"},
+		{"code" : "ifsize", "name" : "Initial firm size"}
+	],
+
 	measlookup : {},
  	statelookup : {},
  	fagelookup : {},
  	fsizelookup: {},
 
-	InitModel : function(vm) {
+ 	years: [],
+
+	InitModel : function() {
 		//Create dictionaries/hashmaps to lookup names of categorical variable values
 		for (var i in this.states)
 			this.statelookup[this.states[i].code]=this.states[i].name;
@@ -134,6 +142,10 @@ var BDSVisModel = {
 			this.fagelookup[this.fage[i].code]=this.fage[i].name;
 		for (var i in this.fsize)
 			this.fsizelookup[this.fsize[i].code]=this.fsize[i].name;
+
+		//Create list of years
+		for (var i=1977; i<2014; i++)
+			this.years.push(i);
 	}
 
 };
