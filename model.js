@@ -1,6 +1,6 @@
 var BDSVisModel = {
-	states : [
-		//{"code" : "00", "name" : "United States", "st":"US"},
+	state : [
+		{"code" : "00", "name" : "United States", "st":"US"},
 		{"code" : "01", "name" : "Alabama", "st" : "AL" },
 		{"code" : "02", "name" : "Alaska", "st" : "AK" },
 		{"code" : "04", "name" : "Arizona", "st" : "AZ" },
@@ -52,7 +52,7 @@ var BDSVisModel = {
 		{"code" : "54", "name" : "West Virginia", "st" : "WV" },
 		{"code" : "55", "name" : "Wisconsin", "st" : "WI" },
 		{"code" : "56", "name" : "Wyoming", "st" : "WY" }],
-	fage : [
+	fage4 : [
 		{"code" : "a", "name" : "0" },
 		{"code" : "b", "name" : "1" },
 		{"code" : "c", "name" : "2" },
@@ -82,7 +82,7 @@ var BDSVisModel = {
 		{"code" : "l", "name" : "10000+" },
 		{"code" : "m", "name" : "All Sizes" }],
 
-	sectors : [
+	sic1 : [
 		{"code" : 00, "acr" : "EW", "name" : "Economy Wide" },
 		{"code" : 07, "acr" : "AGR", "name" : "Agriculture, Forestry, and Fishing" },
 		{"code" : 10, "acr" : "MIN", "name" : "Mining" },
@@ -94,7 +94,7 @@ var BDSVisModel = {
 		{"code" : 60, "acr" : "FIRE", "name" : "Finance, Insurance, and Real Estate" },
 		{"code" : 70, "acr" : "SRV", "name" : "Services" }],
 		
-	measures : [
+	measure : [
 		{"code" : "firms", "name" : "Number of firms" },
 		{"code" : "estabs", "name" : "Number of establishments" },
 		{"code" : "emp", "name" : "Employment" },
@@ -129,29 +129,30 @@ var BDSVisModel = {
  	statelookup : {},
  	fagelookup : {},
  	fsizelookup: {},
+ 	sic1lookup: {},
 
- 	years: [],
+ 	year: [],
 
 	InitModel : function() {
 		//Create dictionaries/hashmaps to lookup names of categorical variable values
-		for (var i in this.states)
-			this.statelookup[this.states[i].code]=this.states[i].name;
-		for (var i in this.measures)
-			this.measlookup[this.measures[i].code]=this.measures[i].name;
-		for (var i in this.fage)
-			this.fagelookup[this.fage[i].code]=this.fage[i].name;
+		for (var i in this.state)
+			this.statelookup[this.state[i].code]=this.state[i].name;
+		for (var i in this.measure)
+			this.measlookup[this.measure[i].code]=this.measure[i].name;
+		for (var i in this.fage4)
+			this.fagelookup[this.fage4[i].code]=this.fage4[i].name;
 		for (var i in this.fsize)
 			this.fsizelookup[this.fsize[i].code]=this.fsize[i].name;
+		for (var i in this.sic1)
+			this.sic1lookup[this.sic1[i].code]=this.sic1[i].name;
 
 		//Create list of years
 		for (var i=1977; i<2014; i++)
-			this.years.push(i);
+			this.year.push(i);
 	},
 
 	GetDomain : function(v) {
-		if (v==="fage4")
-			return this.fage.map(function(d) { return d.name; }) 
-		else if ((v==="fsize") || (v==="ifsize"))
+		if ((v==="fsize") || (v==="ifsize"))
 			return this.fsize.map(function(d) { return d.name; })
 		else
 			return this[v].map(function(d) { return d.name; });
@@ -166,6 +167,8 @@ var BDSVisModel = {
 			return this.measurelookup[d]
 		else if (v==="state")
 			return this.statelookup[d]
+		else if (v==="sic1")
+			return this.sic1lookup[d]
 		else return "Variable is not among: fage4,fsize,ifsize,measure,state"
 
 	},

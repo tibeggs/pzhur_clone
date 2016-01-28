@@ -27,12 +27,17 @@
 }
 .selectors {
   float:left;
+  height:400px;
   margin-right: 50px;
 }
 
 .selectors select {
   width: 200px;
   margin-left: 0px;
+}
+
+.tallselector {
+  height: 200px;
 }
 
 .selectors h4 {
@@ -51,36 +56,39 @@
   </div>
   <span class="selectors">
 
-        <h4>Sectors:</h4><select data-bind="options: model.sectors, optionsText: 'name', optionsValue: 'code', value: sector, selectedOptions: SelectedSectors, attr: {multiple: SectorAsLegend}"></select><br>
+        <h4>Sectors:</h4><select data-bind="options: model.sic1, optionsText: 'name', optionsValue: 'code', value: sic1, selectedOptions: SelectedSectors, attr: {multiple: SectorAsLegend}, css: {tallselector: SectorAsLegend}, disable: StateAsLegend"></select><button data-bind="click: setsectorcvar, visible: (!SectorAsLegend())">Compare Sectors</button><br>
 
-        <h4>Measures:</h4><select data-bind="options: model.measures, optionsText: 'name', optionsValue: 'code', value: measure, selectedOptions: SelectedMeasures, attr: {multiple: MeasureAsLegend}"></select><br>
+        <h4>Measures:</h4><select data-bind="options: model.measure, optionsText: 'name', optionsValue: 'code', value: measure, selectedOptions: SelectedMeasures, attr: {multiple: MeasureAsLegend}, css: {tallselector: MeasureAsLegend}"></select><br>
 
-        <h4>States:</h4><select data-bind="options: model.states, optionsText: 'name', optionsValue: 'code', value: state, selectedOptions: SelectedStates, attr: {multiple: StateAsLegend}" ></select><br>
+        <h4>States:</h4>
+        <select data-bind="options: model.state, optionsText: 'name', optionsValue: 'code', value: state, selectedOptions: SelectedStates, attr: {multiple: StateAsLegend}, css: {tallselector: StateAsLegend}, enable: StateAsLegend" ></select>
+       <button data-bind="click: setstatecvar,  visible: (!StateAsLegend())">Compare States</button><br>
+        <br>
 
-        <h4>Years:</h4><select data-bind="options: model.years, optionsText: $data, optionsValue: $data, value: year, selectedOptions: SelectedYears, attr: {multiple: YearAsLegend}" ></select><br>
+        <h4>Years:</h4><select data-bind="options: model.year, optionsText: $data, optionsValue: $data, value: year, selectedOptions: SelectedYears, attr: {multiple: YearAsLegend}, css: {tallselector: YearAsLegend}" ></select><br>
 
         <h4>Firm Characteristic:</h4><select data-bind="options: model.fchar, optionsText: 'name', optionsValue: 'code', value: fchar, selectedOptions: SelectedFchar, attr: {multiple: FirmCharAsLegend}" ></select><br>
 
   </span>
 
-  <span style="display:block; overflow:auto; height: 200px; width:300px">
+  <span style="display:block; overflow:auto; height: 400px; width:300px">
   Legend:<br>
   <svg id="legend"></svg>
   </span>
 <br>
   <span style="float:left">
-  <button data-bind="click: toggleshowdata">Show Data:</button>
+  <button data-bind="click: toggleshowdata">Show Data</button>
 
 
   <table data-bind="visible: ShowData">
     <thead>
-        <tr><th>Firm Age</th><th>Measure</th><th>State</th></tr>
+        <tr><th data-bind="text: xvar"></th><th data-bind="text: measure"></th><th data-bind="text: cvar">State</th></tr>
     </thead>
     <tbody data-bind="foreach: data">
         <tr>
             <td data-bind="text: category"></td>
             <td style="text-align: center" data-bind="text: value"></td>
-            <td data-bind="text: state"></td>
+            <td data-bind="text: label"></td>
         </tr>
     </tbody>
 </table>

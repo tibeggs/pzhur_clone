@@ -13,38 +13,49 @@ var ViewModel = function() {
 		self.ShowData(!self.ShowData());
 	}
 
-	this.sector = ko.observable(this.model.sectors[0].code);
-	this.measure = ko.observable(this.model.measures[18].code);
-	this.state = ko.observable(this.model.states[20].code);
-	this.year = ko.observable(this.model.years[36]);
-	this.fchar = ko.observable(this.model.fchar[0]);
+	this.setsectorcvar = function () {
+		self.cvar("sic1");
+		this.state(00);
+	}
+
+	this.setstatecvar = function () {
+		self.cvar("state");
+		self.sic1(0);
+		self.state(20);
+		self.SelectedSectors([self.sic1()]);
+	}
+
+	this.sic1 = ko.observable(this.model.sic1[0].code);
+	this.measure = ko.observable(this.model.measure[18].code);
+	this.state = ko.observable(this.model.state[20].code);
+	this.year = ko.observable(this.model.year[36]);
+	this.fchar = ko.observable(this.model.fchar[0].code);
 
 	this.SelectedStates = ko.observableArray([this.state()]);
-	this.SelectedSectors = ko.observableArray([this.sector()]);
+	this.SelectedSectors = ko.observableArray([this.sic1()]);
 	this.SelectedMeasures = ko.observableArray([this.measure()]);
 	this.SelectedYears = ko.observableArray([this.year()]);
 	this.SelectedFchar = ko.observableArray([this.fchar()]);
 
-	//this.xvar = ko.computed(function () {return self.fchar();});
-	this.yvar = ko.observable(this.measure());
+	this.xvar = ko.observable("fchar");
 	this.cvar = ko.observable("state");
 
 	this.StateAsLegend = ko.computed( function () {return self.cvar()=="state";});
 	this.MeasureAsLegend = ko.computed( function () {return self.cvar()=="measure";});
-	this.SectorAsLegend = ko.computed( function () {return self.cvar()=="sector";});
+	this.SectorAsLegend = ko.computed( function () {return self.cvar()=="sic1";});
 	this.YearAsLegend = ko.computed( function () {return self.cvar()=="year";});
 	this.FirmCharAsLegend = ko.computed( function () {return self.cvar()=="fchar";});
 
 
 	this.APIrequest = ko.computed( function  () {
 		return {
-			sector : self.sector(),
-			states : self.SelectedStates(),
-			measure : self.measure(),
+			sic1 : self.SelectedSectors(),
+			state : self.SelectedStates(),
+			measure : self.SelectedMeasures(),
 			fchar : self.fchar(),
 			year : self.year(),
-			xvar : self.fchar(),
-			cvar : self.cvar()
+			xvar : (self.xvar()==="fchar")?(self.fchar()):(self.xvar()),
+			cvar : (self.cvar()==="fchar")?(self.fchar()):(self.cvar())
 		}
 	});
 
@@ -62,15 +73,15 @@ var ViewModel = function() {
 	    var url="http://api.census.gov/data/bds/firms";
 
 	    var geturl=url+"?get="+request.fchar+","+request.measure+
-	    				"&for="+"state:"+request.states.join(",")+
+	    				"&for="+((request.cvar==="state")?("state:"+request.state):("us:*"))+
 	    				"&year2="+request.year+
-	    				"&sic1="+request.sector+
+	    				"&sic1="+request.sic1+
 	    				"&key=93beeef146cec68880fccbd72e455fcd7135228f";
 
 	    console.log(geturl);
 
-	    var jsoned=[];
 	    d3.json(geturl,function (data) {
+	    	var jsoned=[];
 	    	for (i in data) {
 	    		var rec={};
 	    		if (i>0) {
@@ -83,27 +94,35 @@ var ViewModel = function() {
 	    });
 	}
 
-//Process data obtained from API. Change codes into names, add state list number (istate), form data2show for displaying as a table and call the function making the plot
+//Process data obtained from API. Change codes into names, add state list number (icvar), form data2show for displaying as a table and call the function making the plot
 	this.updateBDSdata = function(data) {
 
 		var request=self.APIrequest();
 
 		var data2show=[];
 
+		
+
 		for (var i in data) {
 			data[i][request.xvar]=self.model.NameLookUp(data[i][request.xvar],request.xvar);
-			for (var j in request.states) {
-				if (request.states[j]==data[i]['state'])
-					data[i]['istate']=j
+			for (var j in request[request.cvar]) {
+				if (request[request.cvar][j]==data[i][request.cvar])
+					data[i]['icvar']=j
 			}
-			data[i].state=self.model.statelookup[data[i].state];
-			data[i].value=data[i][request.measure];
-			data[i].category=data[i][request.xvar];
-		}		
+			
+			data[i][request.cvar]=self.model.NameLookUp(data[i][request.cvar],request.cvar);
+			
+			data2show.push({
+				value : data[i][request.measure],
+				category : data[i][request.xvar],
+				label : data[i][request.cvar]
 
-		self.data(data);
+			})
+		}
 
-		self.makeBarChart(self.data());
+		self.data(data2show);
+
+		self.makeBarChart(data);
 	}
 
 	
@@ -122,6 +141,8 @@ var ViewModel = function() {
 		.attr('class', 'chart');
 		
 		var request=self.APIrequest();
+
+		
 		
 		var xScale = d3.scale.ordinal()
 		.domain(self.model.GetDomain(request.xvar))
@@ -132,15 +153,16 @@ var ViewModel = function() {
 		var colors=//['green','red','orange','cyan','purple','blue','magenta','green','red','orange','cyan','purple','blue','magenta'];
 		["#265DAB","#DF5C24","#059748","#E5126F","#9D722A","#7B3A96","#C7B42E","#CB2027","#4D4D4D","#5DA5DA","#FAA43A","#60BD68","#F17CB0","#B2912F","#B276B2","#DECF3F","#F15854","#8C8C8C","#8ABDE6","#FBB258","#90CD97","#F6AAC9","#BFA554","#BC99C7","#EDDD46","#F07E6E","#000000",
 		 "#265DAB","#DF5C24","#059748","#E5126F","#9D722A","#7B3A96","#C7B42E","#CB2027","#4D4D4D","#5DA5DA","#FAA43A","#60BD68","#F17CB0","#B2912F","#B276B2","#DECF3F","#F15854","#8C8C8C","#8ABDE6","#FBB258","#90CD97","#F6AAC9","#BFA554","#BC99C7","#EDDD46","#F07E6E","#000000"];
-		var nbars=request.states.length;
+		
+		var nbars=request[request.cvar].length;
 		var barwidth= xScale.rangeBand()/nbars;
 
 		var chart = svg.selectAll("rect")
 			.data(data)
 			.enter().append("rect")
-		   	.attr("fill",  function(d) {return colors[+d['istate']]})
+		   	.attr("fill",  function(d) {return colors[+d['icvar']]})
 		   	.attr("width", barwidth)
-		   	.attr("x",function(d) {return xScale(d[request.xvar])+barwidth*d.istate})
+		   	.attr("x",function(d) {return xScale(d[request.xvar])+barwidth*d.icvar})
 		   	.attr("y",function(d) {return yScale(0)})
 		   	.attr("height",0).transition()
 		   	.duration(500).ease("sin-in-out")
@@ -154,7 +176,7 @@ var ViewModel = function() {
 		svg.selectAll("text")
 			.data(data)
 			.enter().append("text")
-			.attr("x",function(d) {return (xScale(d[request.xvar])+barwidth*d.istate)+barwidth/4})
+			.attr("x",function(d) {return (xScale(d[request.xvar])+barwidth*d.icvar)+barwidth/4})
 			.attr("y",function(d) {return yScale(+d[request.measure])-8-7*Math.sign(d[request.measure])})
 			.attr("dy", ".75em")
 			.attr("fill","#eeeeee")
@@ -196,10 +218,10 @@ var ViewModel = function() {
 
 		var symbolsize=Math.max(Math.min(barwidth,20),15);
 
-		legendsvg.attr("height",(symbolsize+5)*request.states.length)
+		legendsvg.attr("height",(symbolsize+5)*request[request.cvar].length)
 				.attr("width",200);
 		legendsvg.selectAll("rect")
-			.data(request.states)
+			.data(request[request.cvar])
 			.enter()
 			.append("rect")
 			.attr("fill",  function(d,i) {
@@ -209,13 +231,15 @@ var ViewModel = function() {
 			.attr("y",function(d,i) {return (symbolsize+5)*i;});
 
 		legendsvg.selectAll("text")
-			.data(request.states)
+			.data(request[request.cvar])
 			.enter()
 			.append("text")
 			.attr("fill","black")
 			.attr("x",(symbolsize+5)).attr("y",function(d,i) {return 15+(symbolsize+5)*i;})
-			.text(function(d) { return self.model.statelookup[d];});
+			.text(function(d) { return  self.model.NameLookUp(d,request.cvar);});
 	}
+
+	this.getBDSdata();
 }
 
 ko.applyBindings(new ViewModel());
