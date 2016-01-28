@@ -145,7 +145,6 @@ var ViewModel = function() {
 			self.data.push(xvararr);
 		}
 		
-		console.table(self.data());
 		self.makeBarChart(data);
 	}
 
@@ -158,12 +157,15 @@ var ViewModel = function() {
 
 		var svgcont = d3.select("#chartsvg");
 		svgcont.selectAll("*").remove();
-		svg=svgcont.attr("width", width + margin.left + margin.right)
-		.attr("height", height + margin.top + margin.bottom)
+		var svg=svgcont
+		//svgcont.attr("width", width + margin.left + margin.right)
+		//.attr("height", height + margin.top + margin.bottom)
 		.append('g')
 		.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
 		.attr('class', 'chart');
 		
+		debugger;
+
 		var request=self.APIrequest();
 
 		
@@ -197,15 +199,15 @@ var ViewModel = function() {
 					return 1.5*barwidth/d[request.measure].length; 
 				});
 
-		svg.selectAll("text")
-			.data(data)
-			.enter().append("text")
-			.attr("x",function(d) {return (xScale(d[request.xvar])+barwidth*d.icvar)+barwidth/4})
-			.attr("y",function(d) {return yScale(+d[request.measure])-8-7*Math.sign(d[request.measure])})
-			.attr("dy", ".75em")
-			.attr("fill","#eeeeee")
-			.attr("font-size", fontsize)
-			.text(function(d) { return d[request.measure]; });
+		// svg.selectAll("text")
+		// 	.data(data)
+		// 	.enter().append("text")
+		// 	.attr("x",function(d) {return (xScale(d[request.xvar])+barwidth*d.icvar)+barwidth/4})
+		// 	.attr("y",function(d) {return yScale(+d[request.measure])-8-7*Math.sign(d[request.measure])})
+		// 	.attr("dy", ".75em")
+		// 	.attr("fill","#eeeeee")
+		// 	.attr("font-size", fontsize)
+		// 	.text(function(d) { return d[request.measure]; });
 
 
 		var xAxis = d3.svg.axis()
