@@ -1,0 +1,40 @@
+.axis text {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+
+
+
+#plotarea {
+  margin-top: 15px;
+  margin-bottom: 15px;
+  margin-left: 0px;
+}
+.selectors {
+  float:left;
+  height:350px;
+  margin-right: 50px;
+}
+
+.selectors select {
+  width: 200px;
+  margin-left: 0px;
+}
+
+.tallselector {
+  height: 200px;
+}
+
+.selectors h4 {
+  display:inline-block;
+  font-weight: normal;
+  width: 100px;
+  margin: 5px;
+}
