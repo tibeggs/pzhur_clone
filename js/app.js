@@ -163,8 +163,6 @@ var ViewModel = function() {
 		.append('g')
 		.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
 		.attr('class', 'chart');
-		
-		debugger;
 
 		var request=self.APIrequest();
 
