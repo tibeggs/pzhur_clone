@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=9">
     <title>US Census Business Dynamics Statistics Data Visualization</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -9,7 +10,7 @@
 <body>
   <span style="position:absolute; margin-top:100px; margin-left:200px; font-size:16pt" data-bind="visible: waiting4api">Waiting for data from the server...</span>
   <div id="plotarea">
-    <svg></svg>
+    <svg id="chartsvg"></svg>
   </div>
   <span class="selectors">
 

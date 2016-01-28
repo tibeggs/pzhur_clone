@@ -156,7 +156,7 @@ var ViewModel = function() {
 		width = 960 - margin.left - margin.right,
 		height = 500 - margin.top - margin.bottom;
 
-		var svgcont = d3.select("svg");
+		var svgcont = d3.select("#chartsvg");
 		svgcont.selectAll("*").remove();
 		svg=svgcont.attr("width", width + margin.left + margin.right)
 		.attr("height", height + margin.top + margin.bottom)
