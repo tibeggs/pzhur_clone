@@ -2,53 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Testing BDS API</title>
-    <!--link rel="stylesheet" href="css/style.css"-->
+    <title>US Census Business Dynamics Statistics Data Visualization</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
-<style>
-.axis text {
-  font: 10px sans-serif;
-}
-
-.axis path,
-.axis line {
-  fill: none;
-  stroke: #000;
-  shape-rendering: crispEdges;
-}
-
-
-
-
-#plotarea {
-  margin-top: 15px;
-  margin-bottom: 15px;
-  margin-left: 0px;
-}
-.selectors {
-  float:left;
-  height:400px;
-  margin-right: 50px;
-}
-
-.selectors select {
-  width: 200px;
-  margin-left: 0px;
-}
-
-.tallselector {
-  height: 200px;
-}
-
-.selectors h4 {
-  display:inline-block;
-  font-weight: normal;
-  width: 100px;
-  margin: 5px;
-}
-
-</style>
-
 
 <body>
   <span style="position:absolute; margin-top:100px; margin-left:200px; font-size:16pt" data-bind="visible: waiting4api">Waiting for data from the server...</span>
@@ -72,7 +28,7 @@
 
   </span>
 
-  <span style="display:block; overflow:auto; height: 400px; width:500px">
+  <span style="display:block; overflow:auto; height: 350px; width:500px">
   Legend:<br>
   <svg id="legend"></svg>
   </span>
@@ -97,9 +53,9 @@
 </span>
   
  
-	<script src="d3.min.js"></script>
-  <script src="knockout-3.4.0.js"></script>
-   <script src="model.js"></script>
-  <script src="testBDSapi.js"></script>
+	<script src="js/d3.min.js"></script>
+  <script src="js/knockout-3.4.0.js"></script>
+   <script src="js/model.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>	
