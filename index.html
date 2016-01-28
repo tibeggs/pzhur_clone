@@ -51,6 +51,7 @@
 
 
 <body>
+  <span style="position:absolute; margin-top:100px; margin-left:200px; font-size:16pt" data-bind="visible: waiting4api">Waiting for data from the server...</span>
   <div id="plotarea">
     <svg></svg>
   </div>
@@ -71,7 +72,7 @@
 
   </span>
 
-  <span style="display:block; overflow:auto; height: 400px; width:300px">
+  <span style="display:block; overflow:auto; height: 400px; width:500px">
   Legend:<br>
   <svg id="legend"></svg>
   </span>
@@ -81,14 +82,15 @@
 
 
   <table data-bind="visible: ShowData">
-    <thead>
-        <tr><th data-bind="text: xvar"></th><th data-bind="text: measure"></th><th data-bind="text: cvar">State</th></tr>
+    <thead data-bind="foreach: data.slice(0,1)">
+        <!-- <tr><th data-bind="text: "></th><th data-bind="text: "></th><th data-bind="text: ">State</th></tr> -->
+        <tr data-bind="foreach: $data">
+          <th data-bind="text: $data"></th>
+        </tr>
     </thead>
-    <tbody data-bind="foreach: data">
-        <tr>
-            <td data-bind="text: category"></td>
-            <td style="text-align: center" data-bind="text: value"></td>
-            <td data-bind="text: label"></td>
+    <tbody data-bind="foreach: data.slice(1)">
+        <tr data-bind="foreach: $data">
+            <td data-bind="text: $data"></td>
         </tr>
     </tbody>
 </table>

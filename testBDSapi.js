@@ -14,16 +14,18 @@ var ViewModel = function() {
 	}
 
 	this.setsectorcvar = function () {
-		self.cvar("sic1");
 		this.state(00);
+		self.cvar("sic1");
 	}
 
 	this.setstatecvar = function () {
-		self.cvar("state");
 		self.sic1(0);
-		self.state(20);
 		self.SelectedSectors([self.sic1()]);
+		self.state(20);
+		self.cvar("state");
 	}
+
+	waiting4api = ko.observable(false);
 
 	this.sic1 = ko.observable(this.model.sic1[0].code);
 	this.measure = ko.observable(this.model.measure[18].code);
@@ -61,6 +63,7 @@ var ViewModel = function() {
 
 	//Subscribe to input changes
 	this.APIrequest.subscribe(function() {
+
 		self.getBDSdata();
 	})
 
@@ -79,19 +82,27 @@ var ViewModel = function() {
 	    				"&key=93beeef146cec68880fccbd72e455fcd7135228f";
 
 	    console.log(geturl);
-
+	    
+	    waiting4api(true); //Show "waiting for data" message
 	    d3.json(geturl,function (data) {
-	    	var jsoned=[];
-	    	for (i in data) {
-	    		var rec={};
-	    		if (i>0) {
-	    			for (name in data[0])
-	    				rec[data[0][name]]=data[i][name];
-	    			jsoned.push(rec);
-	    		}
+	    	if (!(data===null)) {
+		    	var jsoned=[];
+		    	for (var i in data) {
+		    		var rec={};
+		    		if (i>0) {
+		    			for (name in data[0])
+		    				rec[data[0][name]]=data[i][name];
+		    			jsoned.push(rec);
+		    		}
+		    	}
+
+	    		self.updateBDSdata(jsoned);
+	    	} else {
+	    		console.log("Server sent empty response to " + geturl);	
 	    	}
-	    	self.updateBDSdata(jsoned);
+	    	waiting4api(false); //Hide "waiting for data" message
 	    });
+	    
 	}
 
 //Process data obtained from API. Change codes into names, add state list number (icvar), form data2show for displaying as a table and call the function making the plot
@@ -99,29 +110,42 @@ var ViewModel = function() {
 
 		var request=self.APIrequest();
 
-		var data2show=[];
-
-		
+		var data2show={};
 
 		for (var i in data) {
-			data[i][request.xvar]=self.model.NameLookUp(data[i][request.xvar],request.xvar);
+			data[i][request.xvar]=self.model.NameLookUp(data[i][request.xvar],request.xvar); //Replace code strings with actual category names for x-variable
+
+			//Add a field to the data corresponding to order in the legend, also equal to color index
 			for (var j in request[request.cvar]) {
 				if (request[request.cvar][j]==data[i][request.cvar])
 					data[i]['icvar']=j
 			}
 			
-			data[i][request.cvar]=self.model.NameLookUp(data[i][request.cvar],request.cvar);
+			data[i][request.cvar]=self.model.NameLookUp(data[i][request.cvar],request.cvar); //Replace code strings with actual category names for c-variable
 			
-			data2show.push({
-				value : data[i][request.measure],
-				category : data[i][request.xvar],
-				label : data[i][request.cvar]
-
-			})
+			//Convert data to 2D table, so that it can be displayed
+			if (data2show[data[i][request.xvar]]===undefined)
+				data2show[data[i][request.xvar]]={};
+			
+			data2show[data[i][request.xvar]][data[i][request.cvar]]=data[i][request.measure];
 		}
 
-		self.data(data2show);
-
+		//Convert the nested object with data to display into nested array (including field names)
+		var cvarnames=[request.xvar];
+		for (var xvarkey in data2show) {
+			for (var cvarkey in data2show[xvarkey])
+				cvarnames.push(cvarkey);
+			break;
+		};
+		self.data([cvarnames]);
+		for (var xvarkey in data2show) {
+			var xvararr=[xvarkey];
+			for (var cvarkey in data2show[xvarkey])
+				xvararr.push(data2show[xvarkey][cvarkey])
+			self.data.push(xvararr);
+		}
+		
+		console.table(self.data());
 		self.makeBarChart(data);
 	}
 
@@ -219,7 +243,7 @@ var ViewModel = function() {
 		var symbolsize=Math.max(Math.min(barwidth,20),15);
 
 		legendsvg.attr("height",(symbolsize+5)*request[request.cvar].length)
-				.attr("width",200);
+				.attr("width",400);
 		legendsvg.selectAll("rect")
 			.data(request[request.cvar])
 			.enter()
