@@ -9,20 +9,21 @@
 <body>
   <span style="position:absolute; margin-top:100px; margin-left:200px; font-size:16pt" data-bind="visible: waiting4api">Waiting for data from the server...</span>
   <div id="plotarea">
-    <svg id="chartsvg" width="960" height="500"></svg>
+    <svg id="chartsvg"></svg>
   </div>
-  <span class="selectors">
+  <span class="selectors" data-bind="vis1ible: !(waiting4api())">
 
         <h4>Sectors:</h4><select data-bind="options: model.sic1, optionsText: 'name', optionsValue: 'code', value: sic1, selectedOptions: SelectedSectors, attr: {multiple: SectorAsLegend}, css: {tallselector: SectorAsLegend}, disable: StateAsLegend"></select><button data-bind="click: setsectorcvar, visible: (!SectorAsLegend())">Compare Sectors</button><br>
 
         <h4>Measures:</h4><select data-bind="options: model.measure, optionsText: 'name', optionsValue: 'code', value: measure, selectedOptions: SelectedMeasures, attr: {multiple: MeasureAsLegend}, css: {tallselector: MeasureAsLegend}"></select><br>
 
         <h4>States:</h4>
-        <select data-bind="options: model.state, optionsText: 'name', optionsValue: 'code', value: state, selectedOptions: SelectedStates, attr: {multiple: StateAsLegend}, css: {tallselector: StateAsLegend}, enable: StateAsLegend" ></select>
+        <select data-bind="options: model.state, optionsText: 'name', optionsValue: 'code', value: state, selectedOptions: SelectedStates, attr: {multiple: StateAsLegend}, css: {tallselector: StateAsLegend}, visible: StateAsLegend" ></select>
+         <h4 data-bind="visible: (!StateAsLegend())" style="width:195px; margin:0px">United States</h4>
        <button data-bind="click: setstatecvar,  visible: (!StateAsLegend())">Compare States</button><br>
         <br>
 
-        <h4>Years:</h4><select data-bind="options: model.year, optionsText: $data, optionsValue: $data, value: year, selectedOptions: SelectedYears, attr: {multiple: YearAsLegend}, css: {tallselector: YearAsLegend}" ></select><br>
+        <h4>Years:</h4><select data-bind="options: model.year2, optionsText: $data, optionsValue: $data, value: year2, selectedOptions: SelectedYears, attr: {multiple: YearAsLegend}, css: {tallselector: YearAsLegend}" ></select><button data-bind="click: setyearcvar,  visible: (!YearAsLegend())">Compare Years</button><br>
 
         <h4>Firm Characteristic:</h4><select data-bind="options: model.fchar, optionsText: 'name', optionsValue: 'code', value: fchar, selectedOptions: SelectedFchar, attr: {multiple: FirmCharAsLegend}" ></select><br>
 

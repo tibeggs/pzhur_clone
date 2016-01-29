@@ -14,29 +14,33 @@ var ViewModel = function() {
 	}
 
 	this.setsectorcvar = function () {
-		this.state(00);
 		self.cvar("sic1");
 	}
 
 	this.setstatecvar = function () {
 		self.sic1(0);
-		self.SelectedSectors([self.sic1()]);
-		self.state(20);
+		//self.state(20);
 		self.cvar("state");
 	}
+
+	this.setyearcvar = function () {
+		self.sic1(0);
+		self.cvar("year2");
+	}
+
 
 	waiting4api = ko.observable(false);
 
 	this.sic1 = ko.observable(this.model.sic1[0].code);
-	this.measure = ko.observable(this.model.measure[18].code);
+	this.measure = ko.observable(this.model.measure[12].code);
 	this.state = ko.observable(this.model.state[20].code);
-	this.year = ko.observable(this.model.year[36]);
+	this.year2 = ko.observable(this.model.year2[36]);
 	this.fchar = ko.observable(this.model.fchar[0].code);
 
 	this.SelectedStates = ko.observableArray([this.state()]);
 	this.SelectedSectors = ko.observableArray([this.sic1()]);
 	this.SelectedMeasures = ko.observableArray([this.measure()]);
-	this.SelectedYears = ko.observableArray([this.year()]);
+	this.SelectedYears = ko.observableArray([this.year2()]);
 	this.SelectedFchar = ko.observableArray([this.fchar()]);
 
 	this.xvar = ko.observable("fchar");
@@ -45,7 +49,7 @@ var ViewModel = function() {
 	this.StateAsLegend = ko.computed( function () {return self.cvar()=="state";});
 	this.MeasureAsLegend = ko.computed( function () {return self.cvar()=="measure";});
 	this.SectorAsLegend = ko.computed( function () {return self.cvar()=="sic1";});
-	this.YearAsLegend = ko.computed( function () {return self.cvar()=="year";});
+	this.YearAsLegend = ko.computed( function () {return self.cvar()=="year2";});
 	this.FirmCharAsLegend = ko.computed( function () {return self.cvar()=="fchar";});
 
 
@@ -55,7 +59,7 @@ var ViewModel = function() {
 			state : self.SelectedStates(),
 			measure : self.SelectedMeasures(),
 			fchar : self.fchar(),
-			year : self.year(),
+			year2 : self.SelectedYears(),
 			xvar : (self.xvar()==="fchar")?(self.fchar()):(self.xvar()),
 			cvar : (self.cvar()==="fchar")?(self.fchar()):(self.cvar())
 		}
@@ -76,9 +80,10 @@ var ViewModel = function() {
 	    var url="http://api.census.gov/data/bds/firms";
 
 	    var geturl=url+"?get="+request.fchar+","+request.measure+
-	    				"&for="+((request.cvar==="state")?("state:"+request.state):("us:*"))+
-	    				"&year2="+request.year+
-	    				"&sic1="+request.sic1+
+	    				"&for="+(((request.cvar)==="state")?("state:"+request.state):("us:*"))+
+	    				//"&time=from+1977+to+2013"+
+	    				"&year2="+((request.cvar==="year2")?(request.year2):(request.year2[0]))+
+	    				((self.SectorAsLegend())?("&sic1="+request.sic1):(""))+
 	    				"&key=93beeef146cec68880fccbd72e455fcd7135228f";
 
 	    console.log(geturl);
@@ -144,6 +149,7 @@ var ViewModel = function() {
 				xvararr.push(data2show[xvarkey][cvarkey])
 			self.data.push(xvararr);
 		}
+
 		
 		self.makeBarChart(data);
 	}
@@ -157,16 +163,13 @@ var ViewModel = function() {
 
 		var svgcont = d3.select("#chartsvg");
 		svgcont.selectAll("*").remove();
-		var svg=svgcont
-		//svgcont.attr("width", width + margin.left + margin.right)
-		//.attr("height", height + margin.top + margin.bottom)
-		.append('g')
-		.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-		.attr('class', 'chart');
+		var svg=svgcont.attr("width", width + margin.left + margin.right)
+			.attr("height", height + margin.top + margin.bottom)
+			.append('g')
+			.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+			.attr('class', 'chart');
 
 		var request=self.APIrequest();
-
-		
 		
 		var xScale = d3.scale.ordinal()
 		.domain(self.model.GetDomain(request.xvar))
@@ -181,9 +184,11 @@ var ViewModel = function() {
 		var nbars=request[request.cvar].length;
 		var barwidth= xScale.rangeBand()/nbars;
 
-		var chart = svg.selectAll("rect")
-			.data(data)
-			.enter().append("rect")
+		var bars=
+		svg.selectAll("rect")
+			.data(data);
+
+		bars.enter().append("rect")
 		   	.attr("fill",  function(d) {return colors[+d['icvar']]})
 		   	.attr("width", barwidth)
 		   	.attr("x",function(d) {return xScale(d[request.xvar])+barwidth*d.icvar})
@@ -261,6 +266,50 @@ var ViewModel = function() {
 			.attr("fill","black")
 			.attr("x",(symbolsize+5)).attr("y",function(d,i) {return 15+(symbolsize+5)*i;})
 			.text(function(d) { return  self.model.NameLookUp(d,request.cvar);});
+
+		
+		// function updateyear(yr) {	
+		// 	//var dataset=data.filter(function(d) {return +d.time==self.model.year2[iy]}) 
+		// 	//svg.selectAll("rect").remove();
+		// 	var bars=
+		// 	svg.selectAll("rect")
+		// 		.data(data);
+
+
+		// 	bars.attr("y",function(d) {return yScale(Math.max(0,+d[request.measure]))})
+		// 	   	.attr("height", function(d) {
+		// 	   		console.log(+d.time,yr,+d.time==yr)
+		// 	   		if (+d.time==yr) 
+		// 	   			return Math.abs(yScale(0)-yScale(+d[request.measure]))
+		// 	   		else return 0;
+		// 	   	})
+
+		// 	bars.enter().append("rect")
+		// 	   	.attr("fill",  function(d) {return colors[+d['icvar']]})
+		// 	   	.attr("width", barwidth)
+		// 	   	.attr("x",function(d) {return xScale(d[request.xvar])+barwidth*d.icvar})
+		// 	   	// .attr("y",function(d) {return yScale(0)})
+		// 	   	// .attr("height",0).transition()
+		// 	   	// .duration(500).ease("sin-in-out")
+		// 	   	.attr("y",function(d) {return yScale(Math.max(0,+d[request.measure]))})
+		// 	   	.attr("height", function(d) {
+		// 	   		console.log(+d.time,yr,+d.time==yr)
+		// 	   		if (+d.time==yr) 
+		// 	   			return Math.abs(yScale(0)-yScale(+d[request.measure]))
+		// 	   		else return 0;
+		// 	   	})
+		// 	//debugger;
+		// // 	bars.attr("y",function(d) {return yScale(Math.max(0,+d[request.measure]))})
+		// // 		.attr("height", function(d) {return (+d.time==self.model.year2[iy])*Math.abs(yScale(0)-yScale(+d[request.measure]))})
+
+		// // 	 //debugger; 
+		// // 	 //bars.exit().remove();
+		// }
+
+
+		// for (iy in self.model.year2.slice(10,12)){
+		// 	setTimeout(updateyear(self.model.year2[iy]),10000);
+		// }
 	}
 
 	this.getBDSdata();

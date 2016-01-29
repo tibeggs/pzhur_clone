@@ -1,6 +1,6 @@
 var BDSVisModel = {
 	state : [
-		{"code" : "00", "name" : "United States", "st":"US"},
+		//{"code" : "00", "name" : "United States", "st":"US"},
 		{"code" : "01", "name" : "Alabama", "st" : "AL" },
 		{"code" : "02", "name" : "Alaska", "st" : "AK" },
 		{"code" : "04", "name" : "Arizona", "st" : "AZ" },
@@ -131,7 +131,7 @@ var BDSVisModel = {
  	fsizelookup: {},
  	sic1lookup: {},
 
- 	year: [],
+ 	year2: [],
 
 	InitModel : function() {
 		//Create dictionaries/hashmaps to lookup names of categorical variable values
@@ -148,7 +148,7 @@ var BDSVisModel = {
 
 		//Create list of years
 		for (var i=1977; i<2014; i++)
-			this.year.push(i);
+			this.year2.push(i);
 	},
 
 	GetDomain : function(v) {
@@ -169,6 +169,8 @@ var BDSVisModel = {
 			return this.statelookup[d]
 		else if (v==="sic1")
 			return this.sic1lookup[d]
+		else if (v==="year2")
+			return d
 		else return "Variable is not among: fage4,fsize,ifsize,measure,state"
 
 	},
