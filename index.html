@@ -17,7 +17,7 @@
 
         <h4>Sectors:</h4><select data-bind="options: model.sic1, optionsText: 'name', optionsValue: 'code', value: SelectedSectors()[0], selectedOptions: SelectedSectors, attr: {multiple: SectorAsLegend}, css: {tallselector: SectorAsLegend}, disable: StateAsLegend"></select><button data-bind="click: setsectorcvar, visible: (!SectorAsLegend())">Compare Sectors</button><br>
 
-        <h4>Measures:</h4><select data-bind="options: model.measure, optionsText: 'name', optionsValue: 'code', value: SelectedMeasures()[0], selectedOptions: SelectedMeasures, attr: {multiple: MeasureAsLegend}, css: {tallselector: MeasureAsLegend}"></select><br>
+        <h4>Measures:</h4><select data-bind="options: model.measure, optionsText: 'name', optionsValue: 'code', value: SelectedMeasures()[0], selectedOptions: SelectedMeasures, attr: {multiple: MeasureAsLegend}, css: {tallselector: MeasureAsLegend}"></select><button data-bind="click: setmeasurecvar,  visible: (!MeasureAsLegend())">Compare Measures</button><br>
 
         <h4>States:</h4>
         <select data-bind="options: model.state, optionsText: 'name', optionsValue: 'code', value: SelectedStates()[0], selectedOptions: SelectedStates, attr: {multiple: StateAsLegend}, css: {tallselector: StateAsLegend}, visible: StateAsLegend" ></select>

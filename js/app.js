@@ -26,14 +26,18 @@ var ViewModel = function() {
 	}
 
 	this.setstatecvar = function () {
-		self.sic1(0);
+		self.SelectedSectors([this.model.sic1[0].code]);
 		//self.state(20);
 		self.cvar("state");
 	}
 
 	this.setyearcvar = function () {
-		self.sic1(0);
+		//self.SelectedSectors([this.model.sic1[0].code]);
 		self.cvar("year2");
+	}
+
+	this.setmeasurecvar = function () {
+		self.cvar("measure");
 	}
 
 
@@ -41,7 +45,7 @@ var ViewModel = function() {
 
 	this.SelectedStates = ko.observableArray([this.model.state[20].code]);
 	this.SelectedSectors = ko.observableArray([this.model.sic1[0].code]);
-	this.SelectedMeasures = ko.observableArray([this.model.measure[12].code]);
+	this.SelectedMeasures = ko.observableArray([this.model.measure[11].code]);
 	this.SelectedYears = ko.observableArray([this.model.year2[36]]);
 	this.fchar = ko.observable(this.model.fchar[0].code);
 	//this.SelectedFchar = ko.observableArray([this.fchar()]);
@@ -123,26 +127,42 @@ var ViewModel = function() {
 
 		var data2show={};
 
-		for (var i in data) {
-			data[i][request.xvar]=self.model.NameLookUp(data[i][request.xvar],request.xvar); //Replace code strings with actual category names for x-variable
+		//If comparing measures, combine different measures into a single column named "measure"
+		var data1=[]
+		// if (request.cvar==="measure") {
+		// 	for (var i in data) {
+		// 		var rec={}
+		// 	}
+		// }
 
-			//Add a field to the data corresponding to order in the legend, also equal to color index
-			for (var j in request[request.cvar]) {
-				if (request[request.cvar][j]==data[i][request.cvar])
-					data[i]['icvar']=j
-			}
-			
-			data[i][request.cvar]=self.model.NameLookUp(data[i][request.cvar],request.cvar); //Replace code strings with actual category names for c-variable
+		for (var i in data) {
+
+			data[i][request.xvar]=self.model.NameLookUp(data[i][request.xvar],request.xvar); //Replace code strings with actual category names for x-variable
+			if (request.cvar!="measure")
+					 data[i][request.cvar]=self.model.NameLookUp(data[i][request.cvar],request.cvar); //Replace code strings with actual category names for c-variable
+			else 
+				for (var imeasure in request.measure) {
+					var rec={};
+					rec.value=data[i][request.measure[imeasure]];
+					rec[request.xvar]=data[i][request.xvar];
+					rec[request.cvar]=self.model.NameLookUp(request.measure[imeasure],"measure");
+					data1.push(rec);
+				}
 			
 			//Convert data to 2D table, so that it can be displayed
 			if (data2show[data[i][request.xvar]]===undefined)
 				data2show[data[i][request.xvar]]={};
 			
-			data2show[data[i][request.xvar]][data[i][request.cvar]]=data[i][request.measure];
+			if (request.cvar!="measure")
+				data2show[data[i][request.xvar]][data[i][request.cvar]]=data[i][request.measure];
+			else 
+				for (var imeasure in request[request.cvar])
+					data2show[data[i][request.xvar]][request[request.cvar][imeasure]]=data[i][request[request.cvar][imeasure]];
 		}
 
+
 		//Convert the nested object with data to display into nested array (including field names)
-		var cvarnames=[request.xvar];
+		var cvarnames=[(self.xvar()==="fchar")?(self.model.NameLookUp(request.xvar,"fchar")):(request.xvar)];
 		for (var xvarkey in data2show) {
 			for (var cvarkey in data2show[xvarkey])
 				cvarnames.push(cvarkey);
@@ -157,12 +177,13 @@ var ViewModel = function() {
 		}
 
 		
-		self.makeBarChart(data);
+		self.makeBarChart((request.cvar!="measure")?data:data1);
 	}
 
 	
 
 	this.makeBarChart = function (data) {
+
 		//Define margins and dimensions of the SVG element containing the chart
 		var margin = {top: 20, right: 30, bottom: 30, left: 80},
 		width = 960 - margin.left - margin.right,
@@ -178,6 +199,10 @@ var ViewModel = function() {
 			.attr('class', 'chart');
 
 		var request=self.APIrequest();
+		//List of selected categories by actual name rather than code
+		var cvarlist=request[request.cvar].map(function(d) {return self.model.NameLookUp(d,request.cvar)});
+
+		if (request.cvar=="measure") request.measure="value";
 		
 		var xScale = d3.scale.ordinal()
 		.domain(self.model.GetDomain(request.xvar))
@@ -189,17 +214,18 @@ var ViewModel = function() {
 		["#265DAB","#DF5C24","#059748","#E5126F","#9D722A","#7B3A96","#C7B42E","#CB2027","#4D4D4D","#5DA5DA","#FAA43A","#60BD68","#F17CB0","#B2912F","#B276B2","#DECF3F","#F15854","#8C8C8C","#8ABDE6","#FBB258","#90CD97","#F6AAC9","#BFA554","#BC99C7","#EDDD46","#F07E6E","#000000",
 		 "#265DAB","#DF5C24","#059748","#E5126F","#9D722A","#7B3A96","#C7B42E","#CB2027","#4D4D4D","#5DA5DA","#FAA43A","#60BD68","#F17CB0","#B2912F","#B276B2","#DECF3F","#F15854","#8C8C8C","#8ABDE6","#FBB258","#90CD97","#F6AAC9","#BFA554","#BC99C7","#EDDD46","#F07E6E","#000000"];
 		
-		var nbars=request[request.cvar].length;
+		var nbars=cvarlist.length;
 		var barwidth= xScale.rangeBand()/nbars;
 
 		var bars=
 		svg.selectAll("rect")
 			.data(data);
 
+
 		bars.enter().append("rect")
-		   	.attr("fill",  function(d) {return colors[+d['icvar']]})
+		   	.attr("fill",  function(d) {return colors[cvarlist.indexOf(d[request.cvar])];})
 		   	.attr("width", barwidth)
-		   	.attr("x",function(d) {return xScale(d[request.xvar])+barwidth*d.icvar})
+		   	.attr("x",function(d) {return xScale(d[request.xvar])+barwidth*cvarlist.indexOf(d[request.cvar])})
 		   	.attr("y",function(d) {return yScale(0)})
 		   	.attr("height",0).transition()
 		   	.duration(500).ease("sin-in-out")
@@ -213,7 +239,7 @@ var ViewModel = function() {
 		// svg.selectAll("text")
 		// 	.data(data)
 		// 	.enter().append("text")
-		// 	.attr("x",function(d) {return (xScale(d[request.xvar])+barwidth*d.icvar)+barwidth/4})
+		// 	.attr("x",function(d) {return (xScale(d[request.xvar])+barwidth*cvarlist.indexOf(d[request.cvar]))+barwidth/4})
 		// 	.attr("y",function(d) {return yScale(+d[request.measure])-8-7*Math.sign(d[request.measure])})
 		// 	.attr("dy", ".75em")
 		// 	.attr("fill","#eeeeee")
@@ -221,18 +247,11 @@ var ViewModel = function() {
 		// 	.text(function(d) { return d[request.measure]; });
 
 
-		var xAxis = d3.svg.axis()
-			.scale(xScale)
-			.orient("bottom");
+		var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
 
-		var xAxis0 = d3.svg.axis()
-			.scale(xScale)
-			.tickFormat("")
-			.orient("bottom");
+		var xAxis0 = d3.svg.axis().scale(xScale).tickFormat("").orient("bottom");
 
-		var yAxis = d3.svg.axis()
-			.scale(yScale)
-			.orient("left");
+		var yAxis = d3.svg.axis().scale(yScale).orient("left");
 
 		svg.append("g")
 			.attr("class", "x axis")
@@ -255,10 +274,10 @@ var ViewModel = function() {
 
 		var symbolsize=Math.max(Math.min(barwidth,20),15);
 
-		legendsvg.attr("height",(symbolsize+5)*request[request.cvar].length)
+		legendsvg.attr("height",(symbolsize+5)*cvarlist.length)
 				.attr("width",400);
 		legendsvg.selectAll("rect")
-			.data(request[request.cvar])
+			.data(cvarlist)
 			.enter()
 			.append("rect")
 			.attr("fill",  function(d,i) {
@@ -268,22 +287,46 @@ var ViewModel = function() {
 			.attr("y",function(d,i) {return (symbolsize+5)*i;});
 
 		legendsvg.selectAll("text")
-			.data(request[request.cvar])
+			.data(cvarlist)
 			.enter()
 			.append("text")
 			.attr("fill","black")
 			.attr("x",(symbolsize+5)).attr("y",function(d,i) {return 15+(symbolsize+5)*i;})
-			.text(function(d) { return  self.model.NameLookUp(d,request.cvar);});
+			.text(function(d) { return  d;});
 
 		// Timelapse animation
 		function updateyear(yr) {
 
 			curyearmessage.transition().duration(1000).text(self.model.year2[yr]); //Display year
-			
 
 			var dataset=data.filter(function(d) {return +d.time==self.model.year2[yr]}); //Select data corresponding to the year
-			var cvarlist=request[request.cvar].map(function(d) {return self.model.NameLookUp(d,request.cvar)})
 			
+			//The data4bars is only needed for smooth transition in animations. There have to be rectangles of 0 height for missing data. data4bars is created
+			//empty outside this function. The following loop fills in / updates to actual data values from current year
+		
+			for (var i in dataset) {
+				data4bars[xScale.domain().indexOf(dataset[i][request.xvar])*request[request.cvar].length
+						+cvarlist.indexOf(dataset[i][request.cvar])][request.measure]=+dataset[i][request.measure]
+			}
+			
+      		var bars=svg.selectAll("rect").data(data4bars);
+
+      		// UPDATE
+			  // Update old elements as needed.
+			  
+			bars
+			   	.attr("fill",  function(d) {return colors[+d.icvar]})
+			   	.attr("x",function(d) {return xScale(d[request.xvar])+barwidth*d.icvar;})
+			   	.transition().duration(500)
+			   	.attr("y",function(d) {return yScale(Math.max(0,+d[request.measure]));})
+			   	.attr("height",function(d) {return Math.abs(yScale(0)-yScale(+d[request.measure]));});
+
+		}
+
+		//Run timelapse animation
+		if (request.timelapse) {
+
+
 			//These loops are only needed for smooth transition in animations. There have to be bars of 0 height for missing data.
 			var data4bars=[]
 			for (var i in xScale.domain())
@@ -293,69 +336,11 @@ var ViewModel = function() {
 						datum4bar[request.xvar]=xScale.domain()[i];
 						datum4bar[request.measure]=0;
 						datum4bar.icvar=j;
-						datum4bar.time=self.model.year2[yr];
 						data4bars.push(datum4bar);
 					}
-			for (var i in dataset) {
-				data4bars[xScale.domain().indexOf(dataset[i][request.xvar])*request[request.cvar].length
-						+cvarlist.indexOf(dataset[i][request.cvar])][request.measure]=+dataset[i][request.measure]
-			}
-			// console.table(data4bars);
-			// console.table(dataset);
-			// debugger;
-			//svg.selectAll("rect").remove();
-      		var bars=
-				svg.selectAll("rect")
-				.data(data4bars);
-      		// UPDATE
-			  // Update old elements as needed.
-			  
-			  bars
-			   	.attr("fill",  function(d) {return colors[+d['icvar']]})
-			   	//.attr("width", barwidth)
-			   	.attr("x",function(d) {return xScale(d[request.xvar])+barwidth*d.icvar;})
-			   	.transition().duration(1000)
-			   	.attr("y",function(d) {return yScale(Math.max(0,+d[request.measure]));})
-			   	.attr("height",function(d) {
-			   		if (+d.time==self.model.year2[yr]) 
-			   			return Math.abs(yScale(0)-yScale(+d[request.measure]))
-			   		else return 0;});
 
-
-
-
-			  // ENTER
-			  // Create new elements as needed.
-			 
-
-			   bars.enter().append("rect")
-			   	.attr("fill",  function(d) {return colors[+d['icvar']]})
-			   	.attr("width", barwidth)
-			   	.attr("x",function(d) {return xScale(d[request.xvar])+barwidth*d.icvar;})
-			   	.attr("y",function(d) {return yScale(Math.max(0,+d[request.measure]));})
-			   	.attr("height",function(d) {
-			   		if (+d.time==self.model.year2[yr]) 
-			   			return Math.abs(yScale(0)-yScale(+d[request.measure]))
-			   		else return 0;});
-
-			  // ENTER + UPDATE
-			  // Appending to the enter selection expands the update selection to include
-			  // entering elements; so, operations on the update selection after appending to
-			  // the enter selection will apply to both entering and updating nodes.
-			 
-			  // /bars.attr("height", function(d) {Math.abs(yScale(0)-yScale(+d[request.measure]))});
-			  // /bars.attr("y",function(d) {return yScale(Math.max(0,+d[request.measure]))});
-
-			  // EXIT
-			  // Remove old elements as needed.
-			 
-			  bars.exit().remove();
-
-		}
-
-		//Run timelapse animation
-		if (request.timelapse) {
 			svg.selectAll("rect").remove();
+			svg.selectAll("rect").data(data4bars).enter().append("rect").attr("width", barwidth);
 
 			var iy=0;
 			var curyearmessage=svg.append("text").attr("x",width/2).attr("y",height/2).attr("font-size",100).attr("fill-opacity",.3);
@@ -363,7 +348,7 @@ var ViewModel = function() {
 	  			updateyear(iy);
 	  			if (iy<self.model.year2.length) iy++; else iy=0;
 	  			self.TimeLapseCurrYear=self.model.year2[iy];
-			}, 1000);
+			}, 500);
 
 		}
 		

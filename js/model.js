@@ -130,6 +130,7 @@ var BDSVisModel = {
  	fagelookup : {},
  	fsizelookup: {},
  	sic1lookup: {},
+ 	fcharlookup: {},
 
  	year2: [],
 
@@ -145,6 +146,8 @@ var BDSVisModel = {
 			this.fsizelookup[this.fsize[i].code]=this.fsize[i].name;
 		for (var i in this.sic1)
 			this.sic1lookup[this.sic1[i].code]=this.sic1[i].name;
+		for (var i in this.fchar)
+			this.fcharlookup[this.fchar[i].code]=this.fchar[i].name;
 
 		//Create list of years
 		for (var i=1977; i<2014; i++)
@@ -159,18 +162,21 @@ var BDSVisModel = {
 	},
 
 	NameLookUp : function(d,v) {
+		//debugger;
 		if (v==="fage4")
 			return this.fagelookup[d]
 		else if ((v==="fsize") || (v==="ifsize"))
 			return this.fsizelookup[d]
 		else if (v==="measure")
-			return this.measurelookup[d]
+			return this.measlookup[d]
 		else if (v==="state")
 			return this.statelookup[d]
 		else if (v==="sic1")
 			return this.sic1lookup[d]
 		else if (v==="year2")
 			return d
+		else if (v==="fchar")
+			return this.fcharlookup[d]
 		else return "Variable is not among: fage4,fsize,ifsize,measure,state"
 
 	},
