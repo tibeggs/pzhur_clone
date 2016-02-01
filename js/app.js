@@ -13,6 +13,14 @@ var ViewModel = function() {
 		self.ShowData(!self.ShowData());
 	}
 
+	this.toggletimelapse = function () {
+		if (self.timelapse()) {
+			clearInterval(self.tlint);
+			self.SelectedYears([self.TimeLapseCurrYear]);
+		}
+		self.timelapse(!self.timelapse());
+	}
+
 	this.setsectorcvar = function () {
 		self.cvar("sic1");
 	}
@@ -31,20 +39,17 @@ var ViewModel = function() {
 
 	waiting4api = ko.observable(false);
 
-	this.sic1 = ko.observable(this.model.sic1[0].code);
-	this.measure = ko.observable(this.model.measure[12].code);
-	this.state = ko.observable(this.model.state[20].code);
-	this.year2 = ko.observable(this.model.year2[36]);
+	this.SelectedStates = ko.observableArray([this.model.state[20].code]);
+	this.SelectedSectors = ko.observableArray([this.model.sic1[0].code]);
+	this.SelectedMeasures = ko.observableArray([this.model.measure[12].code]);
+	this.SelectedYears = ko.observableArray([this.model.year2[36]]);
 	this.fchar = ko.observable(this.model.fchar[0].code);
-
-	this.SelectedStates = ko.observableArray([this.state()]);
-	this.SelectedSectors = ko.observableArray([this.sic1()]);
-	this.SelectedMeasures = ko.observableArray([this.measure()]);
-	this.SelectedYears = ko.observableArray([this.year2()]);
-	this.SelectedFchar = ko.observableArray([this.fchar()]);
+	//this.SelectedFchar = ko.observableArray([this.fchar()]);
 
 	this.xvar = ko.observable("fchar");
 	this.cvar = ko.observable("state");
+	this.timelapse = ko.observable(false);
+	this.tlbuttontext = ko.computed (function() {return self.timelapse()?"Stop":"Time Lapse"});
 
 	this.StateAsLegend = ko.computed( function () {return self.cvar()=="state";});
 	this.MeasureAsLegend = ko.computed( function () {return self.cvar()=="measure";});
@@ -61,7 +66,8 @@ var ViewModel = function() {
 			fchar : self.fchar(),
 			year2 : self.SelectedYears(),
 			xvar : (self.xvar()==="fchar")?(self.fchar()):(self.xvar()),
-			cvar : (self.cvar()==="fchar")?(self.fchar()):(self.cvar())
+			cvar : (self.cvar()==="fchar")?(self.fchar()):(self.cvar()),
+			timelapse : self.timelapse()
 		}
 	});
 
@@ -81,8 +87,8 @@ var ViewModel = function() {
 
 	    var geturl=url+"?get="+request.fchar+","+request.measure+
 	    				"&for="+(((request.cvar)==="state")?("state:"+request.state):("us:*"))+
-	    				//"&time=from+1977+to+2013"+
-	    				"&year2="+((request.cvar==="year2")?(request.year2):(request.year2[0]))+
+	    				((request.timelapse)?("&time=from+1977+to+2013"):
+	    				("&year2="+((request.cvar==="year2")?(request.year2):(request.year2[0]))))+
 	    				((self.SectorAsLegend())?("&sic1="+request.sic1):(""))+
 	    				"&key=93beeef146cec68880fccbd72e455fcd7135228f";
 
@@ -157,10 +163,12 @@ var ViewModel = function() {
 	
 
 	this.makeBarChart = function (data) {
+		//Define margins and dimensions of the SVG element containing the chart
 		var margin = {top: 20, right: 30, bottom: 30, left: 80},
 		width = 960 - margin.left - margin.right,
 		height = 500 - margin.top - margin.bottom;
 
+		//Select the SVG element, remove old drawings, add grouping element for the chart
 		var svgcont = d3.select("#chartsvg");
 		svgcont.selectAll("*").remove();
 		var svg=svgcont.attr("width", width + margin.left + margin.right)
@@ -198,9 +206,9 @@ var ViewModel = function() {
 		   	.attr("y",function(d) {return yScale(Math.max(0,+d[request.measure]))})
 		   	.attr("height", function(d) {return Math.abs(yScale(0)-yScale(+d[request.measure]))})
 
-		 var fontsize= d3.min(data, function(d,i) {
-					return 1.5*barwidth/d[request.measure].length; 
-				});
+		 // var fontsize= d3.min(data, function(d,i) {
+			// 		return 1.5*barwidth/d[request.measure].length; 
+			// 	});
 
 		// svg.selectAll("text")
 		// 	.data(data)
@@ -267,49 +275,98 @@ var ViewModel = function() {
 			.attr("x",(symbolsize+5)).attr("y",function(d,i) {return 15+(symbolsize+5)*i;})
 			.text(function(d) { return  self.model.NameLookUp(d,request.cvar);});
 
+		// Timelapse animation
+		function updateyear(yr) {
+
+			curyearmessage.transition().duration(1000).text(self.model.year2[yr]); //Display year
+			
+
+			var dataset=data.filter(function(d) {return +d.time==self.model.year2[yr]}); //Select data corresponding to the year
+			var cvarlist=request[request.cvar].map(function(d) {return self.model.NameLookUp(d,request.cvar)})
+			
+			//These loops are only needed for smooth transition in animations. There have to be bars of 0 height for missing data.
+			var data4bars=[]
+			for (var i in xScale.domain())
+				for (var j in request[request.cvar])
+					{
+						var datum4bar={}
+						datum4bar[request.xvar]=xScale.domain()[i];
+						datum4bar[request.measure]=0;
+						datum4bar.icvar=j;
+						datum4bar.time=self.model.year2[yr];
+						data4bars.push(datum4bar);
+					}
+			for (var i in dataset) {
+				data4bars[xScale.domain().indexOf(dataset[i][request.xvar])*request[request.cvar].length
+						+cvarlist.indexOf(dataset[i][request.cvar])][request.measure]=+dataset[i][request.measure]
+			}
+			// console.table(data4bars);
+			// console.table(dataset);
+			// debugger;
+			//svg.selectAll("rect").remove();
+      		var bars=
+				svg.selectAll("rect")
+				.data(data4bars);
+      		// UPDATE
+			  // Update old elements as needed.
+			  
+			  bars
+			   	.attr("fill",  function(d) {return colors[+d['icvar']]})
+			   	//.attr("width", barwidth)
+			   	.attr("x",function(d) {return xScale(d[request.xvar])+barwidth*d.icvar;})
+			   	.transition().duration(1000)
+			   	.attr("y",function(d) {return yScale(Math.max(0,+d[request.measure]));})
+			   	.attr("height",function(d) {
+			   		if (+d.time==self.model.year2[yr]) 
+			   			return Math.abs(yScale(0)-yScale(+d[request.measure]))
+			   		else return 0;});
+
+
+
+
+			  // ENTER
+			  // Create new elements as needed.
+			 
+
+			   bars.enter().append("rect")
+			   	.attr("fill",  function(d) {return colors[+d['icvar']]})
+			   	.attr("width", barwidth)
+			   	.attr("x",function(d) {return xScale(d[request.xvar])+barwidth*d.icvar;})
+			   	.attr("y",function(d) {return yScale(Math.max(0,+d[request.measure]));})
+			   	.attr("height",function(d) {
+			   		if (+d.time==self.model.year2[yr]) 
+			   			return Math.abs(yScale(0)-yScale(+d[request.measure]))
+			   		else return 0;});
+
+			  // ENTER + UPDATE
+			  // Appending to the enter selection expands the update selection to include
+			  // entering elements; so, operations on the update selection after appending to
+			  // the enter selection will apply to both entering and updating nodes.
+			 
+			  // /bars.attr("height", function(d) {Math.abs(yScale(0)-yScale(+d[request.measure]))});
+			  // /bars.attr("y",function(d) {return yScale(Math.max(0,+d[request.measure]))});
+
+			  // EXIT
+			  // Remove old elements as needed.
+			 
+			  bars.exit().remove();
+
+		}
+
+		//Run timelapse animation
+		if (request.timelapse) {
+			svg.selectAll("rect").remove();
+
+			var iy=0;
+			var curyearmessage=svg.append("text").attr("x",width/2).attr("y",height/2).attr("font-size",100).attr("fill-opacity",.3);
+			self.tlint=setInterval(function() {
+	  			updateyear(iy);
+	  			if (iy<self.model.year2.length) iy++; else iy=0;
+	  			self.TimeLapseCurrYear=self.model.year2[iy];
+			}, 1000);
+
+		}
 		
-		// function updateyear(yr) {	
-		// 	//var dataset=data.filter(function(d) {return +d.time==self.model.year2[iy]}) 
-		// 	//svg.selectAll("rect").remove();
-		// 	var bars=
-		// 	svg.selectAll("rect")
-		// 		.data(data);
-
-
-		// 	bars.attr("y",function(d) {return yScale(Math.max(0,+d[request.measure]))})
-		// 	   	.attr("height", function(d) {
-		// 	   		console.log(+d.time,yr,+d.time==yr)
-		// 	   		if (+d.time==yr) 
-		// 	   			return Math.abs(yScale(0)-yScale(+d[request.measure]))
-		// 	   		else return 0;
-		// 	   	})
-
-		// 	bars.enter().append("rect")
-		// 	   	.attr("fill",  function(d) {return colors[+d['icvar']]})
-		// 	   	.attr("width", barwidth)
-		// 	   	.attr("x",function(d) {return xScale(d[request.xvar])+barwidth*d.icvar})
-		// 	   	// .attr("y",function(d) {return yScale(0)})
-		// 	   	// .attr("height",0).transition()
-		// 	   	// .duration(500).ease("sin-in-out")
-		// 	   	.attr("y",function(d) {return yScale(Math.max(0,+d[request.measure]))})
-		// 	   	.attr("height", function(d) {
-		// 	   		console.log(+d.time,yr,+d.time==yr)
-		// 	   		if (+d.time==yr) 
-		// 	   			return Math.abs(yScale(0)-yScale(+d[request.measure]))
-		// 	   		else return 0;
-		// 	   	})
-		// 	//debugger;
-		// // 	bars.attr("y",function(d) {return yScale(Math.max(0,+d[request.measure]))})
-		// // 		.attr("height", function(d) {return (+d.time==self.model.year2[iy])*Math.abs(yScale(0)-yScale(+d[request.measure]))})
-
-		// // 	 //debugger; 
-		// // 	 //bars.exit().remove();
-		// }
-
-
-		// for (iy in self.model.year2.slice(10,12)){
-		// 	setTimeout(updateyear(self.model.year2[iy]),10000);
-		// }
 	}
 
 	this.getBDSdata();
