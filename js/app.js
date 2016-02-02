@@ -26,13 +26,10 @@ var ViewModel = function() {
 	}
 
 	this.setstatecvar = function () {
-		self.SelectedSectors([this.model.sic1[0].code]);
-		//self.state(20);
 		self.cvar("state");
 	}
 
 	this.setyearcvar = function () {
-		//self.SelectedSectors([this.model.sic1[0].code]);
 		self.cvar("year2");
 	}
 
@@ -52,20 +49,28 @@ var ViewModel = function() {
 
 	this.xvar = ko.observable("fchar");
 	this.cvar = ko.observable("state");
+
 	this.timelapse = ko.observable(false);
 	this.tlbuttontext = ko.computed (function() {return self.timelapse()?"Stop":"Time Lapse"});
 
-	this.StateAsLegend = ko.computed( function () {return self.cvar()=="state";});
-	this.MeasureAsLegend = ko.computed( function () {return self.cvar()=="measure";});
-	this.SectorAsLegend = ko.computed( function () {return self.cvar()=="sic1";});
-	this.YearAsLegend = ko.computed( function () {return self.cvar()=="year2";});
-	this.FirmCharAsLegend = ko.computed( function () {return self.cvar()=="fchar";});
+	this.SectorAsLegend = ko.computed( function () {return self.cvar()==="sic1";});
+	this.SectorSelectable = ko.observable("false");
+
+	this.StateAsLegend = ko.computed( function () {return self.cvar()==="state";});
+	this.StateSelectable = ko.computed( function () {return ((self.cvar()!="sic1") && !self.SectorSelectable()) ;});
+	
+	this.MeasureAsLegend = ko.computed( function () {return self.cvar()==="measure";});
+	
+
+	
+	this.YearAsLegend = ko.computed( function () {return self.cvar()==="year2";});
+	this.FirmCharAsLegend = ko.computed( function () {return self.cvar()==="fchar";});
 
 
 	this.APIrequest = ko.computed( function  () {
 		return {
-			sic1 : self.SelectedSectors(),
-			state : self.SelectedStates(),
+			sic1 : (self.cvar()==="state")?([0]):self.SelectedSectors(),
+			state : (self.cvar()==="sic1")?([0]):self.SelectedStates(),
 			measure : self.SelectedMeasures(),
 			fchar : self.fchar(),
 			year2 : self.SelectedYears(),
@@ -76,11 +81,14 @@ var ViewModel = function() {
 	});
 
 	//Subscribe to input changes
+	//Any change in the input fields triggers request to the server, followed by data processing and making of a new plot
 	this.APIrequest.subscribe(function() {
-
 		self.getBDSdata();
-	})
+	});
 
+	this.SelectedStates.subscribe(function() {
+		self.SelectedSectors([0]);
+	})
 	
 //Get the data from the API according to current request and render it into array of objects with field names corresponding to the variables
 	this.getBDSdata = function () {
@@ -89,11 +97,19 @@ var ViewModel = function() {
 
 	    var url="http://api.census.gov/data/bds/firms";
 
+	    //Whether to form request for states or for the whole US. If US is selected in the state selector, or if request is by sector, then use "us:*"
+	    var bystate = true;
+		if (((request.state.length===1) && (request.state[0]===0)) || self.SectorAsLegend() 
+			|| ((request.sic1.length===1) 
+				&& 
+				(request.sic1[0]!=0))) 
+			bystate=false;
+
 	    var geturl=url+"?get="+request.fchar+","+request.measure+
-	    				"&for="+(((request.cvar)==="state")?("state:"+request.state):("us:*"))+
+	    				"&for="+(bystate?("state:"+(self.StateAsLegend()?request.state:request.state[0])):("us:*"))+
 	    				((request.timelapse)?("&time=from+1977+to+2013"):
-	    				("&year2="+((request.cvar==="year2")?(request.year2):(request.year2[0]))))+
-	    				((self.SectorAsLegend())?("&sic1="+request.sic1):(""))+
+	    				("&year2="+((self.YearAsLegend())?(request.year2):(request.year2[0]))))+
+	    				((!self.StateAsLegend())?("&sic1="+request.sic1):(""))+
 	    				"&key=93beeef146cec68880fccbd72e455fcd7135228f";
 
 	    console.log(geturl);
@@ -127,13 +143,7 @@ var ViewModel = function() {
 
 		var data2show={};
 
-		//If comparing measures, combine different measures into a single column named "measure"
 		var data1=[]
-		// if (request.cvar==="measure") {
-		// 	for (var i in data) {
-		// 		var rec={}
-		// 	}
-		// }
 
 		for (var i in data) {
 
@@ -199,10 +209,14 @@ var ViewModel = function() {
 			.attr('class', 'chart');
 
 		var request=self.APIrequest();
-		//List of selected categories by actual name rather than code
-		var cvarlist=request[request.cvar].map(function(d) {return self.model.NameLookUp(d,request.cvar)});
 
-		if (request.cvar=="measure") request.measure="value";
+		//List of selected categories by actual name rather than code
+		var cvarlist=request[request.cvar].map(function(d) {
+			var cv=self.model.NameLookUp(d,request.cvar);
+			return (request.cvar==="year2")?(cv.toString()):(cv);
+		});
+
+		if (request.cvar==="measure") request.measure="value";
 		
 		var xScale = d3.scale.ordinal()
 		.domain(self.model.GetDomain(request.xvar))
@@ -220,7 +234,6 @@ var ViewModel = function() {
 		var bars=
 		svg.selectAll("rect")
 			.data(data);
-
 
 		bars.enter().append("rect")
 		   	.attr("fill",  function(d) {return colors[cvarlist.indexOf(d[request.cvar])];})
@@ -299,7 +312,7 @@ var ViewModel = function() {
 
 			curyearmessage.transition().duration(1000).text(self.model.year2[yr]); //Display year
 
-			var dataset=data.filter(function(d) {return +d.time==self.model.year2[yr]}); //Select data corresponding to the year
+			var dataset=data.filter(function(d) {return +d.time===self.model.year2[yr]}); //Select data corresponding to the year
 			
 			//The data4bars is only needed for smooth transition in animations. There have to be rectangles of 0 height for missing data. data4bars is created
 			//empty outside this function. The following loop fills in / updates to actual data values from current year
@@ -330,7 +343,7 @@ var ViewModel = function() {
 			//These loops are only needed for smooth transition in animations. There have to be bars of 0 height for missing data.
 			var data4bars=[]
 			for (var i in xScale.domain())
-				for (var j in request[request.cvar])
+				for (var j in cvarlist)
 					{
 						var datum4bar={}
 						datum4bar[request.xvar]=xScale.domain()[i];

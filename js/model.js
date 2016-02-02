@@ -1,6 +1,6 @@
 var BDSVisModel = {
 	state : [
-		//{"code" : "00", "name" : "United States", "st":"US"},
+		{"code" : "00", "name" : "United States", "st":"US"},
 		{"code" : "01", "name" : "Alabama", "st" : "AL" },
 		{"code" : "02", "name" : "Alaska", "st" : "AK" },
 		{"code" : "04", "name" : "Arizona", "st" : "AZ" },
