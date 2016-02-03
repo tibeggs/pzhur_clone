@@ -167,6 +167,7 @@ var ViewModel = function() {
 					rec.value=data[i][request.measure[imeasure]]; //Column named "value" will contain values of all the measures
 					rec[request.xvar]=data[i][request.xvar];		//x-axis value
 					rec[request.cvar]=self.model.NameLookUp(request.measure[imeasure],"measure"); //Column for c-variable indicates the measure
+					if (self.timelapse()) rec.time=data[i].time;
 					data1.push(rec);
 				}
 			
@@ -354,7 +355,7 @@ var ViewModel = function() {
 			   	.attr("fill",  function(d) {return colors[+d.icvar]})
 			   	.attr("x",function(d) {return xScale(d[request.xvar])+barwidth*d.icvar;})
 			   	.transition().duration(500)
-			   	.attr("y",function(d) {return yScale(Math.max(0,+d[measure]));})
+			   	.attr("y",function(d) { return yScale(Math.max(0,+d[measure]));})
 			   	.attr("height",function(d) {return Math.abs(yScale(0)-yScale(+d[measure]));});
 
 		}
