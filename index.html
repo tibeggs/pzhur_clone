@@ -9,8 +9,9 @@
 <body>
   <span style="position:absolute; margin-top:100px; margin-left:200px; font-size:16pt" data-bind="visible: waiting4api">Waiting for data from the server...</span>
   <div id="plotarea">
+    <div id="graphtitle" style="text-align: center;"></div>
     <svg id="chartsvg"></svg>
-    <div style="text-align: center; "><button data-bind="click: toggletimelapse, text: tlbuttontext, disable: (YearAsLegend()) ">Time Lapse</button></div>
+    <div id="buttonsundergraph" style="text-align: center; "><button data-bind="click: toggletimelapse, text: tlbuttontext, disable: (YearAsLegend()) ">Time Lapse</button></div>
   </div>
 
   <span class="selectors" data-bind="visible: !(timelapse())">
@@ -19,8 +20,8 @@
 
         <h4>Measures:</h4><select data-bind="options: model.measure, optionsText: 'name', optionsValue: 'code', value: SelectedMeasures()[0], selectedOptions: SelectedMeasures, attr: {multiple: MeasureAsLegend}, css: {tallselector: MeasureAsLegend}"></select><button data-bind="click: setmeasurecvar,  visible: (!MeasureAsLegend())">Compare Measures</button><br>
 
-        <h4>States:</h4><select data-bind="options: model.state, optionsText: 'name', optionsValue: 'code', value: SelectedStates()[0], selectedOptions: SelectedStates, attr: {multiple: StateAsLegend}, css: {tallselector: StateAsLegend}, visible: (!SectorAsLegend())"></select>
-         <h4 data-bind="visible: (SectorAsLegend())" style="width:195px; margin:0px">United States</h4>
+        <h4>States:</h4><select data-bind="options: model.state, optionsText: 'name', optionsValue: 'code', value: SelectedStates()[0], selectedOptions: SelectedStates, attr: {multiple: StateAsLegend}, css: {tallselector: StateAsLegend}, visible: (!us())"></select>
+         <h4 data-bind="visible: us()" style="width:195px; margin:0px">United States</h4>
         <button data-bind="click: setstatecvar,  visible: (!StateAsLegend())">Compare States</button><br>
         <br>
 

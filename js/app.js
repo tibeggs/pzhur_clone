@@ -15,10 +15,14 @@ var ViewModel = function() {
 
 	this.toggletimelapse = function () {
 		if (self.timelapse()) {
+			self.timelapse(false);
 			clearInterval(self.tlint);
-			self.SelectedYears([self.TimeLapseCurrYear]);
+			self.SelectedYears([self.TimeLapseCurrYear-1]);
+		} else {
+			self.timelapse(true);
+			self.getBDSdata();
 		}
-		self.timelapse(!self.timelapse());
+		
 	}
 
 	this.setsectorcvar = function () {
@@ -52,31 +56,39 @@ var ViewModel = function() {
 
 	this.timelapse = ko.observable(false);
 	this.tlbuttontext = ko.computed (function() {return self.timelapse()?"Stop":"Time Lapse"});
-
 	this.SectorAsLegend = ko.computed( function () {return self.cvar()==="sic1";});
-	this.SectorSelectable = ko.observable("false");
-
 	this.StateAsLegend = ko.computed( function () {return self.cvar()==="state";});
-	this.StateSelectable = ko.computed( function () {return ((self.cvar()!="sic1") && !self.SectorSelectable()) ;});
-	
 	this.MeasureAsLegend = ko.computed( function () {return self.cvar()==="measure";});
-	
+	this.YearAsLegend = ko.computed( function () {return self.cvar()==="year2";});
+	//this.FirmCharAsLegend = ko.computed( function () {return self.cvar()==="fchar";});
 
 	
-	this.YearAsLegend = ko.computed( function () {return self.cvar()==="year2";});
-	this.FirmCharAsLegend = ko.computed( function () {return self.cvar()==="fchar";});
+
+	this.us = ko.computed(function(){ //Whether to send the "us:*" request or by individual states ("state:*")
+		if (self.StateAsLegend()) return false;
+		else if (self.SectorAsLegend()) return true;
+		else if (self.SelectedSectors()[0]===0) return false;
+		else return true;
+	});
+
+	this.StateRequested = ko.computed (function(){ //Set to request single state or multiple, and remove the 00 code for the US in selector
+		var multiple=self.SelectedStates().length>1;
+		var fisrtUS=self.SelectedStates()[0]==="00";
+
+		if ((multiple) && (fisrtUS)) return self.SelectedStates().slice(1);
+		else return (self.StateAsLegend())?self.SelectedStates():[self.SelectedStates()[0]];
+	})
 
 
 	this.APIrequest = ko.computed( function  () {
 		return {
-			sic1 : (self.cvar()==="state")?([0]):self.SelectedSectors(),
-			state : (self.cvar()==="sic1")?([0]):self.SelectedStates(),
-			measure : self.SelectedMeasures(),
+			sic1 : self.StateAsLegend()?([0]):(self.SectorAsLegend?self.SelectedSectors():[self.SelectedSectors()[0]]),
+			state : self.StateRequested(),
+			measure : self.MeasureAsLegend()?self.SelectedMeasures():[self.SelectedMeasures()[0]],
 			fchar : self.fchar(),
-			year2 : self.SelectedYears(),
+			year2 : self.YearAsLegend()?self.SelectedYears():[self.SelectedYears()[0]],
 			xvar : (self.xvar()==="fchar")?(self.fchar()):(self.xvar()),
 			cvar : (self.cvar()==="fchar")?(self.fchar()):(self.cvar()),
-			timelapse : self.timelapse()
 		}
 	});
 
@@ -86,9 +98,9 @@ var ViewModel = function() {
 		self.getBDSdata();
 	});
 
-	this.SelectedStates.subscribe(function() {
-		self.SelectedSectors([0]);
-	})
+	// this.SelectedStates.subscribe(function() {
+	// 	self.SelectedSectors([0]);
+	// })
 	
 //Get the data from the API according to current request and render it into array of objects with field names corresponding to the variables
 	this.getBDSdata = function () {
@@ -97,37 +109,36 @@ var ViewModel = function() {
 
 	    var url="http://api.census.gov/data/bds/firms";
 
-	    //Whether to form request for states or for the whole US. If US is selected in the state selector, or if request is by sector, then use "us:*"
-	    var bystate = true;
-		if (((request.state.length===1) && (request.state[0]===0)) || self.SectorAsLegend() 
-			|| ((request.sic1.length===1) 
-				&& 
-				(request.sic1[0]!=0))) 
-			bystate=false;
+		var geography=self.us()?("us:*"):("state:"+request.state);
+		if ((request.state.length===1) && (request.state[0]==="00")) geography="us:*";
+
+		var reqtime=((self.timelapse())?("&time=from+1977+to+2013"):("&year2="+request.year2));
 
 	    var geturl=url+"?get="+request.fchar+","+request.measure+
-	    				"&for="+(bystate?("state:"+(self.StateAsLegend()?request.state:request.state[0])):("us:*"))+
-	    				((request.timelapse)?("&time=from+1977+to+2013"):
-	    				("&year2="+((self.YearAsLegend())?(request.year2):(request.year2[0]))))+
-	    				((!self.StateAsLegend())?("&sic1="+request.sic1):(""))+
+	    				"&for="+geography+
+	    				reqtime+
+	    				((self.us())?("&sic1="+request.sic1):(""))+
 	    				"&key=93beeef146cec68880fccbd72e455fcd7135228f";
 
 	    console.log(geturl);
 	    
 	    waiting4api(true); //Show "waiting for data" message
 	    d3.json(geturl,function (data) {
-	    	if (!(data===null)) {
+	    	if (!(data===null)) { //Convert data into array of objects with the same keys
 		    	var jsoned=[];
 		    	for (var i in data) {
 		    		var rec={};
 		    		if (i>0) {
-		    			for (name in data[0])
-		    				rec[data[0][name]]=data[i][name];
+		    			for (iname in data[0]) //Find keys, which are contained in the first line of the array returned by API
+		    			{
+		    				var key=(data[0][iname]==="us")?("state"):data[0][iname]; //Substitute "us" field name to "state"
+		    				rec[key]=data[i][iname]; //Fill the object
+		    			}
 		    			jsoned.push(rec);
 		    		}
 		    	}
 
-	    		self.updateBDSdata(jsoned);
+	    		self.updateBDSdata(jsoned); //Continue to data processing and plotting
 	    	} else {
 	    		console.log("Server sent empty response to " + geturl);	
 	    	}
@@ -141,9 +152,9 @@ var ViewModel = function() {
 
 		var request=self.APIrequest();
 
-		var data2show={};
+		var data2show={}; // The nested object, used as an intermediate step to convert data into 2D array
 
-		var data1=[]
+		var data1=[]; // The reshuffled (melted) data, with measures in the same column. Like R function "melt" from the "reshape" package
 
 		for (var i in data) {
 
@@ -151,20 +162,20 @@ var ViewModel = function() {
 			if (request.cvar!="measure")
 					 data[i][request.cvar]=self.model.NameLookUp(data[i][request.cvar],request.cvar); //Replace code strings with actual category names for c-variable
 			else 
-				for (var imeasure in request.measure) {
+				for (var imeasure in request.measure) { //If comparing by measure, melt the data by measures: combine different measure in single column and create a column indicating which measure it is (c-var)
 					var rec={};
-					rec.value=data[i][request.measure[imeasure]];
-					rec[request.xvar]=data[i][request.xvar];
-					rec[request.cvar]=self.model.NameLookUp(request.measure[imeasure],"measure");
+					rec.value=data[i][request.measure[imeasure]]; //Column named "value" will contain values of all the measures
+					rec[request.xvar]=data[i][request.xvar];		//x-axis value
+					rec[request.cvar]=self.model.NameLookUp(request.measure[imeasure],"measure"); //Column for c-variable indicates the measure
 					data1.push(rec);
 				}
 			
 			//Convert data to 2D table, so that it can be displayed
-			if (data2show[data[i][request.xvar]]===undefined)
+			if (data2show[data[i][request.xvar]]===undefined) //Create nested objects
 				data2show[data[i][request.xvar]]={};
 			
 			if (request.cvar!="measure")
-				data2show[data[i][request.xvar]][data[i][request.cvar]]=data[i][request.measure];
+				data2show[data[i][request.xvar]][data[i][request.cvar]]=data[i][request.measure]; //Fill nested objects
 			else 
 				for (var imeasure in request[request.cvar])
 					data2show[data[i][request.xvar]][request[request.cvar][imeasure]]=data[i][request[request.cvar][imeasure]];
@@ -172,7 +183,7 @@ var ViewModel = function() {
 
 
 		//Convert the nested object with data to display into nested array (including field names)
-		var cvarnames=[(self.xvar()==="fchar")?(self.model.NameLookUp(request.xvar,"fchar")):(request.xvar)];
+		var cvarnames=[(self.xvar()==="fchar")?(self.model.NameLookUp(request.xvar,"fchar")):(request.xvar)]; //Create row with names of c-variable
 		for (var xvarkey in data2show) {
 			for (var cvarkey in data2show[xvarkey])
 				cvarnames.push(cvarkey);
@@ -180,9 +191,9 @@ var ViewModel = function() {
 		};
 		self.data([cvarnames]);
 		for (var xvarkey in data2show) {
-			var xvararr=[xvarkey];
+			var xvararr=[xvarkey]; //Create the column with names of x-variable
 			for (var cvarkey in data2show[xvarkey])
-				xvararr.push(data2show[xvarkey][cvarkey])
+				xvararr.push(data2show[xvarkey][cvarkey]) //Fill the data into 2D table
 			self.data.push(xvararr);
 		}
 
@@ -208,21 +219,28 @@ var ViewModel = function() {
 			.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
 			.attr('class', 'chart');
 
+		d3.select("#plotarea").style("width", width + margin.left + margin.right+"px");
+		
 		var request=self.APIrequest();
+		var measure=(request.cvar==="measure")?"value":request.measure;
 
+		d3.select("#graphtitle").text(((measure.length>1)?("Various measures"):(self.model.NameLookUp(measure,"measure")))+
+					   " in "+(self.us()?"US":((request.state.length>1)?("various states "):(self.model.NameLookUp(request.state,"state"))))+
+					   " in "+((request.year2.length>1)?("various years "):(self.model.NameLookUp(request.year2,"year2")))+
+					   " in "+((request.sic1.length>1)?("various sectors"):(self.model.NameLookUp(request.sic1,"sic1"))));
+	
 		//List of selected categories by actual name rather than code
 		var cvarlist=request[request.cvar].map(function(d) {
 			var cv=self.model.NameLookUp(d,request.cvar);
 			return (request.cvar==="year2")?(cv.toString()):(cv);
 		});
 
-		if (request.cvar==="measure") request.measure="value";
 		
 		var xScale = d3.scale.ordinal()
 		.domain(self.model.GetDomain(request.xvar))
 		.rangeRoundBands([0, width], .1);
 		var yScale = d3.scale.linear()
-		.domain([Math.min(0,d3.min(data, function(d) { return +d[request.measure]; })), d3.max(data, function(d) { return +d[request.measure]; })])
+		.domain([Math.min(0,d3.min(data, function(d) { return +d[measure]; })), d3.max(data, function(d) { return +d[measure]; })])
 		.range([height,0]);
 		var colors=//['green','red','orange','cyan','purple','blue','magenta','green','red','orange','cyan','purple','blue','magenta'];
 		["#265DAB","#DF5C24","#059748","#E5126F","#9D722A","#7B3A96","#C7B42E","#CB2027","#4D4D4D","#5DA5DA","#FAA43A","#60BD68","#F17CB0","#B2912F","#B276B2","#DECF3F","#F15854","#8C8C8C","#8ABDE6","#FBB258","#90CD97","#F6AAC9","#BFA554","#BC99C7","#EDDD46","#F07E6E","#000000",
@@ -242,22 +260,22 @@ var ViewModel = function() {
 		   	.attr("y",function(d) {return yScale(0)})
 		   	.attr("height",0).transition()
 		   	.duration(500).ease("sin-in-out")
-		   	.attr("y",function(d) {return yScale(Math.max(0,+d[request.measure]))})
-		   	.attr("height", function(d) {return Math.abs(yScale(0)-yScale(+d[request.measure]))})
+		   	.attr("y",function(d) {return yScale(Math.max(0,+d[measure]))})
+		   	.attr("height", function(d) {return Math.abs(yScale(0)-yScale(+d[measure]))})
 
 		 // var fontsize= d3.min(data, function(d,i) {
-			// 		return 1.5*barwidth/d[request.measure].length; 
+			// 		return 1.5*barwidth/d[measure].length; 
 			// 	});
 
 		// svg.selectAll("text")
 		// 	.data(data)
 		// 	.enter().append("text")
 		// 	.attr("x",function(d) {return (xScale(d[request.xvar])+barwidth*cvarlist.indexOf(d[request.cvar]))+barwidth/4})
-		// 	.attr("y",function(d) {return yScale(+d[request.measure])-8-7*Math.sign(d[request.measure])})
+		// 	.attr("y",function(d) {return yScale(+d[measure])-8-7*Math.sign(d[measure])})
 		// 	.attr("dy", ".75em")
 		// 	.attr("fill","#eeeeee")
 		// 	.attr("font-size", fontsize)
-		// 	.text(function(d) { return d[request.measure]; });
+		// 	.text(function(d) { return d[measure]; });
 
 
 		var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
@@ -312,6 +330,11 @@ var ViewModel = function() {
 
 			curyearmessage.transition().duration(1000).text(self.model.year2[yr]); //Display year
 
+			d3.select("#graphtitle").text(((measure.length>1)?("Various measures"):(self.model.NameLookUp(measure,"measure")))+
+					   " in "+(self.us()?"US":((request.state.length>1)?("various states "):(self.model.NameLookUp(request.state,"state"))))+
+					   " in "+self.model.year2[yr]+
+					   " in "+((request.sic1.length>1)?("various sectors"):(self.model.NameLookUp(request.sic1,"sic1"))));
+
 			var dataset=data.filter(function(d) {return +d.time===self.model.year2[yr]}); //Select data corresponding to the year
 			
 			//The data4bars is only needed for smooth transition in animations. There have to be rectangles of 0 height for missing data. data4bars is created
@@ -319,7 +342,7 @@ var ViewModel = function() {
 		
 			for (var i in dataset) {
 				data4bars[xScale.domain().indexOf(dataset[i][request.xvar])*request[request.cvar].length
-						+cvarlist.indexOf(dataset[i][request.cvar])][request.measure]=+dataset[i][request.measure]
+						+cvarlist.indexOf(dataset[i][request.cvar])][measure]=+dataset[i][measure]
 			}
 			
       		var bars=svg.selectAll("rect").data(data4bars);
@@ -331,13 +354,13 @@ var ViewModel = function() {
 			   	.attr("fill",  function(d) {return colors[+d.icvar]})
 			   	.attr("x",function(d) {return xScale(d[request.xvar])+barwidth*d.icvar;})
 			   	.transition().duration(500)
-			   	.attr("y",function(d) {return yScale(Math.max(0,+d[request.measure]));})
-			   	.attr("height",function(d) {return Math.abs(yScale(0)-yScale(+d[request.measure]));});
+			   	.attr("y",function(d) {return yScale(Math.max(0,+d[measure]));})
+			   	.attr("height",function(d) {return Math.abs(yScale(0)-yScale(+d[measure]));});
 
 		}
 
 		//Run timelapse animation
-		if (request.timelapse) {
+		if (self.timelapse()) {
 
 
 			//These loops are only needed for smooth transition in animations. There have to be bars of 0 height for missing data.
@@ -347,7 +370,7 @@ var ViewModel = function() {
 					{
 						var datum4bar={}
 						datum4bar[request.xvar]=xScale.domain()[i];
-						datum4bar[request.measure]=0;
+						datum4bar[measure]=0;
 						datum4bar.icvar=j;
 						data4bars.push(datum4bar);
 					}
