@@ -225,10 +225,12 @@ var ViewModel = function() {
 		var request=self.APIrequest();
 		var measure=(request.cvar==="measure")?"value":request.measure;
 
+		console.log(request.sic1==[0])
+
 		d3.select("#graphtitle").text(((measure.length>1)?("Various measures"):(self.model.NameLookUp(measure,"measure")))+
-					   " in "+(self.us()?"US":((request.state.length>1)?("various states "):(self.model.NameLookUp(request.state,"state"))))+
-					   " in "+((request.year2.length>1)?("various years "):(self.model.NameLookUp(request.year2,"year2")))+
-					   " in "+((request.sic1.length>1)?("various sectors"):(self.model.NameLookUp(request.sic1,"sic1"))));
+					   (self.us()?" in US":((request.state.length>1)?(" by state"):(" in "+self.model.NameLookUp(request.state,"state"))))+
+					   ((request.year2.length>1)?(" by year"):(" in "+self.model.NameLookUp(request.year2,"year2")))+
+					   ((request.sic1.length>1)?(" by sector"):(((request.sic1[0]===0)?" ":" in sector of ")+self.model.NameLookUp(request.sic1,"sic1"))));
 	
 		//List of selected categories by actual name rather than code
 		var cvarlist=request[request.cvar].map(function(d) {
@@ -293,7 +295,12 @@ var ViewModel = function() {
 		svg.append("g")
 			.attr("class", "x axis")
 			.attr("transform", "translate(0," + height + ")")
-			.call(xAxis);
+			.call(xAxis)
+			// .selectAll("text")
+			// .attr("y", 0)
+   //  		.attr("x", 10)
+			// .attr("transform", "rotate(15)")
+			// .style("text-anchor", "start");
 
 
 		svg.append("g")
