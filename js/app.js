@@ -210,6 +210,7 @@ var ViewModel = function() {
 		for (var i in data) {
 
 			data[i][request.xvar]=self.model.NameLookUp(data[i][request.xvar],request.xvar); //Replace code strings with actual category names for x-variable
+			
 			data[i][request.cvar]=self.model.NameLookUp(data[i][request.cvar],request.cvar); //Replace code strings with actual category names for c-variable
 	
 			if (self.MeasureAsLegend()) 
@@ -225,17 +226,16 @@ var ViewModel = function() {
 			//Convert data to 2D table, so that it can be displayed
 			if (data2show[data[i][request.xvar]]===undefined) //Create nested objects
 				data2show[data[i][request.xvar]]={};
-			
 			if (!self.MeasureAsLegend())
 				data2show[data[i][request.xvar]][data[i][request.cvar]]=data[i][request.measure]; //Fill nested objects
 			else 
 				for (var imeasure in request[request.cvar])
-					data2show[data[i][request.xvar]][request[request.cvar][imeasure]]=data[i][request[request.cvar][imeasure]];
+					data2show[data[i][request.xvar]][self.model.NameLookUp(request[request.cvar][imeasure],"measure")]=data[i][request[request.cvar][imeasure]];
 		}
 
 
 		//Convert the nested object with data to display into nested array (including field names)
-		var cvarnames=[(self.xvar()==="fchar")?(self.model.NameLookUp(request.xvar,"fchar")):(request.xvar)]; //Create row with names of c-variable
+		var cvarnames=[self.model.NameLookUp(request.xvar,"var")]; //Create row with names of c-variable	
 		for (var xvarkey in data2show) {
 			for (var cvarkey in data2show[xvarkey])
 				cvarnames.push(cvarkey);

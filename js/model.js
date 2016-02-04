@@ -125,6 +125,13 @@ var BDSVisModel = {
 		{"code" : "ifsize", "name" : "Initial firm size"}
 	],
 
+	varnames : {
+		"sic1" : "Sector",
+		"state" : "State",
+		"year2" : "Year",
+		"measure" : "Measure"
+	},
+
 	measlookup : {},
  	statelookup : {},
  	fagelookup : {},
@@ -162,7 +169,6 @@ var BDSVisModel = {
 	},
 
 	NameLookUp : function(d,v) {
-		//debugger;
 		if (v==="fage4")
 			return this.fagelookup[d]
 		else if ((v==="fsize") || (v==="ifsize"))
@@ -177,6 +183,11 @@ var BDSVisModel = {
 			return d
 		else if (v==="fchar")
 			return this.fcharlookup[d]
+		else if (v==="var") {
+			if ((d==="fsize") || (d==="ifsize") || (d==="fage4"))
+				return this.fcharlookup[d]
+			else return this.varnames[d]
+		}
 		else return "Variable is not among: fage4,fsize,ifsize,measure,state"
 
 	},
