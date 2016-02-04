@@ -7,7 +7,9 @@
 </head>
 
 <body>
+
   <span style="position:absolute; margin-top:100px; margin-left:200px; font-size:16pt" data-bind="visible: waiting4api">Waiting for data from the server...</span>
+
   <div id="plotarea">
     <div id="graphtitle" style="text-align: center;"></div>
     <svg id="chartsvg"></svg>
@@ -27,33 +29,34 @@
 
         <h4>Years:</h4><select data-bind="options: model.year2, optionsText: $data, optionsValue: $data, value: SelectedYears()[0], selectedOptions: SelectedYears, attr: {multiple: YearAsLegend}, css: {tallselector: YearAsLegend}" ></select><button data-bind="click: setyearcvar,  visible: (!YearAsLegend())">Compare Years</button><br>
 
-        <h4>Firm Characteristic:</h4><select data-bind="options: model.fchar, optionsText: 'name', optionsValue: 'code', value: fchar" ></select><button data-bind="click: setfcharxvar, visible: (!FirmCharAsArgument())">X-axis</button><br>
+        <h4>Firm Characteristic:</h4><select data-bind="options: model.fchar, optionsText: 'name', optionsValue: 'code', value: fchar" ></select><button data-bind="click: setfcharcvar,  visible: (!FirmCharVar())">Compare</button><button data-bind="click: setfcharxvar, visible: (!FirmCharVar())">X-axis</button><br>
 
   </span>
 
   <span style="display:block; overflow:auto; height: 350px; width:500px">
-  Legend:<br>
-  <svg id="legend"></svg>
+    Legend:<br>
+    <svg id="legend"></svg>
   </span>
+
 <br>
+
   <span style="float:left">
-  <button data-bind="click: toggleshowdata">Show Data</button>
+    <button data-bind="click: toggleshowdata">Show Data</button>
 
+    <table data-bind="visible: ShowData">
+      <thead data-bind="foreach: data.slice(0,1)">
+          <tr data-bind="foreach: $data">
+            <th data-bind="text: $data"></th>
+          </tr>
+      </thead>
+      <tbody data-bind="foreach: data.slice(1)">
+          <tr data-bind="foreach: $data">
+              <td data-bind="text: $data"></td>
+          </tr>
+      </tbody>
+    </table>
 
-  <table data-bind="visible: ShowData">
-    <thead data-bind="foreach: data.slice(0,1)">
-        <!-- <tr><th data-bind="text: "></th><th data-bind="text: "></th><th data-bind="text: ">State</th></tr> -->
-        <tr data-bind="foreach: $data">
-          <th data-bind="text: $data"></th>
-        </tr>
-    </thead>
-    <tbody data-bind="foreach: data.slice(1)">
-        <tr data-bind="foreach: $data">
-            <td data-bind="text: $data"></td>
-        </tr>
-    </tbody>
-</table>
-</span>
+  </span>
   
  
 	<script src="js/d3.min.js"></script>

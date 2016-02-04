@@ -10,10 +10,12 @@ var ViewModel = function() {
 	this.ShowData = ko.observable(0);
 
 	this.toggleshowdata = function () {
+		//This function executes in click to 'Show Data' button.
 		self.ShowData(!self.ShowData());
 	}
 
 	this.toggletimelapse = function () {
+		//This function executes in click to 'Stop'/'Time Lapse' button and stops time lapse animation or starts it.
 		if (self.timelapse()) {
 			self.timelapse(false);
 			clearInterval(self.tlint);
@@ -24,6 +26,8 @@ var ViewModel = function() {
 		}
 		
 	}
+
+	//The following functions set cvar (Legend/Comparison/Color variable) and xvar (X-axis variable)
 
 	this.setsectorcvar = function () {
 		self.cvar("sic1");
@@ -52,13 +56,18 @@ var ViewModel = function() {
 		self.xvar("measure");
 	}
 
+	this.setfcharcvar = function () {
+		self.cvar("fchar");
+	}
+
 	this.setfcharxvar = function () {
 		self.xvar("fchar");
 	}
 
 
-	waiting4api = ko.observable(false);
+	waiting4api = ko.observable(false); //Whether message "Waiting for data from server" is shown
 
+	//What is selected in the input selectors
 	this.SelectedStates = ko.observableArray([this.model.state[20].code]);
 	this.SelectedSectors = ko.observableArray([this.model.sic1[0].code]);
 	this.SelectedMeasures = ko.observableArray([this.model.measure[11].code]);
@@ -66,53 +75,71 @@ var ViewModel = function() {
 	this.fchar = ko.observable(this.model.fchar[0].code);
 	//this.SelectedFchar = ko.observableArray([this.fchar()]);
 
+	//Initial values of X-axis variable and C- variable
 	this.xvar = ko.observable("fchar");
 	this.cvar = ko.observable("state");
 
+	//Initial value and text of Time Lapse button
 	this.timelapse = ko.observable(false);
 	this.tlbuttontext = ko.computed (function() {return self.timelapse()?"Stop":"Time Lapse"});
 
+	//Whether a variable is C- Variable (Legend)
 	this.SectorAsLegend = ko.computed( function () {return self.cvar()==="sic1";});
 	this.StateAsLegend = ko.computed( function () {return (self.cvar()==="state" && self.xvar()!="sic1");});
 	this.MeasureAsLegend = ko.computed( function () {return self.cvar()==="measure";});
 	this.YearAsLegend = ko.computed( function () {return self.cvar()==="year2";});
 	this.FirmCharAsLegend = ko.computed( function () {return self.cvar()==="fchar";});
 
+	//Whether a variable is X-axis variable
 	this.SectorAsArgument = ko.computed( function () {return self.xvar()==="sic1";});
 	this.StateAsArgument = ko.computed( function () {return self.xvar()==="state";});
 	this.YearAsArgument = ko.computed( function () {return self.xvar()==="year2";});
 	this.FirmCharAsArgument = ko.computed( function () {return self.xvar()==="fchar";});
 
+	//Whether a variable is either X- or C-
 	this.SectorVar = ko.computed( function () {return (self.SectorAsLegend() || self.SectorAsArgument());});
 	this.StateVar = ko.computed( function () {return (self.StateAsLegend() || self.StateAsArgument());});
 	this.YearVar = ko.computed( function () {return (self.YearAsLegend() || self.YearAsArgument());});
+	this.FirmCharVar = ko.computed( function () {return (self.FirmCharAsLegend() || self.FirmCharAsArgument());});
 
-
-	this.us = ko.computed(function(){ //Whether to send the "us:*" request or by individual states ("state:*")
-		if (self.StateAsLegend()) return false;
-		else if (self.SectorVar()) return true;
-		else if (self.SelectedSectors()[0]===0) return false;
-		else return true;
+ 	//Whether to send the "us:*" request or by individual states ("state:*")
+	this.us = ko.computed(function(){
+		if (self.StateAsLegend()) return false; //If states are Legend, we need many states, so request NOT general, but by state
+		else if (self.SectorVar()) return true; //If sector is either c- or x- variable, then there is no by-state data, so YES
+		else if (self.SelectedSectors()[0]===0) return false; //If "Economy Wide" is selected in sectors, then by state
+		else return true; //Else means a sector is selected, so there can not be by-state request
 	});
 
-	this.StateRequested = ko.computed (function(){ //Set to request single state or multiple, and remove the 00 code for the US in selector
-		var multiple=self.SelectedStates().length>1;
-		var fisrtUS=self.SelectedStates()[0]==="00";
+	//Set to request single state or multiple, and remove the 00 code for the US in selector
+	this.StateRequested = ko.computed (function(){ 
+		var multiple=self.SelectedStates().length>1; //Whether multiple states are selected
+		var fisrtUS=self.SelectedStates()[0]==="00"; //Whether "United States" is selected
 
-		if ((multiple) && (fisrtUS)) return self.SelectedStates().slice(1);
-		else return (self.StateAsLegend())?self.SelectedStates():[self.SelectedStates()[0]];
+		if ((multiple) && (fisrtUS)) return self.SelectedStates().slice(1); //Remove "United States" if many states are selected
+		//Otherwise return all selected states or one, depending on whether state is the c-variable
+		else return (self.StateAsLegend())?self.SelectedStates():[self.SelectedStates()[0]]; 
 	})
 
-
+	//Changes to these variable trigger API-request and replotting. 
+	//That's why they are put together in an object, so that the single subscription below takes care of all the input changes
 	this.APIrequest = ko.computed( function  () {
 		return {
+			//If by-state request, then only send "Economy Wide", otherwise send all selected sectors or a single sector depending on whether sector is the c-variable(legend)
 			sic1 : self.StateAsLegend()?([0]):(self.SectorAsLegend?self.SelectedSectors():[self.SelectedSectors()[0]]),
+			//See state calculation above in this.StateRequested
 			state : self.StateRequested(),
+			//Send all selected measures or a single one depending on whether measure is the c-variable.
 			measure : self.MeasureAsLegend()?self.SelectedMeasures():[self.SelectedMeasures()[0]],
 			fchar : self.fchar(),
+			//Send all selected years or a single one depending on whether year is the c-variable.
 			year2 : self.YearAsLegend()?self.SelectedYears():[self.SelectedYears()[0]],
+			//"fchar" is actually one of 3: fage4, fsize, ifsize. So that should be sent instead of "fchar"
 			xvar : (self.xvar()==="fchar")?(self.fchar()):(self.xvar()),
 			cvar : (self.cvar()==="fchar")?(self.fchar()):(self.cvar()),
+			//The following 3 lines are just for the case when Firm Characterstic is c-variable.
+			fage4 : self.model.GetDomain("fage4"),
+			fsize : self.model.GetDomain("fsize"),
+			ifsize : self.model.GetDomain("ifsize")
 		}
 	});
 
@@ -138,7 +165,7 @@ var ViewModel = function() {
 
 		var reqtime=((self.timelapse())?("&time=from+1977+to+2013"):("&year2="+request.year2));
 
-	    var geturl=url+"?get="+request.xvar+","+request.measure+
+	    var geturl=url+"?get="+request.xvar+","+request.measure+(self.FirmCharAsLegend()?(","+request.cvar):"")+
 	    				"&for="+geography+
 	    				reqtime+
 	    				((self.us() && (!self.SectorAsArgument()))?("&sic1="+request.sic1):(""))+
@@ -214,7 +241,7 @@ var ViewModel = function() {
 				cvarnames.push(cvarkey);
 			break;
 		};
-		self.data([cvarnames]);
+		self.data([cvarnames]); //First row of the table will contain names of c-variable
 		for (var xvarkey in data2show) {
 			var xvararr=[xvarkey]; //Create the column with names of x-variable
 			for (var cvarkey in data2show[xvarkey])
@@ -247,20 +274,23 @@ var ViewModel = function() {
 		d3.select("#plotarea").style("width", width + margin.left + margin.right+"px");
 		
 		var request=self.APIrequest();
+
+		//If measure is a (c-)variable, then we got melted data from updateBDSdata function, with all measures contained in the "value" column
 		var measure=(self.MeasureAsLegend())?"value":request.measure;
 
+		//Set the title of the plot
 		d3.select("#graphtitle").text(((measure.length>1)?("Various measures"):(self.model.NameLookUp(measure,"measure")))+
 					   (self.us()?" in US":((request.state.length>1)?(" by state"):(" in "+self.model.NameLookUp(request.state,"state"))))+
 					   ((request.year2.length>1)?(" by year"):(" in "+self.model.NameLookUp(request.year2,"year2")))+
 					   ((request.sic1.length>1)?(" by sector"):(((request.sic1[0]===0)?" ":" in sector of ")+self.model.NameLookUp(request.sic1,"sic1"))));
-	
+
 		//List of selected categories by actual name rather than code
 		var cvarlist=request[request.cvar].map(function(d) {
-			var cv=self.model.NameLookUp(d,request.cvar);
+			var cv=self.FirmCharAsLegend()?d:self.model.NameLookUp(d,request.cvar);
 			return (self.YearAsLegend())?(cv.toString()):(cv);
 		});
-
 		
+		//Setting D3 scales
 		var xScale = d3.scale.ordinal()
 		.domain(self.model.GetDomain(request.xvar))
 		.rangeRoundBands([0, width], .1);
@@ -271,6 +301,7 @@ var ViewModel = function() {
 		["#265DAB","#DF5C24","#059748","#E5126F","#9D722A","#7B3A96","#C7B42E","#CB2027","#4D4D4D","#5DA5DA","#FAA43A","#60BD68","#F17CB0","#B2912F","#B276B2","#DECF3F","#F15854","#8C8C8C","#8ABDE6","#FBB258","#90CD97","#F6AAC9","#BFA554","#BC99C7","#EDDD46","#F07E6E","#000000",
 		 "#265DAB","#DF5C24","#059748","#E5126F","#9D722A","#7B3A96","#C7B42E","#CB2027","#4D4D4D","#5DA5DA","#FAA43A","#60BD68","#F17CB0","#B2912F","#B276B2","#DECF3F","#F15854","#8C8C8C","#8ABDE6","#FBB258","#90CD97","#F6AAC9","#BFA554","#BC99C7","#EDDD46","#F07E6E","#000000"];
 		
+		//Number of bars is number of categories in the legend, and barwidth is determined from that
 		var nbars=cvarlist.length;
 		var barwidth= xScale.rangeBand()/nbars;
 
@@ -302,7 +333,7 @@ var ViewModel = function() {
 		// 	.attr("font-size", fontsize)
 		// 	.text(function(d) { return d[measure]; });
 
-
+		//Adding axes
 		var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
 
 		var xAxis0 = d3.svg.axis().scale(xScale).tickFormat("").orient("bottom");
