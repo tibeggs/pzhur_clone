@@ -16,18 +16,18 @@
 
   <span class="selectors" data-bind="visible: !(timelapse())">
 
-        <h4>Sectors:</h4><select data-bind="options: model.sic1, optionsText: 'name', optionsValue: 'code', value: SelectedSectors()[0], selectedOptions: SelectedSectors, attr: {multiple: SectorAsLegend}, css: {tallselector: SectorAsLegend}, disable: (StateAsLegend())"></select><button data-bind="click: setsectorcvar, visible: (!SectorAsLegend())">Compare Sectors</button><br>
+        <h4>Sectors:</h4><select data-bind="options: model.sic1, optionsText: 'name', optionsValue: 'code', value: SelectedSectors()[0], selectedOptions: SelectedSectors, attr: {multiple: SectorAsLegend}, css: {tallselector: SectorAsLegend}, disable: (StateAsLegend() || SectorAsArgument())"></select><button data-bind="click: setsectorcvar, visible: (!SectorVar())">Compare Sectors</button><button data-bind="click: setsectorxvar, visible: (!(SectorVar() || StateVar()))">X-axis</button><br>
 
         <h4>Measures:</h4><select data-bind="options: model.measure, optionsText: 'name', optionsValue: 'code', value: SelectedMeasures()[0], selectedOptions: SelectedMeasures, attr: {multiple: MeasureAsLegend}, css: {tallselector: MeasureAsLegend}"></select><button data-bind="click: setmeasurecvar,  visible: (!MeasureAsLegend())">Compare Measures</button><br>
 
         <h4>States:</h4><select data-bind="options: model.state, optionsText: 'name', optionsValue: 'code', value: SelectedStates()[0], selectedOptions: SelectedStates, attr: {multiple: StateAsLegend}, css: {tallselector: StateAsLegend}, visible: (!us())"></select>
          <h4 data-bind="visible: us()" style="width:195px; margin:0px">United States</h4>
-        <button data-bind="click: setstatecvar,  visible: (!StateAsLegend())">Compare States</button><br>
+        <button data-bind="click: setstatecvar,  visible: (!(StateAsLegend() || SectorAsArgument()))">Compare States</button><br>
         <br>
 
         <h4>Years:</h4><select data-bind="options: model.year2, optionsText: $data, optionsValue: $data, value: SelectedYears()[0], selectedOptions: SelectedYears, attr: {multiple: YearAsLegend}, css: {tallselector: YearAsLegend}" ></select><button data-bind="click: setyearcvar,  visible: (!YearAsLegend())">Compare Years</button><br>
 
-        <h4>Firm Characteristic:</h4><select data-bind="options: model.fchar, optionsText: 'name', optionsValue: 'code', value: fchar" ></select><br>
+        <h4>Firm Characteristic:</h4><select data-bind="options: model.fchar, optionsText: 'name', optionsValue: 'code', value: fchar" ></select><button data-bind="click: setfcharxvar, visible: (!FirmCharAsArgument())">X-axis</button><br>
 
   </span>
 

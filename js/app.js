@@ -29,6 +29,13 @@ var ViewModel = function() {
 		self.cvar("sic1");
 	}
 
+	this.setsectorxvar = function () {
+		self.xvar("sic1");
+		if (self.StateAsLegend()) {
+			this.setmeasurecvar();
+		}
+	}
+
 	this.setstatecvar = function () {
 		self.cvar("state");
 	}
@@ -39,6 +46,14 @@ var ViewModel = function() {
 
 	this.setmeasurecvar = function () {
 		self.cvar("measure");
+	}
+
+	this.setmeasurexvar = function () {
+		self.xvar("measure");
+	}
+
+	this.setfcharxvar = function () {
+		self.xvar("fchar");
 	}
 
 
@@ -56,17 +71,26 @@ var ViewModel = function() {
 
 	this.timelapse = ko.observable(false);
 	this.tlbuttontext = ko.computed (function() {return self.timelapse()?"Stop":"Time Lapse"});
+
 	this.SectorAsLegend = ko.computed( function () {return self.cvar()==="sic1";});
-	this.StateAsLegend = ko.computed( function () {return self.cvar()==="state";});
+	this.StateAsLegend = ko.computed( function () {return (self.cvar()==="state" && self.xvar()!="sic1");});
 	this.MeasureAsLegend = ko.computed( function () {return self.cvar()==="measure";});
 	this.YearAsLegend = ko.computed( function () {return self.cvar()==="year2";});
-	//this.FirmCharAsLegend = ko.computed( function () {return self.cvar()==="fchar";});
+	this.FirmCharAsLegend = ko.computed( function () {return self.cvar()==="fchar";});
 
-	
+	this.SectorAsArgument = ko.computed( function () {return self.xvar()==="sic1";});
+	this.StateAsArgument = ko.computed( function () {return self.xvar()==="state";});
+	this.YearAsArgument = ko.computed( function () {return self.xvar()==="year2";});
+	this.FirmCharAsArgument = ko.computed( function () {return self.xvar()==="fchar";});
+
+	this.SectorVar = ko.computed( function () {return (self.SectorAsLegend() || self.SectorAsArgument());});
+	this.StateVar = ko.computed( function () {return (self.StateAsLegend() || self.StateAsArgument());});
+	this.YearVar = ko.computed( function () {return (self.YearAsLegend() || self.YearAsArgument());});
+
 
 	this.us = ko.computed(function(){ //Whether to send the "us:*" request or by individual states ("state:*")
 		if (self.StateAsLegend()) return false;
-		else if (self.SectorAsLegend()) return true;
+		else if (self.SectorVar()) return true;
 		else if (self.SelectedSectors()[0]===0) return false;
 		else return true;
 	});
@@ -114,10 +138,10 @@ var ViewModel = function() {
 
 		var reqtime=((self.timelapse())?("&time=from+1977+to+2013"):("&year2="+request.year2));
 
-	    var geturl=url+"?get="+request.fchar+","+request.measure+
+	    var geturl=url+"?get="+request.xvar+","+request.measure+
 	    				"&for="+geography+
 	    				reqtime+
-	    				((self.us())?("&sic1="+request.sic1):(""))+
+	    				((self.us() && (!self.SectorAsArgument()))?("&sic1="+request.sic1):(""))+
 	    				"&key=93beeef146cec68880fccbd72e455fcd7135228f";
 
 	    console.log(geturl);
@@ -159,9 +183,9 @@ var ViewModel = function() {
 		for (var i in data) {
 
 			data[i][request.xvar]=self.model.NameLookUp(data[i][request.xvar],request.xvar); //Replace code strings with actual category names for x-variable
-			if (request.cvar!="measure")
-					 data[i][request.cvar]=self.model.NameLookUp(data[i][request.cvar],request.cvar); //Replace code strings with actual category names for c-variable
-			else 
+			data[i][request.cvar]=self.model.NameLookUp(data[i][request.cvar],request.cvar); //Replace code strings with actual category names for c-variable
+	
+			if (self.MeasureAsLegend()) 
 				for (var imeasure in request.measure) { //If comparing by measure, melt the data by measures: combine different measure in single column and create a column indicating which measure it is (c-var)
 					var rec={};
 					rec.value=data[i][request.measure[imeasure]]; //Column named "value" will contain values of all the measures
@@ -175,7 +199,7 @@ var ViewModel = function() {
 			if (data2show[data[i][request.xvar]]===undefined) //Create nested objects
 				data2show[data[i][request.xvar]]={};
 			
-			if (request.cvar!="measure")
+			if (!self.MeasureAsLegend())
 				data2show[data[i][request.xvar]][data[i][request.cvar]]=data[i][request.measure]; //Fill nested objects
 			else 
 				for (var imeasure in request[request.cvar])
@@ -199,7 +223,7 @@ var ViewModel = function() {
 		}
 
 		
-		self.makeBarChart((request.cvar!="measure")?data:data1);
+		self.makeBarChart((!self.MeasureAsLegend())?data:data1);
 	}
 
 	
@@ -207,7 +231,7 @@ var ViewModel = function() {
 	this.makeBarChart = function (data) {
 
 		//Define margins and dimensions of the SVG element containing the chart
-		var margin = {top: 20, right: 30, bottom: 30, left: 80},
+		var margin = {top: 20, right: 30, bottom: 50, left: 80},
 		width = 960 - margin.left - margin.right,
 		height = 500 - margin.top - margin.bottom;
 
@@ -223,9 +247,7 @@ var ViewModel = function() {
 		d3.select("#plotarea").style("width", width + margin.left + margin.right+"px");
 		
 		var request=self.APIrequest();
-		var measure=(request.cvar==="measure")?"value":request.measure;
-
-		console.log(request.sic1==[0])
+		var measure=(self.MeasureAsLegend())?"value":request.measure;
 
 		d3.select("#graphtitle").text(((measure.length>1)?("Various measures"):(self.model.NameLookUp(measure,"measure")))+
 					   (self.us()?" in US":((request.state.length>1)?(" by state"):(" in "+self.model.NameLookUp(request.state,"state"))))+
@@ -235,7 +257,7 @@ var ViewModel = function() {
 		//List of selected categories by actual name rather than code
 		var cvarlist=request[request.cvar].map(function(d) {
 			var cv=self.model.NameLookUp(d,request.cvar);
-			return (request.cvar==="year2")?(cv.toString()):(cv);
+			return (self.YearAsLegend())?(cv.toString()):(cv);
 		});
 
 		
@@ -292,15 +314,20 @@ var ViewModel = function() {
 			.attr("transform", "translate(0," + yScale(0) + ")")
 			.call(xAxis0);
 
-		svg.append("g")
+		var xAxisLabels = svg.append("g")
 			.attr("class", "x axis")
 			.attr("transform", "translate(0," + height + ")")
 			.call(xAxis)
-			// .selectAll("text")
-			// .attr("y", 0)
-   //  		.attr("x", 10)
-			// .attr("transform", "rotate(15)")
-			// .style("text-anchor", "start");
+			.selectAll("text");
+
+		if (self.SectorAsArgument()) {
+			xAxisLabels
+			.attr("y", 10)		
+   			.attr("x", -.5*barwidth)
+			.attr("transform", "rotate(10)")
+			.style("text-anchor", "start");
+			//.attr("y", function(d) {return 15-10*(self.model.GetDomain(request.xvar).indexOf(d) % 2 == 0);});
+		}
 
 
 		svg.append("g")
@@ -338,10 +365,7 @@ var ViewModel = function() {
 
 			curyearmessage.transition().duration(1000).text(self.model.year2[yr]); //Display year
 
-			d3.select("#graphtitle").text(((measure.length>1)?("Various measures"):(self.model.NameLookUp(measure,"measure")))+
-					   " in "+(self.us()?"US":((request.state.length>1)?("various states "):(self.model.NameLookUp(request.state,"state"))))+
-					   " in "+self.model.year2[yr]+
-					   " in "+((request.sic1.length>1)?("various sectors"):(self.model.NameLookUp(request.sic1,"sic1"))));
+			d3.select("#graphtitle").text("");
 
 			var dataset=data.filter(function(d) {return +d.time===self.model.year2[yr]}); //Select data corresponding to the year
 			
