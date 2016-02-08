@@ -81,7 +81,7 @@ var ViewModel = function() {
 
 	//Initial values of X-axis variable and C- variable
 	this.xvar = ko.observable("year2");
-	this.cvar = ko.observable("fchar");
+	this.cvar = ko.observable("sic1");
 
 	//Initial value and text of Time Lapse button
 	this.timelapse = ko.observable(false);
