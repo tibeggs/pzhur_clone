@@ -129,7 +129,7 @@ var ViewModel = function() {
 	this.APIrequest = ko.computed( function  () {
 		return {
 			//If by-state request, then only send "Economy Wide", otherwise send all selected sectors or a single sector depending on whether sector is the c-variable(legend)
-			sic1 : self.StateAsLegend()?([0]):(self.SectorAsLegend?self.SelectedSectors():[self.SelectedSectors()[0]]),
+			sic1 : self.StateAsLegend()?([0]):(self.SectorAsLegend()?self.SelectedSectors():[self.SelectedSectors()[0]]),
 			//See state calculation above in this.StateRequested
 			state : self.StateRequested(),
 			//Send all selected measures or a single one depending on whether measure is the c-variable.
