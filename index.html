@@ -12,8 +12,27 @@
 
   <div id="plotarea">
     <div id="graphtitle" style="text-align: center;"></div>
-    <svg id="chartsvg"></svg>
+    
+    
+    <svg id="chartsvg" data-bind="vis1ible: (!ShowData())"></svg>
     <div id="buttonsundergraph" style="text-align: center; "><button data-bind="click: toggletimelapse, text: tlbuttontext, disable: (YearAsLegend()) ">Time Lapse</button></div>
+
+    <div>
+      <button data-bind="click: toggleshowdata">Show Data</button>
+      <table id="graphdata" data-bind="visible: ShowData">
+        <thead data-bind="foreach: data.slice(0,1)">
+            <tr data-bind="foreach: $data">
+              <th data-bind="text: $data"></th>
+            </tr>
+        </thead>
+        <tbody data-bind="foreach: data.slice(1)">
+            <tr data-bind="foreach: $data">
+                <td data-bind="text: $data"></td>
+            </tr>
+        </tbody>
+      </table>
+
+    </div>
   </div>
 
   <span class="selectors" data-bind="visible: !(timelapse())">
@@ -27,7 +46,7 @@
         <button data-bind="click: setstatecvar,  visible: (!(StateAsLegend() || SectorAsArgument()))">Compare States</button><br>
         <br>
 
-        <h4>Years:</h4><select data-bind="options: model.year2, optionsText: $data, optionsValue: $data, value: SelectedYears()[0], selectedOptions: SelectedYears, attr: {multiple: YearAsLegend}, css: {tallselector: YearAsLegend}" ></select><button data-bind="click: setyearcvar,  visible: (!YearAsLegend())">Compare Years</button><br>
+        <h4>Years:</h4><select data-bind="options: model.year2, optionsText: $data, optionsValue: $data, value: SelectedYears()[0], selectedOptions: SelectedYears, attr: {multiple: YearAsLegend}, css: {tallselector: YearAsLegend}" ></select><button data-bind="click: setyearcvar,  visible: (!YearVar())">Compare Years</button><button data-bind="click: setyearxvar,  visible: (!YearVar())">X-axis</button><br>
 
         <h4>Firm Characteristic:</h4><select data-bind="options: model.fchar, optionsText: 'name', optionsValue: 'code', value: fchar" ></select><button data-bind="click: setfcharcvar,  visible: (!FirmCharVar())">Compare</button><button data-bind="click: setfcharxvar, visible: (!FirmCharVar())">X-axis</button><br>
 
@@ -40,23 +59,7 @@
 
 <br>
 
-  <span style="float:left">
-    <button data-bind="click: toggleshowdata">Show Data</button>
-
-    <table data-bind="visible: ShowData">
-      <thead data-bind="foreach: data.slice(0,1)">
-          <tr data-bind="foreach: $data">
-            <th data-bind="text: $data"></th>
-          </tr>
-      </thead>
-      <tbody data-bind="foreach: data.slice(1)">
-          <tr data-bind="foreach: $data">
-              <td data-bind="text: $data"></td>
-          </tr>
-      </tbody>
-    </table>
-
-  </span>
+  
   
  
 	<script src="js/d3.min.js"></script>

@@ -48,6 +48,10 @@ var ViewModel = function() {
 		self.cvar("year2");
 	}
 
+	this.setyearxvar = function () {
+		self.xvar("year2");
+	}
+
 	this.setmeasurecvar = function () {
 		self.cvar("measure");
 	}
@@ -76,7 +80,7 @@ var ViewModel = function() {
 	//this.SelectedFchar = ko.observableArray([this.fchar()]);
 
 	//Initial values of X-axis variable and C- variable
-	this.xvar = ko.observable("fchar");
+	this.xvar = ko.observable("year2");
 	this.cvar = ko.observable("state");
 
 	//Initial value and text of Time Lapse button
@@ -163,7 +167,7 @@ var ViewModel = function() {
 		var geography=self.us()?("us:*"):("state:"+request.state);
 		if ((request.state.length===1) && (request.state[0]==="00")) geography="us:*";
 
-		var reqtime=((self.timelapse())?("&time=from+1977+to+2013"):("&year2="+request.year2));
+		var reqtime=((self.timelapse() || self.YearAsArgument())?("&time=from+1977+to+2013"):("&year2="+request.year2));
 
 	    var geturl=url+"?get="+request.xvar+","+request.measure+(self.FirmCharAsLegend()?(","+request.cvar):"")+
 	    				"&for="+geography+
@@ -196,7 +200,7 @@ var ViewModel = function() {
 	    	waiting4api(false); //Hide "waiting for data" message
 	    });
 	    
-	}
+	};
 
 //Process data obtained from API. Change codes into names, add state list number (icvar), form data2show for displaying as a table and call the function making the plot
 	this.updateBDSdata = function(data) {
@@ -231,7 +235,7 @@ var ViewModel = function() {
 			else 
 				for (var imeasure in request[request.cvar])
 					data2show[data[i][request.xvar]][self.model.NameLookUp(request[request.cvar][imeasure],"measure")]=data[i][request[request.cvar][imeasure]];
-		}
+		};
 
 
 		//Convert the nested object with data to display into nested array (including field names)
@@ -241,21 +245,19 @@ var ViewModel = function() {
 				cvarnames.push(cvarkey);
 			break;
 		};
+
 		self.data([cvarnames]); //First row of the table will contain names of c-variable
 		for (var xvarkey in data2show) {
 			var xvararr=[xvarkey]; //Create the column with names of x-variable
 			for (var cvarkey in data2show[xvarkey])
 				xvararr.push(data2show[xvarkey][cvarkey]) //Fill the data into 2D table
 			self.data.push(xvararr);
-		}
+		};
 
-		
-		self.makeBarChart((!self.MeasureAsLegend())?data:data1);
-	}
+		self.makePlot((!self.MeasureAsLegend())?data:data1);
+	};
 
-	
-
-	this.makeBarChart = function (data) {
+	this.makeScatterPlot = function (data) {
 
 		//Define margins and dimensions of the SVG element containing the chart
 		var margin = {top: 20, right: 30, bottom: 50, left: 80},
@@ -272,6 +274,51 @@ var ViewModel = function() {
 			.attr('class', 'chart');
 
 		d3.select("#plotarea").style("width", width + margin.left + margin.right+"px");
+		//d3.select("#graphdata").style("height", height + margin.top + margin.bottom-21+"px");
+
+		var request=self.APIrequest();
+
+		//If measure is a (c-)variable, then we got melted data from updateBDSdata function, with all measures contained in the "value" column
+		var measure=(self.MeasureAsLegend())?"value":request.measure;
+
+		//List of selected categories by actual name rather than code
+		var cvarlist=request[request.cvar].map(function(d) {
+			return self.FirmCharAsLegend()?d:self.model.NameLookUp(d,request.cvar);
+		});
+		
+		//Setting D3 scales
+		
+		
+		var yScale = d3.scale.linear()
+		.domain([Math.min(0,d3.min(data, function(d) { return +d[measure]; })), d3.max(data, function(d) { return +d[measure]; })])
+		.range([height,0]);
+
+		
+    	
+
+
+
+	};
+
+	this.makePlot = function (data) {
+
+		//Define margins and dimensions of the SVG element containing the chart
+		var margin = {top: 20, right: 30, bottom: 50, left: 80},
+		width = 960 - margin.left - margin.right,
+		height = 500 - margin.top - margin.bottom;
+
+		//Select the SVG element, remove old drawings, add grouping element for the chart
+		var svgcont = d3.select("#chartsvg");
+		svgcont.selectAll("*").remove();
+		var svg=svgcont.attr("width", width + margin.left + margin.right)
+			.attr("height", height + margin.top + margin.bottom)
+			.append('g')
+			.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+			.attr('class', 'chart');
+
+		d3.select("#plotarea").style("width", width + margin.left + margin.right+"px");
+		//d3.select("#graphdata").style("height", height + margin.top + margin.bottom-21+"px");
+		
 		
 		var request=self.APIrequest();
 
@@ -279,10 +326,12 @@ var ViewModel = function() {
 		var measure=(self.MeasureAsLegend())?"value":request.measure;
 
 		//Set the title of the plot
-		d3.select("#graphtitle").text(((measure.length>1)?("Various measures"):(self.model.NameLookUp(measure,"measure")))+
-					   (self.us()?" in US":((request.state.length>1)?(" by state"):(" in "+self.model.NameLookUp(request.state,"state"))))+
-					   ((request.year2.length>1)?(" by year"):(" in "+self.model.NameLookUp(request.year2,"year2")))+
-					   ((request.sic1.length>1)?(" by sector"):(((request.sic1[0]===0)?" ":" in sector of ")+self.model.NameLookUp(request.sic1,"sic1"))));
+		var ptitle=((measure.length>1)?("Various measures"):(self.model.NameLookUp(measure,"measure")))+
+					   (self.us()?" in US":((request.state.length>1)?(" by state"):(" in "+self.model.NameLookUp(request.state,"state"))));
+		if (!self.YearAsArgument())
+			ptitle=ptitle+((request.year2.length>1)?(" by year"):(" in "+self.model.NameLookUp(request.year2,"year2")));
+		ptitle=ptitle+((request.sic1.length>1)?(" by sector"):(((request.sic1[0]===0)?" ":" in sector of ")+self.model.NameLookUp(request.sic1,"sic1")));
+		d3.select("#graphtitle").text(ptitle);
 
 		//List of selected categories by actual name rather than code
 		var cvarlist=request[request.cvar].map(function(d) {
@@ -290,51 +339,104 @@ var ViewModel = function() {
 			return (self.YearAsLegend())?(cv.toString()):(cv);
 		});
 		
+
 		//Setting D3 scales
-		var xScale = d3.scale.ordinal()
-		.domain(self.model.GetDomain(request.xvar))
-		.rangeRoundBands([0, width], .1);
+		var xScale;
+		if (self.YearAsArgument())
+			xScale = d3.scale.linear()
+				.domain([self.model.year2[0],self.model.year2[self.model.year2.length-1]])
+				.range([0, width]);
+		else
+			xScale = d3.scale.ordinal()
+				.domain(self.model.GetDomain(request.xvar))
+				.rangeRoundBands([0, width], .1);
+
 		var yScale = d3.scale.linear()
 		.domain([Math.min(0,d3.min(data, function(d) { return +d[measure]; })), d3.max(data, function(d) { return +d[measure]; })])
 		.range([height,0]);
-		var colors=//['green','red','orange','cyan','purple','blue','magenta','green','red','orange','cyan','purple','blue','magenta'];
-		["#265DAB","#DF5C24","#059748","#E5126F","#9D722A","#7B3A96","#C7B42E","#CB2027","#4D4D4D","#5DA5DA","#FAA43A","#60BD68","#F17CB0","#B2912F","#B276B2","#DECF3F","#F15854","#8C8C8C","#8ABDE6","#FBB258","#90CD97","#F6AAC9","#BFA554","#BC99C7","#EDDD46","#F07E6E","#000000",
-		 "#265DAB","#DF5C24","#059748","#E5126F","#9D722A","#7B3A96","#C7B42E","#CB2027","#4D4D4D","#5DA5DA","#FAA43A","#60BD68","#F17CB0","#B2912F","#B276B2","#DECF3F","#F15854","#8C8C8C","#8ABDE6","#FBB258","#90CD97","#F6AAC9","#BFA554","#BC99C7","#EDDD46","#F07E6E","#000000"];
-		
-		//Number of bars is number of categories in the legend, and barwidth is determined from that
-		var nbars=cvarlist.length;
-		var barwidth= xScale.rangeBand()/nbars;
 
-		var bars=
-		svg.selectAll("rect")
-			.data(data);
+		//Set up colorscale
+		var yearcolorscale = d3.scale.linear().domain([+cvarlist[0],+cvarlist[cvarlist.length-1]]).range(["#265DAB","#CB2027"]);
+		//['green','red','orange','cyan','purple','blue','magenta','green','red','orange','cyan','purple','blue','magenta'];
+		var colarr=["#265DAB","#DF5C24","#059748","#E5126F","#9D722A","#7B3A96","#C7B42E","#CB2027","#4D4D4D","#5DA5DA","#FAA43A","#60BD68","#F17CB0","#B2912F","#B276B2","#DECF3F","#F15854","#8C8C8C","#8ABDE6","#FBB258","#90CD97","#F6AAC9","#BFA554","#BC99C7","#EDDD46","#F07E6E","#000000",
+		 	"#265DAB","#DF5C24","#059748","#E5126F","#9D722A","#7B3A96","#C7B42E","#CB2027","#4D4D4D","#5DA5DA","#FAA43A","#60BD68","#F17CB0","#B2912F","#B276B2","#DECF3F","#F15854","#8C8C8C","#8ABDE6","#FBB258","#90CD97","#F6AAC9","#BFA554","#BC99C7","#EDDD46","#F07E6E","#000000"];
+			
+		var colors = function(i) {
+			//var normscale=d3.scale.ordinal().domain(self.model.GetDomain(request.cvar)).range(colarr);
+			//debugger;
+			if (self.YearAsLegend()) return yearcolorscale(cvarlist[i]);
+			else if (request.cvar=="fage4") return self.model.fage4color[i];
+			else if ((request.cvar=="fsize") || (request.cvar=="ifsize")) return self.model.fsizecolor[i];
+			else return colarr[i];
+		}
 
-		bars.enter().append("rect")
-		   	.attr("fill",  function(d) {return colors[cvarlist.indexOf(d[request.cvar])];})
-		   	.attr("width", barwidth)
-		   	.attr("x",function(d) {return xScale(d[request.xvar])+barwidth*cvarlist.indexOf(d[request.cvar])})
-		   	.attr("y",function(d) {return yScale(0)})
-		   	.attr("height",0).transition()
-		   	.duration(500).ease("sin-in-out")
-		   	.attr("y",function(d) {return yScale(Math.max(0,+d[measure]))})
-		   	.attr("height", function(d) {return Math.abs(yScale(0)-yScale(+d[measure]))})
+		if (self.YearAsArgument()) {
+			//Timeline scatter plot
 
-		 // var fontsize= d3.min(data, function(d,i) {
-			// 		return 1.5*barwidth/d[measure].length; 
-			// 	});
+			// Define the line
+			var valueline = d3.svg.line()
+	    	.x(function(d) { return xScale(d.time); })
+	    	.y(function(d) { return yScale(d[measure]); });
 
-		// svg.selectAll("text")
-		// 	.data(data)
-		// 	.enter().append("text")
-		// 	.attr("x",function(d) {return (xScale(d[request.xvar])+barwidth*cvarlist.indexOf(d[request.cvar]))+barwidth/4})
-		// 	.attr("y",function(d) {return yScale(+d[measure])-8-7*Math.sign(d[measure])})
-		// 	.attr("dy", ".75em")
-		// 	.attr("fill","#eeeeee")
-		// 	.attr("font-size", fontsize)
-		// 	.text(function(d) { return d[measure]; });
+	    	for (var icv in request[request.cvar])
+	    		svg.append("path")
+	        	.attr("class", "line")
+	        	.attr("fill", "none")
+	        	.attr("stroke-width",2)
+	        	.attr("stroke", colors(icv))
+	        	.attr("d", valueline(data.filter(function(d) {return d[request.cvar]===self.model.NameLookUp(request[request.cvar][icv],request.cvar)})));
+
+	        svg.selectAll("dot")
+        	.data(data)
+      		.enter().append("circle")
+      		.attr("fill", function(d) {return colors(cvarlist.indexOf(d[request.cvar]));})
+        	.attr("r", 3.5)
+        	.attr("cx", function(d) { return xScale(d.time); })
+        	.attr("cy", function(d) { return yScale(d[measure]); });
+
+		} else {
+			//Bar chart	
+
+			//Number of bars is number of categories in the legend, and barwidth is determined from that
+			var nbars=cvarlist.length;
+			var barwidth= xScale.rangeBand()/nbars;
+
+			var bars=
+			svg.selectAll("rect")
+				.data(data);
+
+			bars.enter().append("rect")
+			   	.attr("fill",  function(d) {return colors(cvarlist.indexOf(d[request.cvar]));})
+			   	.attr("stroke", "white")
+			   	.attr("stroke-width",".3")
+			   	//.attr("fill",  function(d) {return colors(d[request.cvar]);})
+			   	.attr("width", barwidth)
+			   	.attr("x",function(d) {return xScale(d[request.xvar])+barwidth*cvarlist.indexOf(d[request.cvar])})
+			   	.attr("y",function(d) {return yScale(0)})
+			   	.attr("height",0).transition()
+			   	.duration(500).ease("sin-in-out")
+			   	.attr("y",function(d) {return yScale(Math.max(0,+d[measure]))})
+			   	.attr("height", function(d) {return Math.abs(yScale(0)-yScale(+d[measure]))})
+
+			 // var fontsize= d3.min(data, function(d,i) {
+				// 		return 1.5*barwidth/d[measure].length; 
+				// 	});
+
+			// svg.selectAll("text")
+			// 	.data(data)
+			// 	.enter().append("text")
+			// 	.attr("x",function(d) {return (xScale(d[request.xvar])+barwidth*cvarlist.indexOf(d[request.cvar]))+barwidth/4})
+			// 	.attr("y",function(d) {return yScale(+d[measure])-8-7*Math.sign(d[measure])})
+			// 	.attr("dy", ".75em")
+			// 	.attr("fill","#eeeeee")
+			// 	.attr("font-size", fontsize)
+			// 	.text(function(d) { return d[measure]; });
+		}
 
 		//Adding axes
 		var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+
+		if (self.YearAsArgument()) xAxis.tickFormat(d3.format("d"));
 
 		var xAxis0 = d3.svg.axis().scale(xScale).tickFormat("").orient("bottom");
 
@@ -369,7 +471,7 @@ var ViewModel = function() {
 		var legendsvg=d3.select("#legend")
 		legendsvg.selectAll("*").remove();
 
-		var symbolsize=Math.max(Math.min(barwidth,20),15);
+		var symbolsize=15;//Math.max(Math.min(barwidth,20),15);
 
 		legendsvg.attr("height",(symbolsize+5)*cvarlist.length)
 				.attr("width",400);
@@ -378,7 +480,7 @@ var ViewModel = function() {
 			.enter()
 			.append("rect")
 			.attr("fill",  function(d,i) {
-				return colors[i]
+				return colors(i)
 			})
 			.attr("width",symbolsize).attr("height",symbolsize)
 			.attr("y",function(d,i) {return (symbolsize+5)*i;});
@@ -414,7 +516,7 @@ var ViewModel = function() {
 			  // Update old elements as needed.
 			  
 			bars
-			   	.attr("fill",  function(d) {return colors[+d.icvar]})
+			   	.attr("fill",  function(d) {return colors(+d.icvar)})
 			   	.attr("x",function(d) {return xScale(d[request.xvar])+barwidth*d.icvar;})
 			   	.transition().duration(500)
 			   	.attr("y",function(d) { return yScale(Math.max(0,+d[measure]));})

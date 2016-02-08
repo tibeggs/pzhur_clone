@@ -141,6 +141,10 @@ var BDSVisModel = {
 
  	year2: [],
 
+//Color schemes
+	fage4color: [],
+	fsizecolor: [],
+
 	InitModel : function() {
 		//Create dictionaries/hashmaps to lookup names of categorical variable values
 		for (var i in this.state)
@@ -159,6 +163,18 @@ var BDSVisModel = {
 		//Create list of years
 		for (var i=1977; i<2014; i++)
 			this.year2.push(i);
+
+		//Generate color scales for fage4 and fsize
+		var scage=d3.scale.pow().exponent(1.).domain([0,26]).range(["#CB2027","#265DAB"]);
+		var fages=[0,1,2,3,4,5,10,15,20,25,30];
+		for (var ifage in fages) this.fage4color.push(scage(fages[ifage]));
+		this.fage4color.push("green");
+		this.fage4color.push("black");
+
+		var scsize=d3.scale.log().domain([1,10000]).range(["#CB2027","#265DAB"]);
+		var fsizes=[1,5,10,30,50,100,250,500,1000,2500,5000,10000];
+		for (var ifsize in fsizes ) this.fsizecolor.push(scsize(fsizes[ifsize]));
+		this.fsizecolor.push("black");
 	},
 
 	GetDomain : function(v) {
