@@ -81,7 +81,7 @@ var ViewModel = function() {
 
 	//Initial values of X-axis variable and C- variable
 	this.xvar = ko.observable("year2");
-	this.cvar = ko.observable("state");
+	this.cvar = ko.observable("fchar");
 
 	//Initial value and text of Time Lapse button
 	this.timelapse = ko.observable(false);
@@ -257,48 +257,6 @@ var ViewModel = function() {
 		self.makePlot((!self.MeasureAsLegend())?data:data1);
 	};
 
-	this.makeScatterPlot = function (data) {
-
-		//Define margins and dimensions of the SVG element containing the chart
-		var margin = {top: 20, right: 30, bottom: 50, left: 80},
-		width = 960 - margin.left - margin.right,
-		height = 500 - margin.top - margin.bottom;
-
-		//Select the SVG element, remove old drawings, add grouping element for the chart
-		var svgcont = d3.select("#chartsvg");
-		svgcont.selectAll("*").remove();
-		var svg=svgcont.attr("width", width + margin.left + margin.right)
-			.attr("height", height + margin.top + margin.bottom)
-			.append('g')
-			.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-			.attr('class', 'chart');
-
-		d3.select("#plotarea").style("width", width + margin.left + margin.right+"px");
-		//d3.select("#graphdata").style("height", height + margin.top + margin.bottom-21+"px");
-
-		var request=self.APIrequest();
-
-		//If measure is a (c-)variable, then we got melted data from updateBDSdata function, with all measures contained in the "value" column
-		var measure=(self.MeasureAsLegend())?"value":request.measure;
-
-		//List of selected categories by actual name rather than code
-		var cvarlist=request[request.cvar].map(function(d) {
-			return self.FirmCharAsLegend()?d:self.model.NameLookUp(d,request.cvar);
-		});
-		
-		//Setting D3 scales
-		
-		
-		var yScale = d3.scale.linear()
-		.domain([Math.min(0,d3.min(data, function(d) { return +d[measure]; })), d3.max(data, function(d) { return +d[measure]; })])
-		.range([height,0]);
-
-		
-    	
-
-
-
-	};
 
 	this.makePlot = function (data) {
 
@@ -375,7 +333,7 @@ var ViewModel = function() {
 
 			// Define the line
 			var valueline = d3.svg.line()
-	    	.x(function(d) { return xScale(d.time); })
+	    	.x(function(d) { return xScale(d.year2); })
 	    	.y(function(d) { return yScale(d[measure]); });
 
 	    	for (var icv in request[request.cvar])
@@ -384,14 +342,18 @@ var ViewModel = function() {
 	        	.attr("fill", "none")
 	        	.attr("stroke-width",2)
 	        	.attr("stroke", colors(icv))
-	        	.attr("d", valueline(data.filter(function(d) {return d[request.cvar]===self.model.NameLookUp(request[request.cvar][icv],request.cvar)})));
+	        	.attr("d", valueline(data.filter(function(d) {
+	        			if (self.FirmCharAsLegend())
+	        				return d[request.cvar]===request[request.cvar][icv]; 
+	        			else return d[request.cvar]===self.model.NameLookUp(request[request.cvar][icv],request.cvar);
+	        		})));
 
 	        svg.selectAll("dot")
         	.data(data)
       		.enter().append("circle")
       		.attr("fill", function(d) {return colors(cvarlist.indexOf(d[request.cvar]));})
         	.attr("r", 3.5)
-        	.attr("cx", function(d) { return xScale(d.time); })
+        	.attr("cx", function(d) { return xScale(d.year2); })
         	.attr("cy", function(d) { return yScale(d[measure]); });
 
 		} else {
@@ -479,9 +441,7 @@ var ViewModel = function() {
 			.data(cvarlist)
 			.enter()
 			.append("rect")
-			.attr("fill",  function(d,i) {
-				return colors(i)
-			})
+			.attr("fill",  function(d,i) {return colors(i);})
 			.attr("width",symbolsize).attr("height",symbolsize)
 			.attr("y",function(d,i) {return (symbolsize+5)*i;});
 
