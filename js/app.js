@@ -7,7 +7,7 @@ var ViewModel = function() {
 	this.data = ko.observableArray();
 	this.data2show = ko.observableArray();
 
-	this.ShowData = ko.observable(0);
+
 
 	this.toggleshowdata = function () {
 		//This function executes in click to 'Show Data' button.
@@ -25,6 +25,10 @@ var ViewModel = function() {
 			self.getBDSdata();
 		}
 		
+	}
+
+	this.toggleyscale = function () {
+		self.logscale(!self.logscale());
 	}
 
 	//The following functions set cvar (Legend/Comparison/Color variable) and xvar (X-axis variable)
@@ -87,6 +91,13 @@ var ViewModel = function() {
 	this.timelapse = ko.observable(false);
 	this.tlbuttontext = ko.computed (function() {return self.timelapse()?"Stop":"Time Lapse"});
 
+	//Initial value for showing data
+	this.ShowData = ko.observable(0);
+
+	//Initial value for log scale of y-axis
+	this.logscale = ko.observable(0);
+	this.yscalebuttontext = ko.computed (function() {return self.logscale()?"Linear":"Log"});
+
 	//Whether a variable is C- Variable (Legend)
 	this.SectorAsLegend = ko.computed( function () {return self.cvar()==="sic1";});
 	this.StateAsLegend = ko.computed( function () {return (self.cvar()==="state" && self.xvar()!="sic1");});
@@ -143,7 +154,9 @@ var ViewModel = function() {
 			//The following 3 lines are just for the case when Firm Characterstic is c-variable.
 			fage4 : self.model.GetDomain("fage4"),
 			fsize : self.model.GetDomain("fsize"),
-			ifsize : self.model.GetDomain("ifsize")
+			ifsize : self.model.GetDomain("ifsize"),
+			//If y-scale changes
+			logscale : self.logscale()
 		}
 	});
 
@@ -257,13 +270,13 @@ var ViewModel = function() {
 		self.makePlot((!self.MeasureAsLegend())?data:data1);
 	};
 
-
+	//This function makes d3js plot, either a bar chart or scatterplot
 	this.makePlot = function (data) {
 
 		//Define margins and dimensions of the SVG element containing the chart
 		var margin = {top: 20, right: 30, bottom: 50, left: 80},
 		width = 960 - margin.left - margin.right,
-		height = 500 - margin.top - margin.bottom;
+		height = 450 - margin.top - margin.bottom;
 
 		//Select the SVG element, remove old drawings, add grouping element for the chart
 		var svgcont = d3.select("#chartsvg");
@@ -284,10 +297,11 @@ var ViewModel = function() {
 		var measure=(self.MeasureAsLegend())?"value":request.measure;
 
 		//Set the title of the plot
-		var ptitle=((measure.length>1)?("Various measures"):(self.model.NameLookUp(measure,"measure")))+
-					   (self.us()?" in US":((request.state.length>1)?(" by state"):(" in "+self.model.NameLookUp(request.state,"state"))));
+		var ptitle=((measure.length>1)?("Various measures"):(self.model.NameLookUp(measure,"measure")))+ //If many measures say "various", otherwise the measure name
+					   (self.us()?" in US":((request.state.length>1)?(" by state"):(" in "+self.model.NameLookUp(request.state,"state")))); // The same for states
 		if (!self.YearAsArgument())
-			ptitle=ptitle+((request.year2.length>1)?(" by year"):(" in "+self.model.NameLookUp(request.year2,"year2")));
+			ptitle=ptitle+((request.year2.length>1)?(" by year"):(" in "+self.model.NameLookUp(request.year2,"year2"))); // the same for years
+		//Say "by sector" if many sectors, if not "economy wide" add "in sector of"
 		ptitle=ptitle+((request.sic1.length>1)?(" by sector"):(((request.sic1[0]===0)?" ":" in sector of ")+self.model.NameLookUp(request.sic1,"sic1")));
 		d3.select("#graphtitle").text(ptitle);
 
@@ -299,7 +313,7 @@ var ViewModel = function() {
 		
 
 		//Setting D3 scales
-		var xScale;
+		var xScale; var yScale; var ymin;
 		if (self.YearAsArgument())
 			xScale = d3.scale.linear()
 				.domain([self.model.year2[0],self.model.year2[self.model.year2.length-1]])
@@ -309,9 +323,19 @@ var ViewModel = function() {
 				.domain(self.model.GetDomain(request.xvar))
 				.rangeRoundBands([0, width], .1);
 
-		var yScale = d3.scale.linear()
-		.domain([Math.min(0,d3.min(data, function(d) { return +d[measure]; })), d3.max(data, function(d) { return +d[measure]; })])
-		.range([height,0]);
+		if (self.logscale()) {
+			ymin = Math.max(1e-5,d3.min(data, function(d) { return +d[measure]; }));
+			yScale = d3.scale.log()
+			.domain([ymin, d3.max(data, function(d) { return +d[measure]; })])
+			.range([height,0]);
+		} else {
+			ymin=Math.min(0,d3.min(data, function(d) { return +d[measure]; }));
+			yScale = d3.scale.linear()
+			.domain([ymin, d3.max(data, function(d) { return +d[measure]; })])
+			.range([height,0]);
+		}
+
+				
 
 		//Set up colorscale
 		var yearcolorscale = d3.scale.linear().domain([+cvarlist[0],+cvarlist[cvarlist.length-1]]).range(["#265DAB","#CB2027"]);
@@ -354,7 +378,12 @@ var ViewModel = function() {
       		.attr("fill", function(d) {return colors(cvarlist.indexOf(d[request.cvar]));})
         	.attr("r", 3.5)
         	.attr("cx", function(d) { return xScale(d.year2); })
-        	.attr("cy", function(d) { return yScale(d[measure]); });
+        	.attr("cy", function(d) { return yScale(d[measure]); })
+        	.append("title").text(function(d) { 
+        		return self.model.NameLookUp(measure,"measure")+": "+d[measure]+"\n"+
+        			 self.model.NameLookUp(request.cvar,"var")+": "+d[request.cvar]+"\n"+
+        			 self.model.NameLookUp(request.xvar,"var")+": "+d[request.xvar]; 
+        	});
 
 		} else {
 			//Bar chart	
@@ -374,11 +403,17 @@ var ViewModel = function() {
 			   	//.attr("fill",  function(d) {return colors(d[request.cvar]);})
 			   	.attr("width", barwidth)
 			   	.attr("x",function(d) {return xScale(d[request.xvar])+barwidth*cvarlist.indexOf(d[request.cvar])})
-			   	.attr("y",function(d) {return yScale(0)})
-			   	.attr("height",0).transition()
-			   	.duration(500).ease("sin-in-out")
+			   	// .attr("y",function(d) {return yScale(ymin)})
+			   	// .attr("height",0).transition()
+			   	// .duration(500).ease("sin-in-out")
 			   	.attr("y",function(d) {return yScale(Math.max(0,+d[measure]))})
-			   	.attr("height", function(d) {return Math.abs(yScale(0)-yScale(+d[measure]))})
+			   	.attr("height", function(d) {return Math.abs(yScale(ymin)-yScale(+d[measure]))})
+			   	.append("title").text(function(d) { 
+        			return self.model.NameLookUp(measure,"measure")+": "+d[measure]+"\n"+
+        			 self.model.NameLookUp(request.cvar,"var")+": "+d[request.cvar]+"\n"+
+        			 self.model.NameLookUp(request.xvar,"var")+": "+d[request.xvar]; 
+        		})
+
 
 			 // var fontsize= d3.min(data, function(d,i) {
 				// 		return 1.5*barwidth/d[measure].length; 
@@ -402,11 +437,11 @@ var ViewModel = function() {
 
 		var xAxis0 = d3.svg.axis().scale(xScale).tickFormat("").orient("bottom");
 
-		var yAxis = d3.svg.axis().scale(yScale).orient("left");
+		var yAxis = d3.svg.axis().scale(yScale).orient("left").ticks(5,d3.format(",d"));
 
 		svg.append("g")
 			.attr("class", "x axis")
-			.attr("transform", "translate(0," + yScale(0) + ")")
+			.attr("transform", "translate(0," + yScale(ymin) + ")")
 			.call(xAxis0);
 
 		var xAxisLabels = svg.append("g")
@@ -480,7 +515,7 @@ var ViewModel = function() {
 			   	.attr("x",function(d) {return xScale(d[request.xvar])+barwidth*d.icvar;})
 			   	.transition().duration(500)
 			   	.attr("y",function(d) { return yScale(Math.max(0,+d[measure]));})
-			   	.attr("height",function(d) {return Math.abs(yScale(0)-yScale(+d[measure]));});
+			   	.attr("height",function(d) {return Math.abs(yScale(ymin)-yScale(+d[measure]));});
 
 		}
 

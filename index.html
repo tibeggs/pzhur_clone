@@ -13,8 +13,8 @@
   <div id="plotarea">
     <div id="graphtitle" style="text-align: center;"></div>
     
-    
-    <svg id="chartsvg" data-bind="vis1ible: (!ShowData())"></svg>
+    <span><button data-bind="click: toggleyscale, text: yscalebuttontext">Log</button></span>
+    <svg id="chartsvg" style="display:inline" data-bind="vis1ible: (!ShowData())"></svg>
     <div id="buttonsundergraph" style="text-align: center; "><button data-bind="click: toggletimelapse, text: tlbuttontext, disable: (YearVar()) ">Time Lapse</button></div>
 
     <div>
