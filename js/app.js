@@ -359,6 +359,26 @@ var ViewModel = function() {
 				ttt+="\n"+self.model.NameLookUp(request.cvar,"var")+": "+d[request.cvar];
 			return ttt;
 		}
+		
+		d3.json("world_countries.json", function(geo_data) {
+            var mapg = svg.append('g')
+            		.attr('class', 'map');
+					
+			var projection = d3.geo.mercator()
+					.scale(140)
+					.translate([width / 2, height / 1.2]);
+
+			var path = d3.geo.path().projection(projection);
+
+			var map = mapg.selectAll('path')
+					.data(geo_data.features)
+					.enter()
+					.append('path')
+					.attr('d', path)
+					.style('fill', 'lightBlue')
+					.style('stroke', 'black')
+					.style('stroke-width', 0.5);
+		});
 
 		if (self.YearAsArgument()) {
 			//Timeline scatter plot
