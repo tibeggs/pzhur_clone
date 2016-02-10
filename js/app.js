@@ -352,6 +352,14 @@ var ViewModel = function() {
 			else return colarr[i];
 		}
 
+		var Tooltiptext = function(d) {
+			var ttt=self.MeasureAsLegend()?d.measure:self.model.NameLookUp(measure,"measure");
+			ttt+=": "+d[measure]+"\n"+self.model.NameLookUp(request.xvar,"var")+": "+d[request.xvar];
+			if (!self.MeasureAsLegend())
+				ttt+="\n"+self.model.NameLookUp(request.cvar,"var")+": "+d[request.cvar];
+			return ttt;
+		}
+
 		if (self.YearAsArgument()) {
 			//Timeline scatter plot
 
@@ -376,14 +384,10 @@ var ViewModel = function() {
         	.data(data)
       		.enter().append("circle")
       		.attr("fill", function(d) {return colors(cvarlist.indexOf(d[request.cvar]));})
-        	.attr("r", 3.5)
+        	.attr("r", 5)
         	.attr("cx", function(d) { return xScale(d.year2); })
         	.attr("cy", function(d) { return yScale(d[measure]); })
-        	.append("title").text(function(d) { 
-        		return self.model.NameLookUp(measure,"measure")+": "+d[measure]+"\n"+
-        			 self.model.NameLookUp(request.cvar,"var")+": "+d[request.cvar]+"\n"+
-        			 self.model.NameLookUp(request.xvar,"var")+": "+d[request.xvar]; 
-        	});
+        	.append("title").text(function(d){return Tooltiptext(d);});
 
 		} else {
 			//Bar chart	
@@ -408,11 +412,7 @@ var ViewModel = function() {
 			   	// .duration(500).ease("sin-in-out")
 			   	.attr("y",function(d) {return yScale(Math.max(0,+d[measure]))})
 			   	.attr("height", function(d) {return Math.abs(yScale(ymin)-yScale(+d[measure]))})
-			   	.append("title").text(function(d) { 
-        			return self.model.NameLookUp(measure,"measure")+": "+d[measure]+"\n"+
-        			 self.model.NameLookUp(request.cvar,"var")+": "+d[request.cvar]+"\n"+
-        			 self.model.NameLookUp(request.xvar,"var")+": "+d[request.xvar]; 
-        		})
+			   	.append("title").text(function(d){return Tooltiptext(d);});
 
 
 			 // var fontsize= d3.min(data, function(d,i) {
