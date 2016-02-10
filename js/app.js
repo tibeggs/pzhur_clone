@@ -360,7 +360,7 @@ var ViewModel = function() {
 			return ttt;
 		}
 		
-		d3.json("world_countries.json", function(geo_data) {
+		d3.json("../json/gz_2010_us_040_00_500k.json", function(geo_data) {
             var mapg = svg.append('g')
             		.attr('class', 'map');
 					
