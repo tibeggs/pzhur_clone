@@ -48,6 +48,11 @@ var ViewModel = function() {
 		self.cvar("state");
 	}
 
+	this.setstatexvar = function () {
+		self.cvar("measure");
+		self.xvar("state");
+	}
+
 	this.setyearcvar = function () {
 		self.cvar("year2");
 	}
@@ -85,7 +90,7 @@ var ViewModel = function() {
 
 	//Initial values of X-axis variable and C- variable
 	this.xvar = ko.observable("state");
-	this.cvar = ko.observable("year2");
+	this.cvar = ko.observable("measure");
 
 	//Initial value and text of Time Lapse button
 	this.timelapse = ko.observable(false);
@@ -299,17 +304,22 @@ var ViewModel = function() {
 		var ymax=d3.max(data, function(d) { return +d[measure]; });
 		var ymid=(ymax+ymin)*.5;
 		var maxabs=d3.max([Math.abs(ymin),Math.abs(ymax)]);
-		console.log(maxabs,ymin,ymax);
+		
 		var yScale = d3.scale.linear()
+
+		var purple="rgb(112,79,161)"; var golden="rgb(194,85,12)"; var teal="rgb(22,136,51)";
 
 		if (ymin<0)
 			yScale.domain([-maxabs,0,maxabs]).range(["#CB2027","#eeeeee","#265DAB"]);
 		else
-			yScale.domain([ymin,ymax]).range(["#eeeeee","#265DAB"]);
+			//yScale.domain([ymin,ymax]).range(["#eeeeee","#265DAB"]);
+			yScale.domain([ymin,ymid,ymax]).range([golden,"#bbbbbb",purple]);
+			//yScale.domain([ymin,ymid,ymax]).range(["red","#ccffcc","blue"]);
+			//rgb(22,136,51) nice greenblue
 
 		//debugger;
 
-		d3.json("../json/gz_2010_us_040_00_500k.json", function(geo_data) {
+		d3.json("../json/gz_2010_us_040_00_20m.json", function(geo_data) {
             var mapg = svg.append('g')
             		.attr('class', 'map');
 					

@@ -129,7 +129,7 @@ var BDSVisModel = {
 		"sic1" : "Sector",
 		"state" : "State",
 		"year2" : "Year",
-		"measure" : "Measure"
+		"measure" : "Measure",
 	},
 
 	measlookup : {},

@@ -11,8 +11,6 @@
 }
 
 
-
-
 #plotarea {
   margin-top: 15px;
   margin-bottom: 15px;
@@ -38,4 +36,8 @@
   font-weight: normal;
   width: 100px;
   margin: 5px;
+}
+
+.selectors button {
+  width: 130px;
 }
