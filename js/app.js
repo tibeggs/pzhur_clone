@@ -20,7 +20,7 @@ var ViewModel = function() {
 			self.timelapse(false);
 			clearInterval(self.tlint);
 			self.SelectedYears([self.TimeLapseCurrYear-1]);
-		} else {
+		} else if (!self.StateAsArgument()){
 			self.timelapse(true);
 			self.getBDSdata();
 		}
@@ -80,8 +80,8 @@ var ViewModel = function() {
 
 	waiting4api = ko.observable(false); //Whether message "Waiting for data from server" is shown
 
-	//What is selected in the input selectors
-	this.SelectedStates = ko.observableArray([this.model.state[20].code]);
+	//Initial values of what is selected in the input selectors
+	this.SelectedStates = ko.observableArray([this.model.state[0].code]);
 	this.SelectedSectors = ko.observableArray([this.model.sic1[0].code]);
 	this.SelectedMeasures = ko.observableArray([this.model.measure[11].code]);
 	this.SelectedYears = ko.observableArray([this.model.year2[36]]);
@@ -144,8 +144,8 @@ var ViewModel = function() {
 	//That's why they are put together in an object, so that the single subscription below takes care of all the input changes
 	this.APIrequest = ko.computed( function  () {
 		return {
-			//If by-state request, then only send "Economy Wide", otherwise send all selected sectors or a single sector depending on whether sector is the c-variable(legend)
-			sic1 : self.StateAsLegend()?([0]):(self.SectorAsLegend()?self.SelectedSectors():[self.SelectedSectors()[0]]),
+			//If by-state request, then only send "Economy Wide", otherwise send all selected sectors or a single sector depending on whether sector is the c-variable(legend). If in map regime (StateAsArgument) send only one measure
+			sic1 : self.StateAsLegend()?([0]):((self.SectorAsLegend() && !self.StateAsArgument())?self.SelectedSectors():[self.SelectedSectors()[0]]),
 			//See state calculation above in this.StateRequested
 			state : self.StateRequested(),
 			//Send all selected measures or a single one depending on whether measure is the c-variable.
@@ -174,6 +174,39 @@ var ViewModel = function() {
 	// this.SelectedStates.subscribe(function() {
 	// 	self.SelectedSectors([0]);
 	// })
+
+
+	//The visual elements of the plot: SVGs for the graph/map and legend
+	this.PlotView = {
+		margin : {top: 20, right: 30, bottom: 50, left: 80},
+		width : 960,
+		height : 450,
+		svg : undefined,
+		Init : function() {
+			//Define margins and dimensions of the SVG element containing the chart
+			var margin = this.margin;
+
+			this.width = 960 - margin.left - margin.right;
+			this.height = 450 - margin.top - margin.bottom;
+			var width=this.width;
+			var height=this.height;
+
+			//Select the SVG element, remove old drawings, add grouping element for the chart
+			var svgcont = d3.select("#chartsvg");
+			svgcont.selectAll("*").remove();
+			this.svg=svgcont.attr("width", width + margin.left + margin.right)
+				.attr("height", height + margin.top + margin.bottom)
+				.append('g')
+				.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+				.attr('class', 'chart');
+
+			d3.select("#plotarea").style("width", width + margin.left + margin.right+"px");
+			//d3.select("#graphdata").style("height", height + margin.top + margin.bottom-21+"px");
+		},
+
+	}
+
+	
 	
 //Get the data from the API according to current request and render it into array of objects with field names corresponding to the variables
 	this.getBDSdata = function () {
@@ -182,9 +215,9 @@ var ViewModel = function() {
 
 	    var url="http://api.census.gov/data/bds/firms";
 
-		var geography=self.StateAsArgument()?"state:*":(self.us()?("us:*"):("state:"+request.state));
-		//var geography=(self.us()?("us:*"):("state:"+request.state));
-		if ((request.state.length===1) && (request.state[0]==="00")) geography="us:*";
+		var geography=(self.us()?("us:*"):("state:"+request.state)); 
+		if ((request.state.length===1) && (request.state[0]==="00")) geography="us:*"; //If only "United States" is selected then use us:*
+		if (self.StateAsArgument()) geography="state:*"; //In map regime use state:*
 
 		var reqtime=((self.timelapse() || self.YearAsArgument())?("&time=from+1977+to+2013"):("&year2="+request.year2));
 
@@ -203,22 +236,17 @@ var ViewModel = function() {
 		    	for (var i in data) {
 		    		var rec={};
 		    		if (i>0) {
-		    			for (iname in data[0]) //Find keys, which are contained in the first line of the array returned by API
-		    			{
+		    			for (iname in data[0]) { //Find keys, which are contained in the first line of the array returned by API
 		    				var key=(data[0][iname]==="us")?("state"):data[0][iname]; //Substitute "us" field name to "state"
 		    				rec[key]=data[i][iname]; //Fill the object
-		    			}
+		    			};
 		    			jsoned.push(rec);
-		    		}
-		    	}
-
+		    		};
+		    	};
 	    		self.updateBDSdata(jsoned); //Continue to data processing and plotting
-	    	} else {
-	    		console.log("Server sent empty response to " + geturl);	
-	    	}
+	    	} else console.log("Server sent empty response to " + geturl);	
 	    	waiting4api(false); //Hide "waiting for data" message
 	    });
-	    
 	};
 
 //Process data obtained from API. Change codes into names, add state list number (icvar), form data2show for displaying as a table and call the function making the plot
@@ -278,24 +306,15 @@ var ViewModel = function() {
 		else self.makePlot((!self.MeasureAsLegend())?data:data1);
 	};
 
+
+	//This function makes the geographical map
 	this.makeMap = function (data) {
 
-		//Define margins and dimensions of the SVG element containing the chart
-		var margin = {top: 20, right: 30, bottom: 50, left: 80},
-		width = 960 - margin.left - margin.right,
-		height = 450 - margin.top - margin.bottom;
-
-		//Select the SVG element, remove old drawings, add grouping element for the chart
-		var svgcont = d3.select("#chartsvg");
-		svgcont.selectAll("*").remove();
-		var svg=svgcont.attr("width", width + margin.left + margin.right)
-			.attr("height", height + margin.top + margin.bottom)
-			.append('g')
-			.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-			.attr('class', 'chart');
-
-		d3.select("#plotarea").style("width", width + margin.left + margin.right+"px");
-		//d3.select("#graphdata").style("height", height + margin.top + margin.bottom-21+"px");
+		self.PlotView.Init();
+		svg=self.PlotView.svg;
+		width=self.PlotView.width;
+		height=self.PlotView.height;
+		
 		
 		var request=self.APIrequest();
 		var measure=request.measure;
@@ -305,11 +324,11 @@ var ViewModel = function() {
 		var ymid=(ymax+ymin)*.5;
 		var maxabs=d3.max([Math.abs(ymin),Math.abs(ymax)]);
 		
-		var yScale = d3.scale.linear()
+		var yScale = (self.logscale())?d3.scale.log():d3.scale.linear()
 
 		var purple="rgb(112,79,161)"; var golden="rgb(194,85,12)"; var teal="rgb(22,136,51)";
 
-		if (ymin<0)
+		if ((ymin<0) && !self.logscale())
 			yScale.domain([-maxabs,0,maxabs]).range(["#CB2027","#eeeeee","#265DAB"]);
 		else
 			//yScale.domain([ymin,ymax]).range(["#eeeeee","#265DAB"]);
@@ -352,23 +371,10 @@ var ViewModel = function() {
 	//This function makes d3js plot, either a bar chart or scatterplot
 	this.makePlot = function (data) {
 
-		//Define margins and dimensions of the SVG element containing the chart
-		var margin = {top: 20, right: 30, bottom: 50, left: 80},
-		width = 960 - margin.left - margin.right,
-		height = 450 - margin.top - margin.bottom;
-
-		//Select the SVG element, remove old drawings, add grouping element for the chart
-		var svgcont = d3.select("#chartsvg");
-		svgcont.selectAll("*").remove();
-		var svg=svgcont.attr("width", width + margin.left + margin.right)
-			.attr("height", height + margin.top + margin.bottom)
-			.append('g')
-			.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-			.attr('class', 'chart');
-
-		d3.select("#plotarea").style("width", width + margin.left + margin.right+"px");
-		//d3.select("#graphdata").style("height", height + margin.top + margin.bottom-21+"px");
-		
+		self.PlotView.Init();
+		svg=self.PlotView.svg;
+		width=self.PlotView.width;
+		height=self.PlotView.height;
 		
 		var request=self.APIrequest();
 
@@ -403,19 +409,18 @@ var ViewModel = function() {
 				.rangeRoundBands([0, width], .1);
 
 		if (self.logscale()) {
+			data=data.filter(function(d) {return d[measure]>0});
 			ymin = Math.max(1e-5,d3.min(data, function(d) { return +d[measure]; }));
-			yScale = d3.scale.log()
-			.domain([ymin, d3.max(data, function(d) { return +d[measure]; })])
-			.range([height,0]);
+			yScale = d3.scale.log();
 		} else {
-			ymin=Math.min(0,d3.min(data, function(d) { return +d[measure]; }));
+			ymin = Math.min(0,d3.min(data, function(d) { return +d[measure]; }));
 			yScale = d3.scale.linear()
-			.domain([ymin, d3.max(data, function(d) { return +d[measure]; })])
-			.range([height,0]);
 		}
 
-				
+		yScale.domain([ymin, d3.max(data, function(d) { return +d[measure]; })])
+			.range([height,0]);
 
+				
 		//Set up colorscale
 		var yearcolorscale = d3.scale.linear().domain([+cvarlist[0],+cvarlist[cvarlist.length-1]]).range(["#265DAB","#CB2027"]);
 		//['green','red','orange','cyan','purple','blue','magenta','green','red','orange','cyan','purple','blue','magenta'];
@@ -488,11 +493,11 @@ var ViewModel = function() {
 			   	//.attr("fill",  function(d) {return colors(d[request.cvar]);})
 			   	.attr("width", barwidth)
 			   	.attr("x",function(d) {return xScale(d[request.xvar])+barwidth*cvarlist.indexOf(d[request.cvar])})
-			   	// .attr("y",function(d) {return yScale(ymin)})
+			   	// .attr("y",function(d) {return yScale(0)})
 			   	// .attr("height",0).transition()
 			   	// .duration(500).ease("sin-in-out")
 			   	.attr("y",function(d) {return yScale(Math.max(0,+d[measure]))})
-			   	.attr("height", function(d) {return Math.abs(yScale(ymin)-yScale(+d[measure]))})
+			   	.attr("height", function(d) {return Math.abs(yScale(0)-yScale(+d[measure]))})
 			   	.append("title").text(function(d){return Tooltiptext(d);});
 
 
@@ -522,14 +527,15 @@ var ViewModel = function() {
 
 		svg.append("g")
 			.attr("class", "x axis")
-			.attr("transform", "translate(0," + yScale(ymin) + ")")
+			.attr("transform", "translate(0," + yScale(0) + ")")
 			.call(xAxis0);
 
-		var xAxisLabels = svg.append("g")
+		var xAxisLabels=svg.append("g")
 			.attr("class", "x axis")
 			.attr("transform", "translate(0," + height + ")")
-			.call(xAxis)
-			.selectAll("text");
+			.call(xAxis).selectAll("text");
+
+		//d3.selectAll("x axis")
 
 		if (self.SectorAsArgument()) {
 			xAxisLabels
@@ -596,7 +602,7 @@ var ViewModel = function() {
 			   	.attr("x",function(d) {return xScale(d[request.xvar])+barwidth*d.icvar;})
 			   	.transition().duration(500)
 			   	.attr("y",function(d) { return yScale(Math.max(0,+d[measure]));})
-			   	.attr("height",function(d) {return Math.abs(yScale(ymin)-yScale(+d[measure]));});
+			   	.attr("height",function(d) {return Math.abs(yScale(0)-yScale(+d[measure]));});
 
 		}
 
