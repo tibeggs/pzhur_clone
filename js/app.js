@@ -84,8 +84,8 @@ var ViewModel = function() {
 	//this.SelectedFchar = ko.observableArray([this.fchar()]);
 
 	//Initial values of X-axis variable and C- variable
-	this.xvar = ko.observable("year2");
-	this.cvar = ko.observable("sic1");
+	this.xvar = ko.observable("state");
+	this.cvar = ko.observable("year2");
 
 	//Initial value and text of Time Lapse button
 	this.timelapse = ko.observable(false);
@@ -177,7 +177,8 @@ var ViewModel = function() {
 
 	    var url="http://api.census.gov/data/bds/firms";
 
-		var geography=self.us()?("us:*"):("state:"+request.state);
+		var geography=self.StateAsArgument()?"state:*":(self.us()?("us:*"):("state:"+request.state));
+		//var geography=(self.us()?("us:*"):("state:"+request.state));
 		if ((request.state.length===1) && (request.state[0]==="00")) geography="us:*";
 
 		var reqtime=((self.timelapse() || self.YearAsArgument())?("&time=from+1977+to+2013"):("&year2="+request.year2));
@@ -267,8 +268,76 @@ var ViewModel = function() {
 			self.data.push(xvararr);
 		};
 
-		self.makePlot((!self.MeasureAsLegend())?data:data1);
+		if (self.StateAsArgument())
+			self.makeMap(data);
+		else self.makePlot((!self.MeasureAsLegend())?data:data1);
 	};
+
+	this.makeMap = function (data) {
+
+		//Define margins and dimensions of the SVG element containing the chart
+		var margin = {top: 20, right: 30, bottom: 50, left: 80},
+		width = 960 - margin.left - margin.right,
+		height = 450 - margin.top - margin.bottom;
+
+		//Select the SVG element, remove old drawings, add grouping element for the chart
+		var svgcont = d3.select("#chartsvg");
+		svgcont.selectAll("*").remove();
+		var svg=svgcont.attr("width", width + margin.left + margin.right)
+			.attr("height", height + margin.top + margin.bottom)
+			.append('g')
+			.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+			.attr('class', 'chart');
+
+		d3.select("#plotarea").style("width", width + margin.left + margin.right+"px");
+		//d3.select("#graphdata").style("height", height + margin.top + margin.bottom-21+"px");
+		
+		var request=self.APIrequest();
+		var measure=request.measure;
+
+		var ymin=d3.min(data, function(d) { return +d[measure]; });
+		var ymax=d3.max(data, function(d) { return +d[measure]; });
+		var ymid=(ymax+ymin)*.5;
+		var maxabs=d3.max([Math.abs(ymin),Math.abs(ymax)]);
+		console.log(maxabs,ymin,ymax);
+		var yScale = d3.scale.linear()
+
+		if (ymin<0)
+			yScale.domain([-maxabs,0,maxabs]).range(["#CB2027","#eeeeee","#265DAB"]);
+		else
+			yScale.domain([ymin,ymax]).range(["#eeeeee","#265DAB"]);
+
+		//debugger;
+
+		d3.json("../json/gz_2010_us_040_00_500k.json", function(geo_data) {
+            var mapg = svg.append('g')
+            		.attr('class', 'map');
+					
+			var projection = d3.geo.albersUsa()
+					.scale(800)
+					.translate([width / 2, height / 2.]);
+
+			var geo_data1=[];
+
+			for (var i in data)
+				geo_data1.push(geo_data.features.filter(function(d) {return data[i].state===d.properties.NAME;})[0]);
+
+			var path = d3.geo.path().projection(projection);
+
+			var map = mapg.selectAll('path')
+					.data(geo_data1)
+					.enter()
+					.append('path')
+					.attr('d', path)
+					.data(data)
+					.style('fill', function(d) { return yScale(d[measure]);})
+					.style('stroke', 'white')
+					.style('stroke-width', 0.3)
+					.append("title").text(function(d){return d.state+":"+d[measure];});
+		});
+
+	}
+
 
 	//This function makes d3js plot, either a bar chart or scatterplot
 	this.makePlot = function (data) {
@@ -360,25 +429,7 @@ var ViewModel = function() {
 			return ttt;
 		}
 		
-		d3.json("../json/gz_2010_us_040_00_500k.json", function(geo_data) {
-            var mapg = svg.append('g')
-            		.attr('class', 'map');
-					
-			var projection = d3.geo.mercator()
-					.scale(140)
-					.translate([width / 2, height / 1.2]);
-
-			var path = d3.geo.path().projection(projection);
-
-			var map = mapg.selectAll('path')
-					.data(geo_data.features)
-					.enter()
-					.append('path')
-					.attr('d', path)
-					.style('fill', 'lightBlue')
-					.style('stroke', 'black')
-					.style('stroke-width', 0.5);
-		});
+		
 
 		if (self.YearAsArgument()) {
 			//Timeline scatter plot
