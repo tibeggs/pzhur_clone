@@ -175,6 +175,21 @@ var ViewModel = function() {
 	// 	self.SelectedSectors([0]);
 	// })
 
+	this.NumFormat = function(d) {
+		var sigdig=2;
+		var exp=Math.floor(Math.log10(Math.abs(d)))-sigdig;
+		var mantissa= Math.floor(d/(Math.pow(10,exp)));
+		if (Math.abs(d)>1e+6)
+			return d3.format("."+(6-exp)+"f")(mantissa*(Math.pow(10,exp-6)))+"M";
+		else if (Math.abs(d)>1e+3)
+			return d3.format("."+(3-exp)+"f")(mantissa*(Math.pow(10,exp-3)))+"k";
+		else if (Math.abs(d)>1)
+			return d3.format("."+(-exp)+"f")(d);
+		else if (Math.abs(d)>5e-2)
+			return d3.format(".2f")(d);
+		else return d3.format(".f")(d);
+	};
+
 
 	//The visual elements of the plot: SVGs for the graph/map and legend
 	this.PlotView = {
@@ -182,6 +197,7 @@ var ViewModel = function() {
 		width : 960,
 		height : 450,
 		svg : undefined,
+		legendsvg: undefined,
 		Init : function() {
 			//Define margins and dimensions of the SVG element containing the chart
 			var margin = this.margin;
@@ -202,9 +218,13 @@ var ViewModel = function() {
 
 			d3.select("#plotarea").style("width", width + margin.left + margin.right+"px");
 			//d3.select("#graphdata").style("height", height + margin.top + margin.bottom-21+"px");
-		},
 
-	}
+			//Clear legend, set size
+			this.legendsvg=d3.select("#legend")
+			this.legendsvg.selectAll("*").remove();
+			this.legendsvg.attr("width",400).attr("height",300);
+		}
+	};
 
 	
 	
@@ -334,9 +354,6 @@ var ViewModel = function() {
 			//yScale.domain([ymin,ymax]).range(["#eeeeee","#265DAB"]);
 			yScale.domain([ymin,ymid,ymax]).range([golden,"#bbbbbb",purple]);
 			//yScale.domain([ymin,ymid,ymax]).range(["red","#ccffcc","blue"]);
-			//rgb(22,136,51) nice greenblue
-
-		//debugger;
 
 		d3.json("../json/gz_2010_us_040_00_20m.json", function(geo_data) {
             var mapg = svg.append('g')
@@ -362,7 +379,41 @@ var ViewModel = function() {
 					.style('fill', function(d) { return yScale(d[measure]);})
 					.style('stroke', 'white')
 					.style('stroke-width', 0.3)
-					.append("title").text(function(d){return d.state+":"+d[measure];});
+					.append("title").text(function(d){return d.state+": "+d3.format(",")(d[measure]);});
+
+			//Making Legend
+			var legendsvg=self.PlotView.legendsvg.append("g").attr("transform","translate(0,10)");
+
+			var colorbar={height:200, width:20, levels:50}
+			var textlabels={n:5, fontsize:15};
+
+			legendsvg.selectAll("rect")
+			.data(function() {
+				var levels=[];
+				for (var i=0; i<colorbar.levels; i++) levels.push(yScale(ymin+i/colorbar.levels*(ymax-ymin)));
+				return levels;
+			})
+			.enter()
+			.append("rect")
+			.attr("fill",  function(d) {return d;})
+			.attr("width",20).attr("height",colorbar.height/colorbar.levels)
+			.attr("y",function(d,i) {return i*colorbar.height/colorbar.levels;});
+
+			legendsvg.selectAll("text")
+			.data(function() {
+				var labels=[];
+				for (var i=0; i<textlabels.n+1; i++) labels.push(ymin+i/textlabels.n*(ymax-ymin));
+				return labels;
+			})
+			.enter()
+			.append("text")
+			.attr("fill", "black")
+			.attr("font-size", textlabels.fontsize+"px")
+			.attr("x",colorbar.width+3)
+			.attr("y",function(d,i) {return .4*textlabels.fontsize+i*(colorbar.height)/textlabels.n;})
+			.text(function(d) {return(self.NumFormat(+d));});
+
+
 		});
 
 	}
@@ -398,7 +449,7 @@ var ViewModel = function() {
 		
 
 		//Setting D3 scales
-		var xScale; var yScale; var ymin;
+		var xScale; var yScale; var ymin; var y0;
 		if (self.YearAsArgument())
 			xScale = d3.scale.linear()
 				.domain([self.model.year2[0],self.model.year2[self.model.year2.length-1]])
@@ -410,9 +461,11 @@ var ViewModel = function() {
 
 		if (self.logscale()) {
 			data=data.filter(function(d) {return d[measure]>0});
-			ymin = Math.max(1e-5,d3.min(data, function(d) { return +d[measure]; }));
+			ymin = d3.min(data, function(d) { return +d[measure]; })/2.;
+			y0=ymin;
 			yScale = d3.scale.log();
 		} else {
+			y0=0;
 			ymin = Math.min(0,d3.min(data, function(d) { return +d[measure]; }));
 			yScale = d3.scale.linear()
 		}
@@ -438,7 +491,7 @@ var ViewModel = function() {
 
 		var Tooltiptext = function(d) {
 			var ttt=self.MeasureAsLegend()?d.measure:self.model.NameLookUp(measure,"measure");
-			ttt+=": "+d[measure]+"\n"+self.model.NameLookUp(request.xvar,"var")+": "+d[request.xvar];
+			ttt+=": "+d3.format(",")(d[measure])+"\n"+self.model.NameLookUp(request.xvar,"var")+": "+d[request.xvar];
 			if (!self.MeasureAsLegend())
 				ttt+="\n"+self.model.NameLookUp(request.cvar,"var")+": "+d[request.cvar];
 			return ttt;
@@ -493,27 +546,12 @@ var ViewModel = function() {
 			   	//.attr("fill",  function(d) {return colors(d[request.cvar]);})
 			   	.attr("width", barwidth)
 			   	.attr("x",function(d) {return xScale(d[request.xvar])+barwidth*cvarlist.indexOf(d[request.cvar])})
-			   	// .attr("y",function(d) {return yScale(0)})
+			   	// .attr("y",function(d) {return yScale(y0)})
 			   	// .attr("height",0).transition()
 			   	// .duration(500).ease("sin-in-out")
 			   	.attr("y",function(d) {return yScale(Math.max(0,+d[measure]))})
-			   	.attr("height", function(d) {return Math.abs(yScale(0)-yScale(+d[measure]))})
+			   	.attr("height", function(d) {return Math.abs(yScale(y0)-yScale(+d[measure]))})
 			   	.append("title").text(function(d){return Tooltiptext(d);});
-
-
-			 // var fontsize= d3.min(data, function(d,i) {
-				// 		return 1.5*barwidth/d[measure].length; 
-				// 	});
-
-			// svg.selectAll("text")
-			// 	.data(data)
-			// 	.enter().append("text")
-			// 	.attr("x",function(d) {return (xScale(d[request.xvar])+barwidth*cvarlist.indexOf(d[request.cvar]))+barwidth/4})
-			// 	.attr("y",function(d) {return yScale(+d[measure])-8-7*Math.sign(d[measure])})
-			// 	.attr("dy", ".75em")
-			// 	.attr("fill","#eeeeee")
-			// 	.attr("font-size", fontsize)
-			// 	.text(function(d) { return d[measure]; });
 		}
 
 		//Adding axes
@@ -523,19 +561,18 @@ var ViewModel = function() {
 
 		var xAxis0 = d3.svg.axis().scale(xScale).tickFormat("").orient("bottom");
 
-		var yAxis = d3.svg.axis().scale(yScale).orient("left").ticks(5,d3.format(",d"));
+		var yAxis = d3.svg.axis().scale(yScale).orient("left");
+		if (self.logscale()) yAxis.ticks(5,d3.format(",d"));
 
 		svg.append("g")
 			.attr("class", "x axis")
-			.attr("transform", "translate(0," + yScale(0) + ")")
+			.attr("transform", "translate(0," + yScale(y0) + ")")
 			.call(xAxis0);
 
 		var xAxisLabels=svg.append("g")
 			.attr("class", "x axis")
 			.attr("transform", "translate(0," + height + ")")
 			.call(xAxis).selectAll("text");
-
-		//d3.selectAll("x axis")
 
 		if (self.SectorAsArgument()) {
 			xAxisLabels
@@ -552,13 +589,12 @@ var ViewModel = function() {
 		.call(yAxis); 
 
 		//Making Legend
-		var legendsvg=d3.select("#legend")
-		legendsvg.selectAll("*").remove();
+		var legendsvg=self.PlotView.legendsvg;
 
 		var symbolsize=15;//Math.max(Math.min(barwidth,20),15);
 
-		legendsvg.attr("height",(symbolsize+5)*cvarlist.length)
-				.attr("width",400);
+		legendsvg.attr("height",(symbolsize+5)*cvarlist.length);
+
 		legendsvg.selectAll("rect")
 			.data(cvarlist)
 			.enter()
@@ -602,7 +638,7 @@ var ViewModel = function() {
 			   	.attr("x",function(d) {return xScale(d[request.xvar])+barwidth*d.icvar;})
 			   	.transition().duration(500)
 			   	.attr("y",function(d) { return yScale(Math.max(0,+d[measure]));})
-			   	.attr("height",function(d) {return Math.abs(yScale(0)-yScale(+d[measure]));});
+			   	.attr("height",function(d) {return Math.abs(yScale(y0)-yScale(+d[measure]));});
 
 		}
 
