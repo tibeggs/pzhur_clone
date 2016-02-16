@@ -20,7 +20,7 @@ var ViewModel = function() {
 			self.timelapse(false);
 			clearInterval(self.tlint);
 			self.SelectedYears([self.TimeLapseCurrYear-1]);
-		} else if (!self.StateAsArgument()){
+		} else {
 			self.timelapse(true);
 			self.getBDSdata();
 		}
@@ -330,6 +330,8 @@ var ViewModel = function() {
 	//This function makes the geographical map
 	this.makeMap = function (data) {
 
+		
+
 		self.PlotView.Init();
 		svg=self.PlotView.svg;
 		width=self.PlotView.width;
@@ -365,6 +367,12 @@ var ViewModel = function() {
 
 			var geo_data1=[];
 
+			if (self.timelapse()) {
+				var datafull=data;
+				data=data.filter(function(d) {return +d.time===self.model.year2[0]});
+			}
+
+			//Put the states in geo_data in the same order as they are in data
 			for (var i in data)
 				geo_data1.push(geo_data.features.filter(function(d) {return data[i].state===d.properties.NAME;})[0]);
 
@@ -412,6 +420,32 @@ var ViewModel = function() {
 			.attr("x",colorbar.width+3)
 			.attr("y",function(d,i) {return .4*textlabels.fontsize+i*(colorbar.height)/textlabels.n;})
 			.text(function(d) {return(self.NumFormat(+d));});
+
+
+
+			// Timelapse animation
+			function updateyear(yr) {
+				curyearmessage.transition().duration(1000).text(self.model.year2[yr]); //Display year
+				d3.select("#graphtitle").text("");
+				var dataset=datafull.filter(function(d) {return +d.time===self.model.year2[yr]}); //Select data corresponding to the year
+				map = mapg.selectAll('path')
+						.data(dataset)
+						.transition().duration(1000)
+						.style('fill', function(d) { return yScale(d[measure]);})
+
+			};
+
+			//Run timelapse animation
+			if (self.timelapse()) {
+				var iy=0;
+				var curyearmessage=svg.append("text").attr("x",0).attr("y",height*.8).attr("font-size",80).attr("fill-opacity",.3);
+				self.tlint=setInterval(function() {
+		  			updateyear(iy);
+		  			if (iy<self.model.year2.length) iy++; else iy=0;
+		  			self.TimeLapseCurrYear=self.model.year2[iy];
+				}, 1000);
+
+			}
 
 
 		});
