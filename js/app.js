@@ -1,13 +1,12 @@
 var ViewModel = function() {
 	var self = this;
 
+	//Reference to the model, which contains variable names and name look (in model.js file)
 	this.model = BDSVisModel;
 	this.model.InitModel();
 
+	//The data array do be displayed as table with numbers
 	this.data = ko.observableArray();
-	this.data2show = ko.observableArray();
-
-
 
 	this.toggleshowdata = function () {
 		//This function executes in click to 'Show Data' button.
@@ -18,67 +17,80 @@ var ViewModel = function() {
 		//This function executes in click to 'Stop'/'Time Lapse' button and stops time lapse animation or starts it.
 		if (self.timelapse()) {
 			self.timelapse(false);
-			clearInterval(self.tlint);
-			self.SelectedYears([self.TimeLapseCurrYear-1]);
+			clearInterval(self.tlint); //Stop the animation
+			self.SelectedYears([self.TimeLapseCurrYear-1]);	//Set the year to the year currently shown in animation
 		} else {
 			self.timelapse(true);
 			self.getBDSdata();
 		}
-		
 	}
 
 	this.toggleyscale = function () {
+		//Toggle whether to plot the graph in log or linear scale
 		self.logscale(!self.logscale());
+		self.getBDSdata();
 	}
 
 	//The following functions set cvar (Legend/Comparison/Color variable) and xvar (X-axis variable)
 
 	this.setsectorcvar = function () {
 		self.cvar("sic1");
+		self.getBDSdata();
 	}
 
 	this.setsectorxvar = function () {
 		self.xvar("sic1");
-		if (self.StateAsLegend()) {
-			this.setmeasurecvar();
-		}
+		if (self.StateAsLegend())
+			self.cvar("measure");
+		self.getBDSdata();
 	}
 
 	this.setstatecvar = function () {
 		self.cvar("state");
+		self.getBDSdata();
 	}
 
 	this.setstatexvar = function () {
 		self.cvar("measure");
 		self.xvar("state");
+		self.getBDSdata();
 	}
 
 	this.setyearcvar = function () {
 		self.cvar("year2");
+		self.getBDSdata();
 	}
 
 	this.setyearxvar = function () {
 		self.xvar("year2");
+		self.getBDSdata();
 	}
 
 	this.setmeasurecvar = function () {
 		self.cvar("measure");
+		self.getBDSdata();
 	}
 
 	this.setmeasurexvar = function () {
 		self.xvar("measure");
+		self.getBDSdata();
 	}
 
 	this.setfcharcvar = function () {
 		self.cvar("fchar");
+		self.getBDSdata();
 	}
 
 	this.setfcharxvar = function () {
 		self.xvar("fchar");
+		self.getBDSdata();
 	}
 
-
-	waiting4api = ko.observable(false); //Whether message "Waiting for data from server" is shown
+    this.timelapse = ko.observable(false);	//Whether time lapse regime is on	
+	waiting4api = ko.observable(false);    //Whether message "Waiting for data from server" is shown
+	disableAll = ko.computed(function () { //Disable all the input elements (used in Time Lapse regime and when the app is waiting for data from server)
+		return (waiting4api() || self.timelapse());
+	})
 
 	//Initial values of what is selected in the input selectors
 	this.SelectedStates = ko.observableArray([this.model.state[0].code]);
@@ -105,14 +117,14 @@ var ViewModel = function() {
 
 	//Whether a variable is C- Variable (Legend)
 	this.SectorAsLegend = ko.computed( function () {return self.cvar()==="sic1";});
-	this.StateAsLegend = ko.computed( function () {return (self.cvar()==="state" && self.xvar()!="sic1");});
+	this.StateAsLegend = ko.computed( function () {return self.cvar()==="state";});
 	this.MeasureAsLegend = ko.computed( function () {return self.cvar()==="measure";});
 	this.YearAsLegend = ko.computed( function () {return self.cvar()==="year2";});
 	this.FirmCharAsLegend = ko.computed( function () {return self.cvar()==="fchar";});
 
 	//Whether a variable is X-axis variable
 	this.SectorAsArgument = ko.computed( function () {return self.xvar()==="sic1";});
-	this.StateAsArgument = ko.computed( function () {return self.xvar()==="state";});
+	this.StateAsArgument = ko.computed( function () {return self.xvar()==="state";}); //When "state" is x-var, it is the geo map regime
 	this.YearAsArgument = ko.computed( function () {return self.xvar()==="year2";});
 	this.FirmCharAsArgument = ko.computed( function () {return self.xvar()==="fchar";});
 
@@ -122,7 +134,9 @@ var ViewModel = function() {
 	this.YearVar = ko.computed( function () {return (self.YearAsLegend() || self.YearAsArgument());});
 	this.FirmCharVar = ko.computed( function () {return (self.FirmCharAsLegend() || self.FirmCharAsArgument());});
 
- 	//Whether to send the "us:*" request or by individual states ("state:*")
+	this.FcharCompButtonText = ko.computed( function() {return "Compare "+self.model.NameLookUp(self.fchar(),"var");});
+
+ 	//Whether to show the state selector (and also to send the "us:*" request or by individual states ("state:*"))
 	this.us = ko.computed(function(){
 		if (self.StateAsLegend()) return false; //If states are Legend, we need many states, so request NOT general, but by state
 		else if (self.SectorVar()) return true; //If sector is either c- or x- variable, then there is no by-state data, so YES
@@ -130,54 +144,20 @@ var ViewModel = function() {
 		else return true; //Else means a sector is selected, so there can not be by-state request
 	});
 
-	//Set to request single state or multiple, and remove the 00 code for the US in selector
-	this.StateRequested = ko.computed (function(){ 
-		var multiple=self.SelectedStates().length>1; //Whether multiple states are selected
-		var fisrtUS=self.SelectedStates()[0]==="00"; //Whether "United States" is selected
-
-		if ((multiple) && (fisrtUS)) return self.SelectedStates().slice(1); //Remove "United States" if many states are selected
-		//Otherwise return all selected states or one, depending on whether state is the c-variable
-		else return (self.StateAsLegend())?self.SelectedStates():[self.SelectedStates()[0]]; 
-	})
-
-	//Changes to these variable trigger API-request and replotting. 
-	//That's why they are put together in an object, so that the single subscription below takes care of all the input changes
-	this.APIrequest = ko.computed( function  () {
-		return {
-			//If by-state request, then only send "Economy Wide", otherwise send all selected sectors or a single sector depending on whether sector is the c-variable(legend). If in map regime (StateAsArgument) send only one measure
-			sic1 : self.StateAsLegend()?([0]):((self.SectorAsLegend() && !self.StateAsArgument())?self.SelectedSectors():[self.SelectedSectors()[0]]),
-			//See state calculation above in this.StateRequested
-			state : self.StateRequested(),
-			//Send all selected measures or a single one depending on whether measure is the c-variable.
-			measure : self.MeasureAsLegend()?self.SelectedMeasures():[self.SelectedMeasures()[0]],
-			fchar : self.fchar(),
-			//Send all selected years or a single one depending on whether year is the c-variable.
-			year2 : self.YearAsLegend()?self.SelectedYears():[self.SelectedYears()[0]],
-			//"fchar" is actually one of 3: fage4, fsize, ifsize. So that should be sent instead of "fchar"
-			xvar : (self.xvar()==="fchar")?(self.fchar()):(self.xvar()),
-			cvar : (self.cvar()==="fchar")?(self.fchar()):(self.cvar()),
-			//The following 3 lines are just for the case when Firm Characterstic is c-variable.
-			fage4 : self.model.GetDomain("fage4"),
-			fsize : self.model.GetDomain("fsize"),
-			ifsize : self.model.GetDomain("ifsize"),
-			//If y-scale changes
-			logscale : self.logscale()
-		}
-	});
-
 	//Subscribe to input changes
-	//Any change in the input fields triggers request to the server, followed by data processing and making of a new plot
-	this.APIrequest.subscribe(function() {
-		self.getBDSdata();
-	});
+	//Any change in the input select fields triggers request to the server, followed by data processing and making of a new plot
 
-	// this.SelectedStates.subscribe(function() {
-	// 	self.SelectedSectors([0]);
-	// })
+	this.SelectedStates.subscribe(function() {self.getBDSdata();});
+	this.SelectedMeasures.subscribe(function() {self.getBDSdata();});
+	this.SelectedSectors.subscribe(function() {self.getBDSdata();});
+	this.SelectedYears.subscribe(function() {self.getBDSdata();});
+	this.fchar.subscribe(function() {self.getBDSdata();});
 
+
+	//This is a general use function for whenever the number should be printed in format with fixed significant digits and M and k for millions and thousands
 	this.NumFormat = function(d) {
-		var sigdig=2;
-		var exp=Math.floor(Math.log10(Math.abs(d)))-sigdig;
+		var sigdig=3; //How many digits to show
+		var exp=Math.floor(Math.log10(Math.abs(d)))-sigdig+1;
 		var mantissa= Math.floor(d/(Math.pow(10,exp)));
 		if (Math.abs(d)>1e+6)
 			return d3.format("."+(6-exp)+"f")(mantissa*(Math.pow(10,exp-6)))+"M";
@@ -196,6 +176,7 @@ var ViewModel = function() {
 		margin : {top: 20, right: 30, bottom: 50, left: 80},
 		width : 960,
 		height : 450,
+		legendwidth: 100,
 		svg : undefined,
 		legendsvg: undefined,
 		Init : function() {
@@ -210,7 +191,7 @@ var ViewModel = function() {
 			//Select the SVG element, remove old drawings, add grouping element for the chart
 			var svgcont = d3.select("#chartsvg");
 			svgcont.selectAll("*").remove();
-			this.svg=svgcont.attr("width", width + margin.left + margin.right)
+			this.svg=svgcont.attr("width", width + margin.left + margin.right+this.legendwidth)
 				.attr("height", height + margin.top + margin.bottom)
 				.append('g')
 				.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
@@ -220,18 +201,52 @@ var ViewModel = function() {
 			//d3.select("#graphdata").style("height", height + margin.top + margin.bottom-21+"px");
 
 			//Clear legend, set size
-			this.legendsvg=d3.select("#legend")
+			this.legendsvg=d3.select("#legend").attr("width",400).attr("height",300)
 			this.legendsvg.selectAll("*").remove();
-			this.legendsvg.attr("width",400).attr("height",300);
+			if (self.StateAsArgument())
+				this.legendsvg=d3.select("#chartsvg").append("g").attr("transform","translate("+width+","+height*.3+")");
+			else this.legendsvg=this.legendsvg.append("g").attr("transform","translate(0,20)");
 		}
 	};
 
 	
 	
-//Get the data from the API according to current request and render it into array of objects with field names corresponding to the variables
+//Form the API request and get the data from the API, then render it into array of objects with field names corresponding to the variables
 	this.getBDSdata = function () {
 
-		var request=self.APIrequest();
+		//The list of variables to request from API. Based on this, the request URL is formed and then this list is used when plotting.
+		var APIrequest = function  () {
+			
+			//Calculate whether to request single state or multiple, and remove the 00 code for the US in selector
+			var StateRequested;
+			var multiple=self.SelectedStates().length>1; //Whether multiple states are selected
+			var firstUS=self.SelectedStates()[0]==="00"; //Whether "United States" is selected
+
+			if ((multiple) && (firstUS)) StateRequested=self.SelectedStates().slice(1); //Remove "United States" if many states are selected
+			//Otherwise return all selected states or one, depending on whether state is the c-variable
+			else StateRequested=(self.StateAsLegend())?self.SelectedStates():[self.SelectedStates()[0]]; 
+
+			return {
+				//If by-state request, then only send "Economy Wide", otherwise send all selected sectors or a single sector depending on whether sector is the c-variable(legend). If in map regime (StateAsArgument) send only one measure
+				sic1 : self.StateAsLegend()?([0]):(self.SectorAsLegend()?self.SelectedSectors():[self.SelectedSectors()[0]]),
+				//See state calculation above for StateRequested
+				state : StateRequested,
+				//Send all selected measures or a single one depending on whether measure is the c-variable and whether it's a geo map regime.
+				measure : (self.MeasureAsLegend() && !self.StateAsArgument())?self.SelectedMeasures():[self.SelectedMeasures()[0]],
+				fchar : self.fchar(),
+				//Send all selected years or a single one depending on whether year is the c-variable.
+				year2 : self.YearAsLegend()?self.SelectedYears():[self.SelectedYears()[0]],
+				//"fchar" is actually one of 3: fage4, fsize, ifsize. So that should be sent instead of "fchar"
+				xvar : (self.xvar()==="fchar")?(self.fchar()):(self.xvar()),
+				cvar : (self.cvar()==="fchar")?(self.fchar()):(self.cvar()),
+				//The following 3 lines are just for the case when Firm Characterstic is c-variable.
+				fage4 : self.model.GetDomain("fage4"),
+				fsize : self.model.GetDomain("fsize"),
+				ifsize : self.model.GetDomain("ifsize"),
+			}
+		};
+
+		var request=APIrequest();
 
 	    var url="http://api.census.gov/data/bds/firms";
 
@@ -239,12 +254,14 @@ var ViewModel = function() {
 		if ((request.state.length===1) && (request.state[0]==="00")) geography="us:*"; //If only "United States" is selected then use us:*
 		if (self.StateAsArgument()) geography="state:*"; //In map regime use state:*
 
+		//Whether to request all years or a particular year
 		var reqtime=((self.timelapse() || self.YearAsArgument())?("&time=from+1977+to+2013"):("&year2="+request.year2));
 
-	    var geturl=url+"?get="+request.xvar+","+request.measure+(self.FirmCharAsLegend()?(","+request.cvar):"")+
-	    				"&for="+geography+
-	    				reqtime+
-	    				((self.us() && (!self.SectorAsArgument()))?("&sic1="+request.sic1):(""))+
+		//Put everything together
+	    var geturl=url+"?get="+request.xvar+","+request.measure+(self.FirmCharAsLegend()?(","+request.cvar):"")+ //variables: measures and firm characteristics
+	    				"&for="+geography+ //states or US
+	    				reqtime+ //years
+	    				((self.us() && (!self.SectorAsArgument()) && (!self.StateAsArgument()))?("&sic1="+request.sic1):(""))+ //sectors, if US
 	    				"&key=93beeef146cec68880fccbd72e455fcd7135228f";
 
 	    console.log(geturl);
@@ -263,16 +280,14 @@ var ViewModel = function() {
 		    			jsoned.push(rec);
 		    		};
 		    	};
-	    		self.updateBDSdata(jsoned); //Continue to data processing and plotting
+	    		self.updateBDSdata(jsoned,request); //Continue to data processing and plotting
 	    	} else console.log("Server sent empty response to " + geturl);	
 	    	waiting4api(false); //Hide "waiting for data" message
 	    });
 	};
 
 //Process data obtained from API. Change codes into names, add state list number (icvar), form data2show for displaying as a table and call the function making the plot
-	this.updateBDSdata = function(data) {
-
-		var request=self.APIrequest();
+	this.updateBDSdata = function(data,request) {
 
 		var data2show={}; // The nested object, used as an intermediate step to convert data into 2D array
 
@@ -322,25 +337,26 @@ var ViewModel = function() {
 		};
 
 		if (self.StateAsArgument())
-			self.makeMap(data);
-		else self.makePlot((!self.MeasureAsLegend())?data:data1);
+			self.makeMap(data,request);
+		else self.makePlot((!self.MeasureAsLegend())?data:data1,request);
 	};
 
 
 	//This function makes the geographical map
-	this.makeMap = function (data) {
+	this.makeMap = function (data,request) {
 
-		
-
+		//Initialize the SVG elements and get width and length for scales
 		self.PlotView.Init();
 		svg=self.PlotView.svg;
 		width=self.PlotView.width;
 		height=self.PlotView.height;
 		
-		
-		var request=self.APIrequest();
 		var measure=request.measure;
 
+		//Set graph title
+		d3.select("#graphtitle").text(self.model.NameLookUp(measure,"measure")+" in "+request.year2);
+
+		//Set D3 scales
 		var ymin=d3.min(data, function(d) { return +d[measure]; });
 		var ymax=d3.max(data, function(d) { return +d[measure]; });
 		var ymid=(ymax+ymin)*.5;
@@ -357,6 +373,8 @@ var ViewModel = function() {
 			yScale.domain([ymin,ymid,ymax]).range([golden,"#bbbbbb",purple]);
 			//yScale.domain([ymin,ymid,ymax]).range(["red","#ccffcc","blue"]);
 
+
+		//Get the map from the shape file in JSON format
 		d3.json("../json/gz_2010_us_040_00_20m.json", function(geo_data) {
             var mapg = svg.append('g')
             		.attr('class', 'map');
@@ -390,11 +408,14 @@ var ViewModel = function() {
 					.append("title").text(function(d){return d.state+": "+d3.format(",")(d[measure]);});
 
 			//Making Legend
-			var legendsvg=self.PlotView.legendsvg.append("g").attr("transform","translate(0,10)");
+			var legendsvg=self.PlotView.legendsvg;
+			//legendsvg.selectAll("g").remove();
+			//legendsvg=legendsvg.;
 
 			var colorbar={height:200, width:20, levels:50}
 			var textlabels={n:5, fontsize:15};
 
+			//Make the colorbar
 			legendsvg.selectAll("rect")
 			.data(function() {
 				var levels=[];
@@ -407,6 +428,7 @@ var ViewModel = function() {
 			.attr("width",20).attr("height",colorbar.height/colorbar.levels)
 			.attr("y",function(d,i) {return i*colorbar.height/colorbar.levels;});
 
+			//Make the labels of the colorbar
 			legendsvg.selectAll("text")
 			.data(function() {
 				var labels=[];
@@ -421,11 +443,9 @@ var ViewModel = function() {
 			.attr("y",function(d,i) {return .4*textlabels.fontsize+i*(colorbar.height)/textlabels.n;})
 			.text(function(d) {return(self.NumFormat(+d));});
 
-
-
 			// Timelapse animation
 			function updateyear(yr) {
-				curyearmessage.transition().duration(1000).text(self.model.year2[yr]); //Display year
+				curyearmessage.text(self.model.year2[yr]); //Display year
 				d3.select("#graphtitle").text("");
 				var dataset=datafull.filter(function(d) {return +d.time===self.model.year2[yr]}); //Select data corresponding to the year
 				map = mapg.selectAll('path')
@@ -438,30 +458,26 @@ var ViewModel = function() {
 			//Run timelapse animation
 			if (self.timelapse()) {
 				var iy=0;
-				var curyearmessage=svg.append("text").attr("x",0).attr("y",height*.8).attr("font-size",80).attr("fill-opacity",.3);
+				var curyearmessage=d3.select("#chartsvg").append("text").attr("x",0).attr("y",height*.5).attr("font-size",100).attr("fill-opacity",.3);
 				self.tlint=setInterval(function() {
 		  			updateyear(iy);
 		  			if (iy<self.model.year2.length) iy++; else iy=0;
 		  			self.TimeLapseCurrYear=self.model.year2[iy];
 				}, 1000);
-
 			}
-
-
 		});
-
 	}
 
 
 	//This function makes d3js plot, either a bar chart or scatterplot
-	this.makePlot = function (data) {
+	this.makePlot = function (data,request) {
 
 		self.PlotView.Init();
 		svg=self.PlotView.svg;
 		width=self.PlotView.width;
 		height=self.PlotView.height;
 		
-		var request=self.APIrequest();
+		//var request=self.APIrequest();
 
 		//If measure is a (c-)variable, then we got melted data from updateBDSdata function, with all measures contained in the "value" column
 		var measure=(self.MeasureAsLegend())?"value":request.measure;
@@ -510,17 +526,16 @@ var ViewModel = function() {
 				
 		//Set up colorscale
 		var yearcolorscale = d3.scale.linear().domain([+cvarlist[0],+cvarlist[cvarlist.length-1]]).range(["#265DAB","#CB2027"]);
-		//['green','red','orange','cyan','purple','blue','magenta','green','red','orange','cyan','purple','blue','magenta'];
-		var colarr=["#265DAB","#DF5C24","#059748","#E5126F","#9D722A","#7B3A96","#C7B42E","#CB2027","#4D4D4D","#5DA5DA","#FAA43A","#60BD68","#F17CB0","#B2912F","#B276B2","#DECF3F","#F15854","#8C8C8C","#8ABDE6","#FBB258","#90CD97","#F6AAC9","#BFA554","#BC99C7","#EDDD46","#F07E6E","#000000",
-		 	"#265DAB","#DF5C24","#059748","#E5126F","#9D722A","#7B3A96","#C7B42E","#CB2027","#4D4D4D","#5DA5DA","#FAA43A","#60BD68","#F17CB0","#B2912F","#B276B2","#DECF3F","#F15854","#8C8C8C","#8ABDE6","#FBB258","#90CD97","#F6AAC9","#BFA554","#BC99C7","#EDDD46","#F07E6E","#000000"];
+		//var normscale=d3.scale.linear().domain([0,cvarlist.length/2,cvarlist.length-1]).range(["#265DAB","#dddddd","#CB2027"]);
+		var normscale=d3.scale.linear().domain([0,cvarlist.length-1]).range(["#265DAB","#dddddd"]);
+		//var colarr=["#265DAB","#DF5C24","#059748","#E5126F","#9D722A","#7B3A96","#C7B42E","#CB2027","#4D4D4D","#5DA5DA","#FAA43A","#60BD68","#F17CB0","#B2912F","#B276B2","#DECF3F","#F15854","#8C8C8C","#8ABDE6","#FBB258","#90CD97","#F6AAC9","#BFA554","#BC99C7","#EDDD46","#F07E6E","#000000"];
 			
 		var colors = function(i) {
-			//var normscale=d3.scale.ordinal().domain(self.model.GetDomain(request.cvar)).range(colarr);
-			//debugger;
 			if (self.YearAsLegend()) return yearcolorscale(cvarlist[i]);
 			else if (request.cvar=="fage4") return self.model.fage4color[i];
 			else if ((request.cvar=="fsize") || (request.cvar=="ifsize")) return self.model.fsizecolor[i];
-			else return colarr[i];
+			else if (self.YearAsArgument()) return colorbrewer.Dark2[8][i % 8];//colarr[i % colarr.length];
+			else return colorbrewer.BrBG[11][10 - (i % 11)];//colarr[i % colarr.length];//normscale(i);
 		}
 
 		var Tooltiptext = function(d) {
@@ -531,10 +546,8 @@ var ViewModel = function() {
 			return ttt;
 		}
 		
-		
-
 		if (self.YearAsArgument()) {
-			//Timeline scatter plot
+			//Timeline scatter plot is year is x-variable
 
 			// Define the line
 			var valueline = d3.svg.line()
@@ -563,8 +576,8 @@ var ViewModel = function() {
         	.append("title").text(function(d){return Tooltiptext(d);});
 
 		} else {
-			//Bar chart	
-
+			//Bar chart	if x-variable is other than year
+			
 			//Number of bars is number of categories in the legend, and barwidth is determined from that
 			var nbars=cvarlist.length;
 			var barwidth= xScale.rangeBand()/nbars;
@@ -576,7 +589,7 @@ var ViewModel = function() {
 			bars.enter().append("rect")
 			   	.attr("fill",  function(d) {return colors(cvarlist.indexOf(d[request.cvar]));})
 			   	.attr("stroke", "white")
-			   	.attr("stroke-width",".3")
+			   	.attr("stroke-width",".1")
 			   	//.attr("fill",  function(d) {return colors(d[request.cvar]);})
 			   	.attr("width", barwidth)
 			   	.attr("x",function(d) {return xScale(d[request.xvar])+barwidth*cvarlist.indexOf(d[request.cvar])})
@@ -612,7 +625,7 @@ var ViewModel = function() {
 			xAxisLabels
 			.attr("y", 10)		
    			.attr("x", -.5*barwidth)
-			.attr("transform", "rotate(10)")
+			.attr("transform", "rotate(7)")
 			.style("text-anchor", "start");
 			//.attr("y", function(d) {return 15-10*(self.model.GetDomain(request.xvar).indexOf(d) % 2 == 0);});
 		}
@@ -629,20 +642,23 @@ var ViewModel = function() {
 
 		legendsvg.attr("height",(symbolsize+5)*cvarlist.length);
 
+		legendsvg.append("text").text(self.model.NameLookUp(request.cvar,'var')+": ");
+
 		legendsvg.selectAll("rect")
 			.data(cvarlist)
 			.enter()
 			.append("rect")
 			.attr("fill",  function(d,i) {return colors(i);})
 			.attr("width",symbolsize).attr("height",symbolsize)
-			.attr("y",function(d,i) {return (symbolsize+5)*i;});
+			.attr("y",function(d,i) {return 10+(symbolsize+5)*i;});
 
-		legendsvg.selectAll("text")
+		legendsvg.selectAll("text .leglabel")
 			.data(cvarlist)
 			.enter()
 			.append("text")
+			.attr("class","leglabel")
 			.attr("fill","black")
-			.attr("x",(symbolsize+5)).attr("y",function(d,i) {return 15+(symbolsize+5)*i;})
+			.attr("x",(symbolsize+5)).attr("y",function(d,i) {return 22+(symbolsize+5)*i;})
 			.text(function(d) { return  d;});
 
 		// Timelapse animation
@@ -656,11 +672,12 @@ var ViewModel = function() {
 			
 			//The data4bars is only needed for smooth transition in animations. There have to be rectangles of 0 height for missing data. data4bars is created
 			//empty outside this function. The following loop fills in / updates to actual data values from current year
-		
-			for (var i in dataset) {
+			for (var i in data4bars) data4bars[i][measure]=0; //Set every bar to 0 so that missing bars disappear
+				
+			for (var i in dataset) { //Set the values of existing bars
 				data4bars[xScale.domain().indexOf(dataset[i][request.xvar])*request[request.cvar].length
-						+cvarlist.indexOf(dataset[i][request.cvar])][measure]=+dataset[i][measure]
-			}
+						+cvarlist.indexOf(dataset[i][request.cvar])][measure]=+dataset[i][measure];
+			};
 			
       		var bars=svg.selectAll("rect").data(data4bars);
 
@@ -678,8 +695,6 @@ var ViewModel = function() {
 
 		//Run timelapse animation
 		if (self.timelapse()) {
-
-
 			//These loops are only needed for smooth transition in animations. There have to be bars of 0 height for missing data.
 			var data4bars=[]
 			for (var i in xScale.domain())
@@ -702,10 +717,8 @@ var ViewModel = function() {
 	  			if (iy<self.model.year2.length) iy++; else iy=0;
 	  			self.TimeLapseCurrYear=self.model.year2[iy];
 			}, 500);
-
 		}
-		
-	}
+	};
 
 	this.getBDSdata();
 }

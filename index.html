@@ -8,14 +8,13 @@
 
 <body>
 
-  <span style="position:absolute; margin-top:100px; margin-left:200px; font-size:16pt" data-bind="visible: waiting4api">Waiting for data from the server...</span>
+  <span class="waiting-caption" data-bind="visible: waiting4api">Waiting for data from the server...</span>
 
   <div id="plotarea">
     <div id="graphtitle" style="text-align: center;"></div>
-    
-    <span><button data-bind="click: toggleyscale, text: yscalebuttontext">Log</button></span>
-    <svg id="chartsvg" style="display:inline" data-bind="vis1ible: (!ShowData())"></svg>
-    <div id="buttonsundergraph" style="text-align: center; "><button data-bind="click: toggletimelapse, text: tlbuttontext, disable: (YearVar()) ">Time Lapse</button></div>
+   <button data-bind="click: toggleyscale, text: yscalebuttontext, disable: disableAll() ">Log</button>
+    <svg id="chartsvg" data-bind="vis1ible: (!ShowData())"></svg>
+    <div id="buttonsundergraph" style="text-align: center; "><button data-bind="click: toggletimelapse, text: tlbuttontext, disable: YearVar() ">Time Lapse</button></div>
     <button data-bind="click: toggleshowdata">Show Data</button>
     <div style="display:block; overflow:auto; height: 180px;" data-bind="visible: ShowData">
       <table id="graphdata">
@@ -34,23 +33,22 @@
     </div>
   </div>
 
-  <span class="selectors" data-bind="visible: !(timelapse())">
+  <span class="selectors" data-bind="vis1ible: !timelapse()">
 
-        <h4>Sectors:</h4><select data-bind="options: model.sic1, optionsText: 'name', optionsValue: 'code', value: SelectedSectors()[0], selectedOptions: SelectedSectors, attr: {multiple: SectorAsLegend}, css: {tallselector: SectorAsLegend}, disable: (StateVar() || SectorAsArgument())"></select><button data-bind="click: setsectorcvar, disable: (SectorVar() || StateAsArgument())">Compare Sectors</button><button data-bind="click: setsectorxvar, disable: (SectorVar() || StateAsLegend())">Make X-axis</button><br>
+        <h4>Sectors:</h4><select data-bind="options: model.sic1, optionsText: 'name', optionsValue: 'code', value: SelectedSectors()[0], selectedOptions: SelectedSectors, attr: {multiple: SectorAsLegend}, css: {tallselector: SectorAsLegend}, disable: (StateVar() || SectorAsArgument() || disableAll())"></select><button data-bind="click: setsectorcvar, disable: (SectorVar() || StateAsArgument() || disableAll())">Compare Sectors</button><button data-bind="click: setsectorxvar, disable: (SectorVar() || StateAsLegend() || disableAll())">Make X-axis</button><br>
 
-        <h4>Measures:</h4><select data-bind="options: model.measure, optionsText: 'name', optionsValue: 'code', value: SelectedMeasures()[0], selectedOptions: SelectedMeasures, attr: {multiple: MeasureAsLegend() && !StateAsArgument()}, css: {tallselector: MeasureAsLegend() && !StateAsArgument()}"></select><button data-bind="click: setmeasurecvar,  disable: (MeasureAsLegend() || StateAsArgument())">Compare Measures</button><br>
+        <h4>Measures:</h4><select data-bind="options: model.measure, optionsText: 'name', optionsValue: 'code', value: SelectedMeasures()[0], selectedOptions: SelectedMeasures, attr: {multiple: MeasureAsLegend() && !StateAsArgument()}, css: {tallselector: MeasureAsLegend() && !StateAsArgument()}, disable: disableAll"></select><button data-bind="click: setmeasurecvar,  disable: (MeasureAsLegend() || StateAsArgument() || disableAll())">Compare Measures</button><br>
 
-        <h4>States:</h4><select data-bind="options: model.state, optionsText: 'name', optionsValue: 'code', value: SelectedStates()[0], selectedOptions: SelectedStates, attr: {multiple: StateAsLegend}, css: {tallselector: StateAsLegend}, visible: (!us()), disable:StateAsArgument" ></select><h4 data-bind="visible: us()" style="width:200px; margin:0px">United States</h4><button data-bind="click: setstatecvar,  disable: (StateVar() || SectorAsArgument())">Compare States</button><button data-bind="click: setstatexvar,  enable: (!StateVar())">See Map</button><br>
+        <h4>States:</h4><select data-bind="options: model.state, optionsText: 'name', optionsValue: 'code', value: SelectedStates()[0], selectedOptions: SelectedStates, attr: {multiple: StateAsLegend}, css: {tallselector: StateAsLegend}, visible: (!us()), disable: (StateAsArgument() || disableAll())" ></select><h4 data-bind="visible: us()" style="width:200px; margin:0px">United States</h4><button data-bind="click: setstatecvar,  disable: (StateVar() || SectorAsArgument() || disableAll())">Compare States</button><button data-bind="click: setstatexvar,  enable: (!(StateVar() || disableAll()))">See Map</button><br>
         <br>
 
-        <h4>Years:</h4><select data-bind="options: model.year2, optionsText: $data, optionsValue: $data, value: SelectedYears()[0], selectedOptions: SelectedYears, attr: {multiple: YearAsLegend}, css: {tallselector: YearAsLegend}, disable: YearAsArgument() " ></select><button data-bind="click: setyearcvar,  disable: YearVar() || StateAsArgument()">Compare Years</button><button data-bind="click: setyearxvar,  disable: YearVar">Make X-axis</button><br>
+        <h4>Years:</h4><select data-bind="options: model.year2, optionsText: $data, optionsValue: $data, value: SelectedYears()[0], selectedOptions: SelectedYears, attr: {multiple: YearAsLegend}, css: {tallselector: YearAsLegend}, disable: (YearAsArgument() || disableAll()) " ></select><button data-bind="click: setyearcvar,  disable: (YearVar() || StateAsArgument() || disableAll())">Compare Years</button><button data-bind="click: setyearxvar,  disable: (YearVar() || disableAll())">Make X-axis</button><br>
 
-        <h4>Firm Characteristic:</h4><select data-bind="options: model.fchar, optionsText: 'name', optionsValue: 'code', value: fchar, disable: StateAsArgument"  ></select><button data-bind="click: setfcharcvar,  disable: FirmCharVar() || StateAsArgument(), text: 'Compare' "></button><button data-bind="click: setfcharxvar, disable: FirmCharVar">Make X-axis</button><br>
+        <h4>Firm Characteristic:</h4><select data-bind="options: model.fchar, optionsText: 'name', optionsValue: 'code', value: fchar, disable: (StateAsArgument() || disableAll())"  ></select><button data-bind="click: setfcharcvar,  disable: (FirmCharVar() || StateAsArgument() || disableAll()), text: FcharCompButtonText "></button><button data-bind="click: setfcharxvar, disable: (FirmCharVar() || disableAll())">Make X-axis</button><br>
 
   </span>
 
   <span style="display:block; overflow:auto; height: 350px; width:500px">
-    <span data-bind="text: model.NameLookUp(APIrequest().cvar,'var')+':'"></span><br>
     <svg id="legend"></svg>
   </span>
 
@@ -61,7 +59,8 @@
  
 	<script src="js/d3.min.js"></script>
   <script src="js/knockout-3.4.0.js"></script>
-   <script src="js/model.js"></script>
+  <script src="js/colorbrewer.min.js"></script>
+  <script src="js/model.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>	
