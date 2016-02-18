@@ -415,6 +415,8 @@ var ViewModel = function() {
 			var colorbar={height:200, width:20, levels:50}
 			var textlabels={n:5, fontsize:15};
 
+			legendsvg.append("text").text(self.model.NameLookUp(measure,"measure")).attr("x",-20).attr("y",-20);
+
 			//Make the colorbar
 			legendsvg.selectAll("rect")
 			.data(function() {
@@ -429,7 +431,7 @@ var ViewModel = function() {
 			.attr("y",function(d,i) {return i*colorbar.height/colorbar.levels;});
 
 			//Make the labels of the colorbar
-			legendsvg.selectAll("text")
+			legendsvg.selectAll("text .leglabel")
 			.data(function() {
 				var labels=[];
 				for (var i=0; i<textlabels.n+1; i++) labels.push(ymin+i/textlabels.n*(ymax-ymin));
