@@ -1,4 +1,6 @@
-var BDSVisModel = {
+var BDSVis = BDSVis || {};
+
+BDSVis.Model = {
 	state : [
 		{"code" : "00", "name" : "United States", "st":"US"},
 		{"code" : "01", "name" : "Alabama", "st" : "AL" },

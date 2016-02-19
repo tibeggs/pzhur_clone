@@ -1,5 +1,7 @@
+var BDSVis = BDSVis || {};
+
 //The visual elements of the plot: SVGs for the graph/map and legend
-var BDSVisPlotView = {
+BDSVis.PlotView = {
 	margin : {top: 20, right: 30, bottom: 20, left: 80},
 	width0 : 850,
 	height0 : 450,

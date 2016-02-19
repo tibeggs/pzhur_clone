@@ -1,12 +1,14 @@
+var BDSVis = BDSVis || {};
+
 //This function makes the geographical map
-var BDSVismakeMap = function (data,request,self) {
-	//"self" is the reference to ViewModel
+BDSVis.makeMap = function (data,request,vm) {
+	//"vm" is the reference to ViewModel
 
 	//Initialize the SVG elements and get width and length for scales
-	//self.PlotView.Init();
-	svg=self.PlotView.svg;
-	width=self.PlotView.width;
-	height=self.PlotView.height;
+	//vm.PlotView.Init();
+	svg=vm.PlotView.svg;
+	width=vm.PlotView.width;
+	height=vm.PlotView.height;
 	
 	var measure=request.measure;
 
@@ -14,8 +16,8 @@ var BDSVismakeMap = function (data,request,self) {
 	//d3.select("#graphtitle").
 	d3.select("#chartsvg")
 		.append("text").attr("class","graph-title")
-		.text(self.model.NameLookUp(measure,"measure")+" in "+request.year2)
-		.attr("x",function(d) { return (self.PlotView.margin.left+self.PlotView.margin.right+width-this.getComputedTextLength())/2.; })
+		.text(vm.model.NameLookUp(measure,"measure")+" in "+request.year2)
+		.attr("x",function(d) { return (vm.PlotView.margin.left+vm.PlotView.margin.right+width-this.getComputedTextLength())/2.; })
 		.attr("y",1+"em");
 
 	//Set D3 scales
@@ -25,13 +27,13 @@ var BDSVismakeMap = function (data,request,self) {
 	var maxabs=d3.max([Math.abs(ymin),Math.abs(ymax)]);
 	
 	//Define which scale to use, for the map and the colorbar. Note that log scale can be replaced by any other here (like sqrt), the colormap will adjust accordingly.
-	var scaletype = (self.logscale())?d3.scale.log():d3.scale.linear();
+	var scaletype = (vm.logscale())?d3.scale.log():d3.scale.linear();
 
 	var yScale = scaletype.copy();
 	
 	var purple="rgb(112,79,161)"; var golden="rgb(194,85,12)"; var teal="rgb(22,136,51)";
 
-	if ((ymin<0) && !self.logscale())
+	if ((ymin<0) && !vm.logscale())
 		yScale.domain([-maxabs,0,maxabs]).range(["#CB2027","#eeeeee","#265DAB"]);
 	else
 		//yScale.domain([ymin,ymax]).range(["#eeeeee","#265DAB"]);
@@ -49,9 +51,9 @@ var BDSVismakeMap = function (data,request,self) {
 
 		var geo_data1=[];
 
-		if (self.timelapse()) { //In time lapse regime, select only the data corresponding to the current year
+		if (vm.timelapse()) { //In time lapse regime, select only the data corresponding to the current year
 			var datafull=data;
-			data=data.filter(function(d) {return +d.time===self.model.year2[0]});
+			data=data.filter(function(d) {return +d.time===vm.model.year2[0]});
 		}
 
 		//Put the states in geo_data in the same order as they are in data
@@ -72,7 +74,7 @@ var BDSVismakeMap = function (data,request,self) {
 				.append("title").text(function(d){return d.state+": "+d3.format(",")(d[measure]);});
 
 		//Making Legend
-		var legendsvg=self.PlotView.legendsvg;
+		var legendsvg=vm.PlotView.legendsvg;
 
 		var colorbar={height:200, width:20, nlevels:100, nlabels:5, fontsize:15, levels:[]};
 
@@ -81,36 +83,36 @@ var BDSVismakeMap = function (data,request,self) {
 
 		for (var i=0; i<colorbar.nlevels+1; i++) colorbar.levels.push(y2levelsScale.invert(i));
 
-		legendsvg.append("text").attr("class","legtitle").text(self.model.NameLookUp(measure,"measure")).attr("x",-20).attr("y",-20);
+		legendsvg.append("text").attr("class","legtitle").text(vm.model.NameLookUp(measure,"measure")).attr("x",-20).attr("y",-20);
 
 		//Make the colorbar
 		legendsvg.selectAll("rect")
-		.data(colorbar.levels)
-		.enter()
-		.append("rect")
-		.attr("fill",  function(d) {return yScale(d);})
-		.attr("width",20)
-		.attr("height",colorbar.height/colorbar.nlevels+1)
-		.attr("y",function(d) {return hScale(d);})
-		.append("title").text(function(d){return self.model.NumFormat(+d,3);});
+			.data(colorbar.levels)
+			.enter()
+			.append("rect")
+			.attr("fill",  function(d) {return yScale(d);})
+			.attr("width",20)
+			.attr("height",colorbar.height/colorbar.nlevels+1)
+			.attr("y",function(d) {return hScale(d);})
+			.append("title").text(function(d){return vm.model.NumFormat(+d,3);});
 
 		//Make the labels of the colorbar
 		legendsvg.selectAll("text .leglabel")
-		.data(colorbar.levels.filter(function(d,i) {return !(i % Math.floor(colorbar.nlevels/colorbar.nlabels));})) //Choose rectangles to put labels next to
-		.enter()
-		.append("text")
-		.attr("fill", "black")
-		.attr("class","leglabel")
-		.attr("font-size", colorbar.fontsize+"px")
-		.attr("x",colorbar.width+3)
-		.attr("y",function(d) {return .4*colorbar.fontsize+hScale(d);})
-		.text(function(d) {return(self.model.NumFormat(+d,3));});
+			.data(colorbar.levels.filter(function(d,i) {return !(i % ~~(colorbar.nlevels/colorbar.nlabels));})) //Choose rectangles to put labels next to
+			.enter()
+			.append("text")
+			.attr("fill", "black")
+			.attr("class","leglabel")
+			.attr("font-size", colorbar.fontsize+"px")
+			.attr("x",colorbar.width+3)
+			.attr("y",function(d) {return .4*colorbar.fontsize+hScale(d);})
+			.text(function(d) {return(vm.model.NumFormat(+d,3));});
 
 		// Timelapse animation
 		function updateyear(yr) {
-			curyearmessage.text(self.model.year2[yr]); //Display year
+			curyearmessage.text(vm.model.year2[yr]); //Display year
 			d3.select("#graphtitle").text("");
-			var dataset=datafull.filter(function(d) {return +d.time===self.model.year2[yr]}); //Select data corresponding to the year
+			var dataset=datafull.filter(function(d) {return +d.time===vm.model.year2[yr]}); //Select data corresponding to the year
 			map = mapg.selectAll('path')
 					.data(dataset)
 					.transition().duration(1000)
@@ -118,13 +120,13 @@ var BDSVismakeMap = function (data,request,self) {
 		};
 
 		//Run timelapse animation
-		if (self.timelapse()) {
+		if (vm.timelapse()) {
 			var iy=0;
 			var curyearmessage=d3.select("#chartsvg").append("text").attr("x",0).attr("y",height*.5).attr("font-size",100).attr("fill-opacity",.3);
-			self.tlint=setInterval(function() {
+			vm.tlint=setInterval(function() {
 	  			updateyear(iy);
-	  			if (iy<self.model.year2.length) iy++; else iy=0;
-	  			self.TimeLapseCurrYear=self.model.year2[iy];
+	  			if (iy<vm.model.year2.length) iy++; else iy=0;
+	  			vm.TimeLapseCurrYear=vm.model.year2[iy];
 			}, 1000);
 		}
 	});
