@@ -177,7 +177,7 @@ var ViewModel = function() {
 		width0 : 850,
 		height0 : 450,
 		legendwidth: 500,
-		titleheight: 20,
+		titleheight: 15,
 		xaxislabelheight: 40,
 		Init : function() {
 			//Define margins and dimensions of the SVG element containing the chart
@@ -197,7 +197,9 @@ var ViewModel = function() {
 				.attr("transform", "translate(" + margin.left + "," + (margin.top+this.titleheight)+ ")")
 				.attr('class', 'chart');
 
-			d3.select("#plotarea").style("width", width + margin.left + margin.right+"px");
+			d3.select("#buttonsundergraph").style("width",width + margin.left+"px");
+			d3.select("#plotarea").style("width", width + margin.left + margin.right+this.legendwidth+"px");
+
 			//d3.select("#graphdata").style("height", height + margin.top + margin.bottom-21+"px");
 
 			//Clear legend, set size
@@ -492,12 +494,14 @@ var ViewModel = function() {
 		var measure=(self.MeasureAsLegend())?"value":request.measure;
 
 		//Set the title of the plot
-		var ptitle=((measure.length>1)?("Various measures"):(self.model.NameLookUp(measure,"measure")))+ //If many measures say "various", otherwise the measure name
+		var ptitle=((request.measure.length>1)?("Various measures"):(self.model.NameLookUp(request.measure,"measure")))+ //If many measures say "various", otherwise the measure name
 					   (self.us()?" in US":((request.state.length>1)?(" by state"):(" in "+self.model.NameLookUp(request.state,"state")))); // The same for states
 		if (!self.YearAsArgument())
 			ptitle=ptitle+((request.year2.length>1)?(" by year"):(" in "+self.model.NameLookUp(request.year2,"year2"))); // the same for years
-		//Say "by sector" if many sectors, if not "economy wide" add "in sector of"
-		ptitle=ptitle+((request.sic1.length>1)?(" by sector"):(((request.sic1[0]===0)?" ":" in sector of ")+self.model.NameLookUp(request.sic1,"sic1")));
+		
+		if (!self.SectorAsArgument())
+			//Say "by sector" if many sectors, if not "economy wide" add "in sector of"
+			ptitle=ptitle+((request.sic1.length>1)?(" by sector"):(((request.sic1[0]===0)?" ":" in sector of ")+self.model.NameLookUp(request.sic1,"sic1")));
 		
 		//d3.select("#graphtitle").text(ptitle);
 		d3.select("#chartsvg")

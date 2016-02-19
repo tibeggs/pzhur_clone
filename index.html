@@ -9,13 +9,18 @@
 <body>
 
   <span class="waiting-caption" data-bind="visible: waiting4api">Waiting for data from the server...</span>
-
+  
   <div id="plotarea">
-   <button data-bind="click: toggleyscale, text: yscalebuttontext, disable: disableAll() ">Log</button>
+    <button id="logbutton" data-bind="click: toggleyscale, text: yscalebuttontext, disable: disableAll()" >Log</button>
+
     <svg id="chartsvg" data-bind="vis1ible: (!ShowData())"></svg>
-    <div id="buttonsundergraph" style="text-align: center; "><button data-bind="click: toggletimelapse, text: tlbuttontext, disable: YearVar() ">Time Lapse</button></div>
-    <button data-bind="click: toggleshowdata">Show Data</button>
-    <div style="display:block; overflow:auto; height: 180px;" data-bind="visible: ShowData">
+  
+    <div id="buttonsundergraph" style="text-align: center;">
+      <button data-bind="click: toggleshowdata">Show Data</button>
+      <button data-bind="click: toggletimelapse, text: tlbuttontext, disable: YearVar() ">Time Lapse</button>
+    </div>
+    
+    <div id="datashowarea" data-bind="visible: ShowData">
       <table id="graphdata">
         <thead data-bind="foreach: data.slice(0,1)">
             <tr data-bind="foreach: $data">
@@ -30,7 +35,8 @@
       </table>
 
     </div>
-  </div>
+   </div>
+ 
 
   <span class="selectors" data-bind="vis1ible: !timelapse()">
 
@@ -38,23 +44,15 @@
 
         <h4>Measures:</h4><select data-bind="options: model.measure, optionsText: 'name', optionsValue: 'code', value: SelectedMeasures()[0], selectedOptions: SelectedMeasures, attr: {multiple: MeasureAsLegend() && !StateAsArgument()}, css: {tallselector: MeasureAsLegend() && !StateAsArgument()}, disable: disableAll"></select><button data-bind="click: setmeasurecvar,  disable: (MeasureAsLegend() || StateAsArgument() || disableAll())">Compare Measures</button><br>
 
-        <h4>States:</h4><select data-bind="options: model.state, optionsText: 'name', optionsValue: 'code', value: SelectedStates()[0], selectedOptions: SelectedStates, attr: {multiple: StateAsLegend}, css: {tallselector: StateAsLegend}, visible: (!us()), disable: (StateAsArgument() || disableAll())" ></select><h4 data-bind="visible: us()" style="width:200px; margin:0px">United States</h4><button data-bind="click: setstatecvar,  disable: (StateVar() || SectorAsArgument() || disableAll())">Compare States</button><button data-bind="click: setstatexvar,  enable: (!(StateVar() || disableAll()))">See Map</button><br>
-        <br>
-
+        <h4>States:</h4><select data-bind="options: model.state, optionsText: 'name', optionsValue: 'code', value: SelectedStates()[0], selectedOptions: SelectedStates, attr: {multiple: StateAsLegend}, css: {tallselector: StateAsLegend}, visible: (!us()), disable: (StateAsArgument() || disableAll())" ></select><h4 id="stateinputplaceholder" data-bind="visible: us()">United States</h4><button data-bind="click: setstatecvar,  disable: (StateVar() || SectorAsArgument() || disableAll())">Compare States</button><button data-bind="click: setstatexvar,  enable: (!(StateVar() || disableAll()))">See Map</button><br>
+        
         <h4>Years:</h4><select data-bind="options: model.year2, optionsText: $data, optionsValue: $data, value: SelectedYears()[0], selectedOptions: SelectedYears, attr: {multiple: YearAsLegend}, css: {tallselector: YearAsLegend}, disable: (YearAsArgument() || disableAll()) " ></select><button data-bind="click: setyearcvar,  disable: (YearVar() || StateAsArgument() || disableAll())">Compare Years</button><button data-bind="click: setyearxvar,  disable: (YearVar() || disableAll())">Make X-axis</button><br>
 
         <h4>Firm Characteristic:</h4><select data-bind="options: model.fchar, optionsText: 'name', optionsValue: 'code', value: fchar, disable: (StateAsArgument() || disableAll())"  ></select><button data-bind="click: setfcharcvar,  disable: (FirmCharVar() || StateAsArgument() || disableAll()), text: FcharCompButtonText "></button><button data-bind="click: setfcharxvar, disable: (FirmCharVar() || disableAll())">Make X-axis</button><br>
 
   </span>
 
-  <span style="display:block; overflow:auto; height: 350px; width:500px">
-    <svg id="legend"></svg>
-  </span>
-
 <br>
-
-  
-  
  
 	<script src="js/d3.min.js"></script>
   <script src="js/knockout-3.4.0.js"></script>

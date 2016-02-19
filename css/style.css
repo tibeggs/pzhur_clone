@@ -16,6 +16,12 @@
   margin-left: 0px;
 }
 
+#datashowarea {
+  display:block; 
+  overflow:auto; 
+  height: 250px;
+}
+
 .selectors {
   float:left;
   height:350px;
@@ -28,6 +34,11 @@
   margin-left: 0px;
 }
 
+#stateinputplaceholder {
+  width:200px; 
+  margin:0px;
+}
+
 .tallselector {
   height: 200px;
 }
@@ -35,7 +46,7 @@
 .selectors h4 {
   display:inline-block;
   font-weight: normal;
-  width: 100px;
+  width: 130px;
   margin: 0px;
 }
 
