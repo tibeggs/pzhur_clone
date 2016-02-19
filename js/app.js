@@ -173,18 +173,18 @@ var ViewModel = function() {
 
 	//The visual elements of the plot: SVGs for the graph/map and legend
 	this.PlotView = {
-		margin : {top: 20, right: 30, bottom: 50, left: 80},
-		width : 960,
-		height : 450,
-		legendwidth: 100,
-		svg : undefined,
-		legendsvg: undefined,
+		margin : {top: 20, right: 30, bottom: 20, left: 80},
+		width0 : 850,
+		height0 : 450,
+		legendwidth: 500,
+		titleheight: 20,
+		xaxislabelheight: 40,
 		Init : function() {
 			//Define margins and dimensions of the SVG element containing the chart
 			var margin = this.margin;
 
-			this.width = 960 - margin.left - margin.right;
-			this.height = 450 - margin.top - margin.bottom;
+			this.width = this.width0 - margin.left - margin.right;
+			this.height = this.height0 - margin.top - margin.bottom;
 			var width=this.width;
 			var height=this.height;
 
@@ -192,9 +192,9 @@ var ViewModel = function() {
 			var svgcont = d3.select("#chartsvg");
 			svgcont.selectAll("*").remove();
 			this.svg=svgcont.attr("width", width + margin.left + margin.right+this.legendwidth)
-				.attr("height", height + margin.top + margin.bottom)
+				.attr("height", height + margin.top + margin.bottom + this.titleheight + this.xaxislabelheight)
 				.append('g')
-				.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+				.attr("transform", "translate(" + margin.left + "," + (margin.top+this.titleheight)+ ")")
 				.attr('class', 'chart');
 
 			d3.select("#plotarea").style("width", width + margin.left + margin.right+"px");
@@ -203,9 +203,12 @@ var ViewModel = function() {
 			//Clear legend, set size
 			this.legendsvg=d3.select("#legend").attr("width",400).attr("height",300)
 			this.legendsvg.selectAll("*").remove();
-			if (self.StateAsArgument())
-				this.legendsvg=d3.select("#chartsvg").append("g").attr("transform","translate("+width+","+height*.3+")");
-			else this.legendsvg=this.legendsvg.append("g").attr("transform","translate(0,20)");
+			this.legendsvg=d3.select("#chartsvg").append("g").attr("transform","translate("+(width+margin.left+ margin.right)+","+height*.3+")");
+			
+			//X-axis label
+			this.xaxislabel=d3.select("#chartsvg").append("text")
+				.attr("class","xaxislabel")
+				.attr("y",(height + margin.top + this.xaxislabelheight + this.titleheight));
 		}
 	};
 
@@ -267,6 +270,7 @@ var ViewModel = function() {
 	    console.log(geturl);
 	    
 	    waiting4api(true); //Show "waiting for data" message
+	    self.PlotView.Init();
 	    d3.json(geturl,function (data) {
 	    	if (!(data===null)) { //Convert data into array of objects with the same keys
 		    	var jsoned=[];
@@ -346,7 +350,7 @@ var ViewModel = function() {
 	this.makeMap = function (data,request) {
 
 		//Initialize the SVG elements and get width and length for scales
-		self.PlotView.Init();
+		//self.PlotView.Init();
 		svg=self.PlotView.svg;
 		width=self.PlotView.width;
 		height=self.PlotView.height;
@@ -354,7 +358,12 @@ var ViewModel = function() {
 		var measure=request.measure;
 
 		//Set graph title
-		d3.select("#graphtitle").text(self.model.NameLookUp(measure,"measure")+" in "+request.year2);
+		//d3.select("#graphtitle").
+		d3.select("#chartsvg")
+			.append("text").attr("class","graph-title")
+			.text(self.model.NameLookUp(measure,"measure")+" in "+request.year2)
+			.attr("x",function(d) { return (self.PlotView.margin.left+self.PlotView.margin.right+width-this.getComputedTextLength())/2.; })
+			.attr("y",1+"em");
 
 		//Set D3 scales
 		var ymin=d3.min(data, function(d) { return +d[measure]; });
@@ -362,8 +371,11 @@ var ViewModel = function() {
 		var ymid=(ymax+ymin)*.5;
 		var maxabs=d3.max([Math.abs(ymin),Math.abs(ymax)]);
 		
-		var yScale = (self.logscale())?d3.scale.log():d3.scale.linear()
+		//Define which scale to use, for the map and the colorbar. Note that log scale can be replaced by any other here (like sqrt), the colormap will adjust accordingly.
+		var scaletype = (self.logscale())?d3.scale.log():d3.scale.linear();
 
+		var yScale = scaletype.copy();
+		
 		var purple="rgb(112,79,161)"; var golden="rgb(194,85,12)"; var teal="rgb(22,136,51)";
 
 		if ((ymin<0) && !self.logscale())
@@ -372,7 +384,6 @@ var ViewModel = function() {
 			//yScale.domain([ymin,ymax]).range(["#eeeeee","#265DAB"]);
 			yScale.domain([ymin,ymid,ymax]).range([golden,"#bbbbbb",purple]);
 			//yScale.domain([ymin,ymid,ymax]).range(["red","#ccffcc","blue"]);
-
 
 		//Get the map from the shape file in JSON format
 		d3.json("../json/gz_2010_us_040_00_20m.json", function(geo_data) {
@@ -385,7 +396,7 @@ var ViewModel = function() {
 
 			var geo_data1=[];
 
-			if (self.timelapse()) {
+			if (self.timelapse()) { //In time lapse regime, select only the data corresponding to the current year
 				var datafull=data;
 				data=data.filter(function(d) {return +d.time===self.model.year2[0]});
 			}
@@ -409,40 +420,37 @@ var ViewModel = function() {
 
 			//Making Legend
 			var legendsvg=self.PlotView.legendsvg;
-			//legendsvg.selectAll("g").remove();
-			//legendsvg=legendsvg.;
 
-			var colorbar={height:200, width:20, levels:50}
-			var textlabels={n:5, fontsize:15};
+			var colorbar={height:200, width:20, nlevels:100, nlabels:5, fontsize:15, levels:[]};
 
-			legendsvg.append("text").text(self.model.NameLookUp(measure,"measure")).attr("x",-20).attr("y",-20);
+			var hScale = scaletype.copy().domain([ymin,ymax]).range([0,colorbar.height]); //Scale for height of the rectangles in the colorbar
+			var y2levelsScale = scaletype.copy().domain([ymin,ymax]).range([0,colorbar.nlevels]); //Scale for levels of the colorbar
+
+			for (var i=0; i<colorbar.nlevels+1; i++) colorbar.levels.push(y2levelsScale.invert(i));
+
+			legendsvg.append("text").attr("class","legtitle").text(self.model.NameLookUp(measure,"measure")).attr("x",-20).attr("y",-20);
 
 			//Make the colorbar
 			legendsvg.selectAll("rect")
-			.data(function() {
-				var levels=[];
-				for (var i=0; i<colorbar.levels; i++) levels.push(yScale(ymin+i/colorbar.levels*(ymax-ymin)));
-				return levels;
-			})
+			.data(colorbar.levels)
 			.enter()
 			.append("rect")
-			.attr("fill",  function(d) {return d;})
-			.attr("width",20).attr("height",colorbar.height/colorbar.levels)
-			.attr("y",function(d,i) {return i*colorbar.height/colorbar.levels;});
+			.attr("fill",  function(d) {return yScale(d);})
+			.attr("width",20)
+			.attr("height",colorbar.height/colorbar.nlevels+1)
+			.attr("y",function(d) {return hScale(d);})
+			.append("title").text(function(d){return self.NumFormat(+d);});
 
 			//Make the labels of the colorbar
 			legendsvg.selectAll("text .leglabel")
-			.data(function() {
-				var labels=[];
-				for (var i=0; i<textlabels.n+1; i++) labels.push(ymin+i/textlabels.n*(ymax-ymin));
-				return labels;
-			})
+			.data(colorbar.levels.filter(function(d,i) {return !(i % Math.floor(colorbar.nlevels/colorbar.nlabels));})) //Choose rectangles to put labels next to
 			.enter()
 			.append("text")
 			.attr("fill", "black")
-			.attr("font-size", textlabels.fontsize+"px")
+			.attr("class","leglabel")
+			.attr("font-size", colorbar.fontsize+"px")
 			.attr("x",colorbar.width+3)
-			.attr("y",function(d,i) {return .4*textlabels.fontsize+i*(colorbar.height)/textlabels.n;})
+			.attr("y",function(d) {return .4*colorbar.fontsize+hScale(d);})
 			.text(function(d) {return(self.NumFormat(+d));});
 
 			// Timelapse animation
@@ -454,7 +462,6 @@ var ViewModel = function() {
 						.data(dataset)
 						.transition().duration(1000)
 						.style('fill', function(d) { return yScale(d[measure]);})
-
 			};
 
 			//Run timelapse animation
@@ -474,7 +481,7 @@ var ViewModel = function() {
 	//This function makes d3js plot, either a bar chart or scatterplot
 	this.makePlot = function (data,request) {
 
-		self.PlotView.Init();
+		//self.PlotView.Init();
 		svg=self.PlotView.svg;
 		width=self.PlotView.width;
 		height=self.PlotView.height;
@@ -491,7 +498,13 @@ var ViewModel = function() {
 			ptitle=ptitle+((request.year2.length>1)?(" by year"):(" in "+self.model.NameLookUp(request.year2,"year2"))); // the same for years
 		//Say "by sector" if many sectors, if not "economy wide" add "in sector of"
 		ptitle=ptitle+((request.sic1.length>1)?(" by sector"):(((request.sic1[0]===0)?" ":" in sector of ")+self.model.NameLookUp(request.sic1,"sic1")));
-		d3.select("#graphtitle").text(ptitle);
+		
+		//d3.select("#graphtitle").text(ptitle);
+		d3.select("#chartsvg")
+			.append("text").attr("class","graph-title")
+			.text(ptitle)
+			.attr("x",function(d) { return (self.PlotView.margin.left+self.PlotView.margin.right+width-this.getComputedTextLength())/2.; })
+			.attr("y",1+"em");
 
 		//List of selected categories by actual name rather than code
 		var cvarlist=request[request.cvar].map(function(d) {
@@ -512,10 +525,10 @@ var ViewModel = function() {
 				.rangeRoundBands([0, width], .1);
 
 		if (self.logscale()) {
-			data=data.filter(function(d) {return d[measure]>0});
-			ymin = d3.min(data, function(d) { return +d[measure]; })/2.;
+			ymin = d3.min(data.filter(function(d) {return d[measure]>0}), function(d) { return +d[measure]; })/2.;
 			y0=ymin;
 			yScale = d3.scale.log();
+			data=data.map(function(d) {if (d[measure]<=0) d[measure]=1e-15; return d;}); //0 and negative numbers are -infinity on log scale, replace them with "almost -infinity", so that they can be plotted, but outside of the graph limits.
 		} else {
 			y0=0;
 			ymin = Math.min(0,d3.min(data, function(d) { return +d[measure]; }));
@@ -632,10 +645,15 @@ var ViewModel = function() {
 			//.attr("y", function(d) {return 15-10*(self.model.GetDomain(request.xvar).indexOf(d) % 2 == 0);});
 		}
 
-
 		svg.append("g")
 		.attr("class", "y axis")
 		.call(yAxis); 
+
+		//X-axis label
+		self.PlotView.xaxislabel
+			.text(self.model.NameLookUp(request.xvar,"var"))
+			.attr("x",function(d) { return (self.PlotView.margin.left+self.PlotView.margin.right+width-this.getComputedTextLength())/2.; })
+			
 
 		//Making Legend
 		var legendsvg=self.PlotView.legendsvg;
@@ -644,7 +662,7 @@ var ViewModel = function() {
 
 		legendsvg.attr("height",(symbolsize+5)*cvarlist.length);
 
-		legendsvg.append("text").text(self.model.NameLookUp(request.cvar,'var')+": ");
+		legendsvg.append("text").attr("class","legtitle").text(self.model.NameLookUp(request.cvar,'var')+": ");
 
 		legendsvg.selectAll("rect")
 			.data(cvarlist)
@@ -661,7 +679,7 @@ var ViewModel = function() {
 			.attr("class","leglabel")
 			.attr("fill","black")
 			.attr("x",(symbolsize+5)).attr("y",function(d,i) {return 22+(symbolsize+5)*i;})
-			.text(function(d) { return  d;});
+			.text(function(d) {return d;});
 
 		// Timelapse animation
 		function updateyear(yr) {

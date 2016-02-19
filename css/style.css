@@ -2,7 +2,6 @@
   font: 10px sans-serif;
 }
 
-
 .axis path,
 .axis line {
   fill: none;
@@ -16,10 +15,12 @@
   margin-bottom: 15px;
   margin-left: 0px;
 }
+
 .selectors {
   float:left;
   height:350px;
   margin-right: 50px;
+  font: 12px sans-serif;
 }
 
 .selectors select {
@@ -44,8 +45,27 @@
 
 .waiting-caption {
   position:absolute; 
+  width: 500px;
+  height: 500px;
   margin-top:100px; 
   margin-left:200px; 
   font-size:16pt; 
   background: white
+}
+
+.graph-title {
+  fill: black;
+  font: 20px Arial;
+}
+
+.leglabel {
+  font: 14px sans-serif;
+}
+
+.xaxislabel {
+  font: 16px sans-serif;
+}
+
+.legtitle {
+  font: 16px sans-serif;
 }
