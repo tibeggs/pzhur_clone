@@ -4,7 +4,7 @@ var BDSVis = BDSVis || {};
 BDSVis.makePlot = function (data,request,vm) {
 	//"vm" is the reference to ViewModel
 
-	//vm.PlotView.Init();
+	vm.PlotView.Init();
 	var svg=vm.PlotView.svg;
 	var width=vm.PlotView.width;
 	var height=vm.PlotView.height;

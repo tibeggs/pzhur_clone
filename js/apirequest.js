@@ -56,7 +56,7 @@ BDSVis.getAPIdata = function (vm) {
     console.log(geturl);
     
     vm.waiting4api(true); //Show "waiting for data" message
-    vm.PlotView.Init();
+    //vm.PlotView.Init();
     d3.json(geturl,function (data) {
     	if (!(data===null)) { //Convert data into array of objects with the same keys
 	    	var jsoned = [];

@@ -8,10 +8,10 @@
 
 <body>
 
-  <span class="waiting-caption" data-bind="visible: waiting4api">Waiting for data from the server...</span>
+  <div class="waiting-caption" data-bind="visible: waiting4api"><br><br><br><br><br><br><br><br>Waiting for data from the server...</div>
   
   <div id="plotarea">
-  
+
     <button id="logbutton" data-bind="click: toggleyscale, text: yscalebuttontext, disable: disableAll()" >Log</button>
 
     <svg id="chartsvg" data-bind="vis1ible: (!ShowData())"></svg>

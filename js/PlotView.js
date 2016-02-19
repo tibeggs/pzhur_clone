@@ -25,7 +25,7 @@ BDSVis.PlotView = {
 			.append('g')
 			.attr("transform", "translate(" + margin.left + "," + (margin.top+this.titleheight)+ ")")
 			.attr('class', 'chart');
-
+		
 		d3.select("#buttonsundergraph").style("width",width + margin.left+"px");
 		d3.select("#plotarea").style("width", width + margin.left + margin.right+this.legendwidth+"px");
 
