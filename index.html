@@ -15,7 +15,7 @@
 
     <svg id="chartsvg" data-bind="vis1ible: (!ShowData())"></svg>
   
-    <div id="buttonsundergraph" style="text-align: center;">
+    <div id="buttonsundergraph">
       <button data-bind="click: toggleshowdata">Show Data</button>
       <button data-bind="click: toggletimelapse, text: tlbuttontext, disable: YearVar() ">Time Lapse</button>
     </div>
@@ -58,6 +58,10 @@
   <script src="js/knockout-3.4.0.js"></script>
   <script src="js/colorbrewer.min.js"></script>
   <script src="js/model.js"></script>
+  <script src="js/PlotView.js"></script>
+  <script src="js/apirequest.js"></script>
+  <script src="js/geomap.js"></script>
+  <script src="js/plots.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>	

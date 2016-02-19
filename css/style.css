@@ -22,6 +22,10 @@
   height: 250px;
 }
 
+#buttonsundergraph {
+  text-align: center;
+}
+
 .selectors {
   float:left;
   height:350px;
