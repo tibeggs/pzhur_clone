@@ -90,8 +90,8 @@ BDSVis.ViewModel = function() {
 	//this.SelectedFchar = ko.observableArray([this.fchar()]);
 
 	//Initial values of X-axis variable and C- variable
-	this.xvar = ko.observable("state");
-	this.cvar = ko.observable("measure");	
+	this.xvar = ko.observable("fchar");
+	this.cvar = ko.observable("sic1");	
 
 	//Whether a variable is C- Variable (Legend)
 	this.SectorAsLegend = ko.computed( function () {return vm.cvar()==="sic1";});

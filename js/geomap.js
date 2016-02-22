@@ -113,12 +113,10 @@ BDSVis.makeMap = function (data,request,vm) {
 		d3.select("#graphtitle").text("");
 		var dataset=datafull.filter(function(d) {return +d.time===vm.model.year2[yr]}); //Select data corresponding to the year
 		//Change the data that is displayed raw as a table
-		var vmdata=vm.data();
-		for (var i=1; i<dataset.length; i++)
-			vmdata[i][1]=dataset[i][measure];
-		vm.data(vmdata);
-		
-		// debugger;
+		// var vmdata=vm.data();
+		// for (var i=1; i<dataset.length; i++)
+		// 	vmdata[i][1]=dataset[i][measure];
+		// vm.data(vmdata);
 		map = mapg.selectAll('path')
 				.data(dataset)
 				.transition().duration(1000)
