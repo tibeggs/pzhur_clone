@@ -112,10 +112,19 @@ BDSVis.makeMap = function (data,request,vm) {
 		curyearmessage.text(vm.model.year2[yr]); //Display year
 		d3.select("#graphtitle").text("");
 		var dataset=datafull.filter(function(d) {return +d.time===vm.model.year2[yr]}); //Select data corresponding to the year
+		//Change the data that is displayed raw as a table
+		var vmdata=vm.data();
+		for (var i=1; i<dataset.length; i++)
+			vmdata[i][1]=dataset[i][measure];
+		vm.data(vmdata);
+		
+		// debugger;
 		map = mapg.selectAll('path')
 				.data(dataset)
 				.transition().duration(1000)
 				.style('fill', function(d) { return yScale(d[measure]);})
+
+		mapg.selectAll('title').data(dataset).text(function(d){return d.state+": "+d3.format(",")(d[measure]);});
 	};
 
 	//Run timelapse animation

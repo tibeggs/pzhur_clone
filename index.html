@@ -17,7 +17,7 @@
     <svg id="chartsvg" data-bind="vis1ible: (!ShowData())"></svg>
   
     <div id="buttonsundergraph">
-      <button data-bind="click: toggleshowdata">Show Data</button>
+      <button data-bind="click: toggleshowdata, disable: timelapse">Show Data</button>
       <button data-bind="click: toggletimelapse, text: tlbuttontext, disable: YearVar() ">Time Lapse</button>
     </div>
     
