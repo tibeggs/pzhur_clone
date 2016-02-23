@@ -159,16 +159,11 @@ BDSVis.makePlot = function (data,request,vm) {
 	var xAxisLabels=svg.append("g")
 		.attr("class", "x axis")
 		.attr("transform", "translate(0," + height + ")")
-		.call(xAxis).selectAll("text");
+		.call(xAxis)
+		.selectAll(".tick text");
 
-	if (vm.SectorAsArgument()) {
-		xAxisLabels
-		.attr("y", 10)		
-			.attr("x", -.5*barwidth)
-		.attr("transform", "rotate(7)")
-		.style("text-anchor", "start");
-		//.attr("y", function(d) {return 15-10*(vm.model.GetDomain(request.xvar).indexOf(d) % 2 == 0);});
-	}
+	if (!vm.YearAsArgument())
+      	xAxisLabels.call(wrap,xScale.rangeBand());
 
 	svg.append("g")
 	.attr("class", "y axis")
@@ -262,5 +257,31 @@ BDSVis.makePlot = function (data,request,vm) {
   			if (iy<vm.model.year2.length) iy++; else iy=0;
   			vm.TimeLapseCurrYear=vm.model.year2[iy];
 		}, 500);
-	}
+	};
+
+	//Automatic text wrapping function by Mike Bostock, http://bl.ocks.org/mbostock/1846692, corrected
+	function wrap(text, width) {
+	  	text.each(function() {
+		    var text = d3.select(this),
+		        words = text.text().split(/\s+/).reverse(),
+		        word,
+		        line = [],
+		        lineNumber = 0,
+		        lineHeight = 1.1, // ems
+		        y = text.attr("y"),
+		        dy = parseFloat(text.attr("dy")),
+		        tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em");
+		        while (word = words.pop()) {
+		        	line.push(word);
+		        	tspan.text(line.join(" "));
+		        	if (tspan.node().getComputedTextLength() > width) {
+		        		line.pop();
+		        		tspan.text(line.join(" "));
+		        		line = [word];
+			        if (tspan.node().getComputedTextLength()>0) //Corrected to not make a new line when even the single word is too long
+			        	tspan = text.append("tspan").attr("x", 0).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+		   		 	}
+				}
+	  	});
+	};
 };
