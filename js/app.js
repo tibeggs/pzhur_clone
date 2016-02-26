@@ -3,7 +3,7 @@ var BDSVis = BDSVis || {};
 BDSVis.ViewModel = function() {
 	var vm = this;
 
-	//Reference to the model, which contains variable names and name look (in model.js file)
+	//Reference to the model, which contains variable names and name look up tables/functions (in model.js file)
 	this.model = BDSVis.Model;
 	this.model.InitModel();
 

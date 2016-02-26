@@ -4,10 +4,12 @@ var BDSVis = BDSVis || {};
 BDSVis.makePlot = function (data,request,vm) {
 	//"vm" is the reference to ViewModel
 
-	vm.PlotView.Init();
-	var svg=vm.PlotView.svg;
-	var width=vm.PlotView.width;
-	var height=vm.PlotView.height;
+	var pv=vm.PlotView;
+
+	pv.Init();
+	var svg=pv.svg;
+	var width=pv.width;
+	var height=pv.height;
 	
 	//var request=vm.APIrequest();
 
@@ -25,11 +27,12 @@ BDSVis.makePlot = function (data,request,vm) {
 		ptitle=ptitle+((request.sic1.length>1)?(" by sector"):(((request.sic1[0]===0)?" ":" in sector of ")+vm.model.NameLookUp(request.sic1,"sic1")));
 	
 	//d3.select("#graphtitle").text(ptitle);
-	d3.select("#chartsvg")
+	var maintitle=d3.select("#chartsvg")
 		.append("text").attr("class","graph-title")
 		.text(ptitle)
-		.attr("x",function(d) { return (vm.PlotView.margin.left+vm.PlotView.margin.right+width-this.getComputedTextLength())/2.; })
-		.attr("y",1+"em");
+		.attr("dy",1+"em");
+	maintitle.call(wrap,width*.7);
+	maintitle.selectAll("tspan").attr("x",function(d) { return (pv.legendx-this.getComputedTextLength())/2.; })
 
 	//List of selected categories by actual name rather than code
 	var cvarlist=request[request.cvar].map(function(d) {
@@ -50,13 +53,14 @@ BDSVis.makePlot = function (data,request,vm) {
 			.rangeRoundBands([0, width], .1);
 
 	if (vm.logscale()) {
-		ymin = d3.min(data.filter(function(d) {return d[measure]>0}), function(d) { return +d[measure]; })/2.;
-		y0=ymin;
+		ymin = d3.min(data.filter(function(d) {return d[measure]>0}), function(d) { return +d[measure]; })/2.; // The bottom of the graph, a half of the smallest positive value
+		y0=ymin; //Where the 0 horizontal line is located, for the base of the bar. Since 0 can not be on a log plot, it's ymin
 		yScale = d3.scale.log();
-		data=data.map(function(d) {if (d[measure]<=0) d[measure]=1e-15; return d;}); //0 and negative numbers are -infinity on log scale, replace them with "almost -infinity", so that they can be plotted, but outside of the graph limits.
+		 //0 and negative numbers are -infinity on log scale, replace them with "almost -infinity", so that they can be plotted, but outside of the graph limits.
+		data=data.map(function(d) {if (d[measure]<=0) d[measure]=1e-15; return d;});
 	} else {
-		y0=0;
-		ymin = Math.min(0,d3.min(data, function(d) { return +d[measure]; }));
+		y0=0; //Where the 0 horizontal line is located, for the base of the bar
+		ymin = Math.min(0,d3.min(data, function(d) { return +d[measure]; })); //Bars should be plotted at least from 0.
 		yScale = d3.scale.linear()
 	}
 
@@ -87,13 +91,15 @@ BDSVis.makePlot = function (data,request,vm) {
 	}
 	
 	if (vm.YearAsArgument()) {
-		//Timeline scatter plot is year is x-variable
+		//Make a timeline scatter plot if year is x-variable
 
 		// Define the line
 		var valueline = d3.svg.line()
     	.x(function(d) { return xScale(d.year2); })
     	.y(function(d) { return yScale(d[measure]); });
 
+
+    	//Add lines
     	for (var icv in request[request.cvar])
     		svg.append("path")
         	.attr("class", "line")
@@ -106,6 +112,7 @@ BDSVis.makePlot = function (data,request,vm) {
         			else return d[request.cvar]===vm.model.NameLookUp(request[request.cvar][icv],request.cvar);
         		})));
 
+        //Add dots
         svg.selectAll("dot")
     	.data(data)
   		.enter().append("circle")
@@ -116,7 +123,7 @@ BDSVis.makePlot = function (data,request,vm) {
     	.append("title").text(function(d){return Tooltiptext(d);});
 
 	} else {
-		//Bar chart	if x-variable is other than year
+		//Make a bar chart if x-variable is other than year
 		
 		//Number of bars is number of categories in the legend, and barwidth is determined from that
 		var nbars=cvarlist.length;
@@ -170,13 +177,13 @@ BDSVis.makePlot = function (data,request,vm) {
 	.call(yAxis); 
 
 	//X-axis label
-	vm.PlotView.xaxislabel
+	pv.xaxislabel
 		.text(vm.model.NameLookUp(request.xvar,"var"))
-		.attr("x",function(d) { return (vm.PlotView.margin.left+vm.PlotView.margin.right+width-this.getComputedTextLength())/2.; })
+		.attr("x",function(d) { return (pv.margin.left+pv.margin.right+width-this.getComputedTextLength())/2.; })
 		
 
 	//Making Legend
-	var legendsvg=vm.PlotView.legendsvg;
+	var legendsvg=pv.legendsvg;
 
 	var symbolsize=15;//Math.max(Math.min(barwidth,20),15);
 
@@ -184,22 +191,46 @@ BDSVis.makePlot = function (data,request,vm) {
 
 	legendsvg.append("text").attr("class","legtitle").text(vm.model.NameLookUp(request.cvar,'var')+": ");
 
+	var legendlabels=legendsvg.selectAll("text .leglabel")
+		.data(cvarlist)
+		.enter()
+		.append("text")
+		.attr("class","leglabel")
+		.attr("fill","black")
+		.attr("x",(symbolsize+5))
+		//.attr("y",function(d,i) {return 8+(symbolsize+5)*i;})
+		//.attr("y",function(d,i) {return 1.5*i+"em";})
+		.attr("dy",1+"em")
+		.text(function(d) {return d;});
+
+	//Split long labels into multiple lines
+	legendlabels.call(wrap,pv.legendwidth - (symbolsize+5));
+	legendlabels.selectAll("tspan").attr("x",(symbolsize+5));
+	var numlines=legendsvg.selectAll(".leglabel").selectAll("tspan").map(function(d) {return d.length;}); //Number of lines in each label
+	tspany=[]; //"y" attributes for tspans
+	for (var i in numlines) {
+		for (var j=0; j<numlines[i]; j++)
+			tspany.push((i>0)?(numlines[i-1]+i*.75):0);
+		if (i>0)
+			numlines[i]+=numlines[i-1];
+	};
+
+	legendsvg.selectAll("tspan")
+		.data(tspany)
+		.attr("y",function(d) {return d+.5+'em';});
+
 	legendsvg.selectAll("rect")
 		.data(cvarlist)
 		.enter()
 		.append("rect")
 		.attr("fill",  function(d,i) {return colors(i);})
 		.attr("width",symbolsize).attr("height",symbolsize)
-		.attr("y",function(d,i) {return 10+(symbolsize+5)*i;});
+		.attr("y",function(d,i) {return 0.6+((i>0)?(numlines[i-1]+i*.75):0)+"em";})
 
-	legendsvg.selectAll("text .leglabel")
-		.data(cvarlist)
-		.enter()
-		.append("text")
-		.attr("class","leglabel")
-		.attr("fill","black")
-		.attr("x",(symbolsize+5)).attr("y",function(d,i) {return 22+(symbolsize+5)*i;})
-		.text(function(d) {return d;});
+	var legendheight=d3.select(".legbox").node().getBBox().height
+	d3.select(".legbox").attr("transform","translate("+pv.legendx+","+Math.max(20,.5*(height+pv.margin.top+pv.margin.bottom+pv.titleheight-legendheight))+")")
+
+	
 
 	// Timelapse animation
 	function updateyear(yr) {
@@ -263,7 +294,7 @@ BDSVis.makePlot = function (data,request,vm) {
 	function wrap(text, width) {
 	  	text.each(function() {
 		    var text = d3.select(this),
-		        words = text.text().split(/\s+/).reverse(),
+		        words = text.text().split(/[\s]+/).reverse(),
 		        word,
 		        line = [],
 		        lineNumber = 0,
@@ -271,17 +302,18 @@ BDSVis.makePlot = function (data,request,vm) {
 		        y = text.attr("y"),
 		        dy = parseFloat(text.attr("dy")),
 		        tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em");
-		        while (word = words.pop()) {
-		        	line.push(word);
-		        	tspan.text(line.join(" "));
-		        	if (tspan.node().getComputedTextLength() > width) {
-		        		line.pop();
-		        		tspan.text(line.join(" "));
-		        		line = [word];
-			        if (tspan.node().getComputedTextLength()>0) //Corrected to not make a new line when even the single word is too long
-			        	tspan = text.append("tspan").attr("x", 0).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
-		   		 	}
-				}
+	        while (word = words.pop()) {
+	        	line.push(word);
+	        	tspan.text(line.join(" "));
+	        	if (tspan.node().getComputedTextLength() > width) {
+	        		line.pop();
+	        		tspan.text(line.join(" "));
+	        		line = [word];
+	        		if (tspan.node().getComputedTextLength()>0) //Corrected to not make a new line when even the single word is too long
+	        			lineNumber++;
+		        	tspan = text.append("tspan").attr("x", 0).attr("y", y).attr("dy", lineNumber * lineHeight + dy + "em").text(word);
+	   		 	}
+			}
 	  	});
 	};
 };

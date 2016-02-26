@@ -5,7 +5,7 @@ BDSVis.PlotView = {
 	margin : {top: 20, right: 30, bottom: 20, left: 80},
 	width0 : 850,
 	height0 : 450,
-	legendwidth: 500,
+	legendwidth: 250,
 	titleheight: 15,
 	xaxislabelheight: 40,
 	Init : function() {
@@ -25,16 +25,21 @@ BDSVis.PlotView = {
 			.append('g')
 			.attr("transform", "translate(" + margin.left + "," + (margin.top+this.titleheight)+ ")")
 			.attr('class', 'chart');
-		
+
 		d3.select("#buttonsundergraph").style("width",width + margin.left+"px");
 		d3.select("#plotarea").style("width", width + margin.left + margin.right+this.legendwidth+"px");
+		d3.select(".waiting-caption").style("width", width + margin.left + margin.right+this.legendwidth+"px");
 
 		//d3.select("#graphdata").style("height", height + margin.top + margin.bottom-21+"px");
 
 		//Clear legend, set size
-		this.legendsvg=d3.select("#legend").attr("width",400).attr("height",300)
-		this.legendsvg.selectAll("*").remove();
-		this.legendsvg=d3.select("#chartsvg").append("g").attr("transform","translate("+(width+margin.left+ margin.right)+","+height*.3+")");
+		// this.legendsvg=d3.select("#legend").attr("width",400).attr("height",300);
+		// this.legendsvg.selectAll("*").remove();
+		this.legendx=width+margin.left+ margin.right;
+		this.legendsvg=d3.select("#chartsvg")
+			.append("g")
+			.attr("transform","translate("+(width+margin.left+ margin.right)+","+height*.3+")")
+			.attr("class","leglabel legbox");
 		
 		//X-axis label
 		this.xaxislabel=d3.select("#chartsvg").append("text")
