@@ -31,7 +31,7 @@ BDSVis.makePlot = function (data,request,vm) {
 		.append("text").attr("class","graph-title")
 		.text(ptitle)
 		.attr("dy",1+"em");
-	maintitle.call(wrap,width*.7);
+	maintitle.call(wrap,width);
 	maintitle.selectAll("tspan").attr("x",function(d) { return (pv.legendx-this.getComputedTextLength())/2.; })
 
 	//List of selected categories by actual name rather than code
