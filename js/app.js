@@ -56,7 +56,6 @@ BDSVis.ViewModel = function() {
 	disableAll = ko.computed(function () { //Disable all the input elements (used in Time Lapse regime and when the app is waiting for data from server)
 		return (vm.waiting4api() || vm.timelapse());
 	});
-
 	
 	//The following functions set cvar (Legend/Comparison/Color variable) and xvar (X-axis variable)
 	//////////////////
@@ -121,6 +120,29 @@ BDSVis.ViewModel = function() {
 		else if (vm.SelectedSectors()[0]===0) return false; //If "Economy Wide" is selected in sectors, then by state
 		else return true; //Else means a sector is selected, so there can not be by-state request
 	});
+
+	//For active-highlighted and disabled controls
+	SectorSelectorDis = ko.computed(function() { return (vm.StateVar()  || vm.SectorAsArgument() || disableAll()) });
+	SectorCompareDis = ko.computed(function()  { return (vm.SectorVar() || vm.StateAsArgument()  || disableAll()) });
+	SectorXDis = ko.computed(function()        { return (vm.SectorVar() || vm.StateAsLegend()    || disableAll()) });
+
+	MeasureSelectorDis = ko.computed(function() { return disableAll() });
+	MeasureCompareDis = ko.computed(function()  { return (vm.MeasureAsLegend() || vm.StateAsArgument() || disableAll()) });
+
+	StateSelectorDis = ko.computed(function() { return (vm.us() || vm.StateAsArgument() || disableAll()) });
+	StateCompareDis = ko.computed(function()  { return  (vm.StateVar() || vm.SectorAsArgument() || disableAll()) });
+	StateXDis = ko.computed(function()        { return (vm.StateVar() || disableAll()) });
+
+	YearSelectorDis = ko.computed(function() { return (vm.YearAsArgument() || disableAll()) });
+	YearCompareDis = ko.computed(function()  { return (vm.YearVar() || vm.StateAsArgument() || disableAll()) });
+	YearXDis = ko.computed(function()        { return  (vm.YearVar() || disableAll()) });
+
+	FcharSelectorDis = ko.computed(function() { return (vm.StateAsArgument() || disableAll()) });
+	FcharCompareDis = ko.computed(function()  { return (vm.FirmCharVar() || vm.StateAsArgument() || disableAll()) });
+	FcharXDis = ko.computed(function()        { return (vm.FirmCharVar() || disableAll()) });
+
+
+
 
 	//Subscribe to input changes
 	//Any change in the input select fields triggers request to the server, followed by data processing and making of a new plot

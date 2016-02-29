@@ -68,7 +68,7 @@
 
 }
 
-.selectors button.disable {
+.selectors button:disabled {
   opacity: 0.6;
 }
 
