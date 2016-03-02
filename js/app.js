@@ -12,15 +12,16 @@ for (var i in BDSVis.Model.variables) {
 		so="SelectedOpts['"+varname+"']",
 		optionstext="",
 		optionsvalue="";
-	if (variable.type==="continuous") {optionstext="$data"; optionsvalues="$data"};
-	if (variable.type==="categorical") {optionstext="'name'"; optionsvalues="'code'"};
+	if (variable.type==="continuous") {optionstext="$data"; optionsvalue="$data"};
+	if (variable.type==="categorical") {optionstext="'name'"; optionsvalue="'code'"};
 	
-	
-	selectors.append("h4").text(varfullname+":");
-	selectors.append("select").attr("data-bind","options: model."+varname+", optionsText: "+optionstext+", optionsValue: '"+optionsvalue+"', value: "+so+"()[0], selectedOptions: "+so+", attr: {multiple: "+multiple+"}, css: {tallselector: "+multiple+"}, disable:  vars.disabled('"+varname+"','selector')");
-	selectors.append("button").attr("data-bind","click: function(variable) {setcvar('"+varname+"')}, disable: vars.disabled('"+varname+"','cbutton'), css: {activebutton: "+multiple+"}").text("Compare "+varfullname+"s");//, text: FcharCompButtonText");
-	selectors.append("button").attr("data-bind","click: function(variable) {setxvar('"+varname+"')}, disable: vars.disabled('"+varname+"','xbutton'), css: {activebutton: vars.isvar('"+varname+"','x')}").text("Make X-axis");
-	selectors.append("br");
+	if (variable.type!="variablegroup") {
+		selectors.append("h4").text(varfullname+":");
+		selectors.append("select").attr("data-bind","options: model."+varname+", optionsText: "+optionstext+", optionsValue: "+optionsvalue+", value: "+so+"()[0], selectedOptions: "+so+", attr: {multiple: "+multiple+"}, css: {tallselector: "+multiple+"}, disable:  vars.disabled('"+varname+"','selector')");
+		selectors.append("button").attr("data-bind","click: function(variable) {setcvar('"+varname+"')}, disable: vars.disabled('"+varname+"','cbutton'), css: {activebutton: "+multiple+"}").text("Compare "+varfullname+"s");//, text: FcharCompButtonText");
+		selectors.append("button").attr("data-bind","click: function(variable) {setxvar('"+varname+"')}, disable: vars.disabled('"+varname+"','xbutton'), css: {activebutton: vars.isvar('"+varname+"','x')}").text("Make X-axis");
+		selectors.append("br");
+	}
 }
 
 varnames=['fchar'];
