@@ -1,11 +1,33 @@
 var BDSVis = BDSVis || {};
 
 var selectors = d3.select('.selectors');
-selectors.append("h4").text('Firm Characteristic:');
-selectors.append("select").attr("data-bind","options: model.fchar, optionsText: 'name', optionsValue: 'code', value: fchar, disable: FcharSelectorDis");
-selectors.append("button").attr("data-bind","click: function(variable) {setcvar('fchar')},  css: {activebutton: FirmCharAsLegend()}, disable: FcharCompareDis, text: FcharCompButtonText").text("Make X-axis");
-selectors.append("button").attr("data-bind","click: function(variable) {setxvar('fchar')}, disable: FcharXDis, css: {activebutton: vars.isxvar('fchar')}").text("Make X-axis");
-selectors.append("br")
+
+var varnames=['sic1','measure','state','year2'];
+
+for (var i in varnames) {
+	var varname=varnames[i];
+	var varfullname=BDSVis.Model.NameLookUp(varname,"var");
+	var multiple="vars.multiple('"+varname+"')";
+	var so="SelectedOpts['"+varname+"']";
+	selectors.append("h4").text(varfullname+":");
+	selectors.append("select").attr("data-bind","options: model."+varname+", optionsText: 'name', optionsValue: 'code', value: "+so+"()[0], selectedOptions: "+so+", attr: {multiple: "+multiple+"}, css: {tallselector: "+multiple+"}, disable:  vars.disabled('"+varname+"','selector')");
+	selectors.append("button").attr("data-bind","click: function(variable) {setcvar('"+varname+"')}, disable: vars.disabled('"+varname+"','cbutton'), css: {activebutton: "+multiple+"}").text("Compare "+varfullname+"s");//, text: FcharCompButtonText");
+	selectors.append("button").attr("data-bind","click: function(variable) {setxvar('"+varname+"')}, disable: vars.disabled('"+varname+"','xbutton'), css: {activebutton: vars.isvar('"+varname+"','x')}").text("Make X-axis");
+	selectors.append("br");
+}
+
+varnames=['fchar'];
+
+for (var i in varnames) {
+	var varname=varnames[i];
+	var multiple="vars.multiple('"+varname+"')";
+	selectors.append("h4").text(BDSVis.Model.NameLookUp(varname,"var")+":");
+	selectors.append("select").attr("data-bind","options: model."+varname+", optionsText: 'name', optionsValue: 'code', value: "+varname+", disable: vars.disabled('"+varname+"','selector')");
+	selectors.append("button").attr("data-bind","click: function(variable) {setcvar('"+varname+"')}, disable: vars.disabled('"+varname+"','cbutton'), css: {activebutton: "+multiple+"}, text: FcharCompButtonText");
+	selectors.append("button").attr("data-bind","click: function(variable) {setxvar('"+varname+"')}, disable: vars.disabled('"+varname+"','xbutton'), css: {activebutton: vars.isvar('"+varname+"','x')}").text("Make X-axis");
+	selectors.append("br");
+}
+
 
 BDSVis.ViewModel = function() {
 	var vm = this;
@@ -41,7 +63,7 @@ BDSVis.ViewModel = function() {
 		if (vm.timelapse()) {
 			vm.timelapse(false);
 			clearInterval(vm.tlint); //Stop the animation
-			vm.SelectedYears([vm.TimeLapseCurrYear-1]);	//Set the year to the year currently shown in animation
+			vm.SelectedOpts['year2']([vm.TimeLapseCurrYear-1]);	//Set the year to the year currently shown in animation
 		} else {
 			vm.timelapse(true);
 			vm.getBDSdata();
@@ -66,26 +88,73 @@ BDSVis.ViewModel = function() {
 
 	
 	//The following functions set cvar (Legend/Comparison/Color variable) and xvar (X-axis variable)
-	this.setcvar = function (variable) {
-		vm.cvar(variable);
-		if (variable==="sic1")
-			vm.SelectedStates([this.model.state[0].code]);
-		else if (variable==="state")
-			vm.SelectedSectors([this.model.sic1[0].code]);
+	this.setcvar = function (varname) {
+		vm.cvar(varname);
+		if (varname==="sic1")
+			vm.SelectedOpts['state']([this.model.state[0].code]);
+		else if (varname==="state")
+			vm.SelectedOpts['sic1']([this.model.sic1[0].code]);
 		else vm.getBDSdata();
 	};
 
-	this.setxvar = function (variable) {
-		vm.xvar(variable);
-		if (((variable==="sic1") && vm.StateAsLegend()) || variable==="state") vm.cvar("measure");
+	this.setxvar = function (varname) {
+		vm.xvar(varname);
+		if (((varname==="sic1") && vm.StateAsLegend()) || varname==="state") vm.cvar("measure");
 		vm.getBDSdata();
 	};
+
+	//Disabled / Active / Selected logic
+	this.vars=ko.observable(0);
+
+	//Check whether a variable is x- or c- or any of the two
+	this.vars.isvar = function(varname,xc) {
+		return ko.computed(function() {
+			if (xc==='c') return vm.cvar()===varname;
+			else if (xc==='x') return vm.xvar()===varname; 
+			else if (xc==='any') return ((vm.xvar()===varname) || ( vm.cvar()===varname));
+			else return false;
+		}, this);	
+	}.bind(this.vars);
+
+	//For disabled controls
+	this.vars.disabled = function (varname,uielement) {
+		if (disableAll()) return true;
+		else if (uielement==='selector') {
+			if (vm.vars.isvar(varname,'x')() && (varname!="fchar")) return true; //Disable selector is variable is on x-axis
+			if (varname==='sic1') {
+				if (vm.vars.isvar('state','any')()) return true; //Disable simultaneous sector and state choice
+			} else if (varname==='state') {
+				if (vm.vars.isvar('sic1','any')()) return true; //Disable simultaneous sector and state choice
+			}
+		} else if (uielement==='xbutton') {
+			return vm.vars.isvar(varname,'any'); //Disable 'Make X' button is variable is xvar or cvar
+		} else if (uielement==='cbutton') {
+			if (vm.vars.isvar('state','x')()) return true; //Disable 'Compare' button is variable is xvar or cvar or in geomap regime
+			else if (varname==='sic1') {
+				if (vm.vars.isvar('state','any')()) return true; //Disable simultaneous sector and state choice
+			} else if (varname==='state') {
+				if (vm.vars.isvar('sic1','x')()) return true; //Disable simultaneous sector and state choice
+			}
+			else return vm.vars.isvar(varname,'any');
+		} else return false;
+
+	}.bind(this.vars);
+
+	//Whether selector is multiple (basically, amounts to being c-variable) and "Compare" button active
+	this.vars.multiple = function (varname) {
+		var multiple = vm.vars.isvar(varname,'c')();
+		if (varname==='measure') multiple = multiple && (!vm.vars.isvar('state','x')());
+		return multiple; 
+	}.bind(this.vars);
     
 	//Initial values of what is selected in the input selectors
-	this.SelectedStates = ko.observableArray([this.model.state[0].code]);
-	this.SelectedSectors = ko.observableArray([this.model.sic1[0].code]);
-	this.SelectedMeasures = ko.observableArray([this.model.measure[11].code]);
-	this.SelectedYears = ko.observableArray([this.model.year2[36]]);
+	this.SelectedOpts = {
+		state:ko.observableArray([this.model.state[0].code]),
+		sic1:ko.observableArray([this.model.sic1[0].code]),
+		measure:ko.observableArray([this.model.measure[11].code]),
+		year2:ko.observableArray([this.model.year2[36]])
+	}
+	
 	this.fchar = ko.observable(this.model.fchar[0].code);
 	//this.SelectedFchar = ko.observableArray([this.fchar()]);
 
@@ -107,12 +176,6 @@ BDSVis.ViewModel = function() {
 	//this.YearAsArgument = ko.computed( function (xvar) {return vm.xvar()===xvar;});
 	this.FirmCharAsArgument = ko.computed( function () {return vm.xvar()==="fchar";});
 
-	this.vars=ko.observable(0);
-
-	this.vars.isxvar = function(variable) {
-		return ko.computed(function() { return vm.xvar()===variable }, this);	
-	}.bind(this.vars);
-
 	//Whether a variable is either X- or C-
 	this.SectorVar = ko.computed( function () {return (vm.SectorAsLegend() || vm.SectorAsArgument());});
 	this.StateVar = ko.computed( function () {return (vm.StateAsLegend() || vm.StateAsArgument());});
@@ -121,41 +184,19 @@ BDSVis.ViewModel = function() {
 
 	this.FcharCompButtonText = ko.computed( function() {return "Compare "+vm.model.NameLookUp(vm.fchar(),"var");});
 
- 	//Whether to show the state selector (and also to send the "us:*" request or by individual states ("state:*"))
 	this.us = function(){
 		if (vm.StateAsLegend()) return false; //If states are Legend, we need many states, so request NOT general, but by state
 		else if (vm.SectorVar()) return true; //If sector is either c- or x- variable, then there is no by-state data, so YES
-		else if (vm.SelectedSectors()[0]===0) return false; //If "Economy Wide" is selected in sectors, then by state
+		else if (vm.SelectedOpts['sic1']()[0]===0) return false; //If "Economy Wide" is selected in sectors, then by state
 		else return true; //Else means a sector is selected, so there can not be by-state request
 	};
 
-	//For active-highlighted and disabled controls
-	SectorSelectorDis = ko.computed(function() { return (vm.StateVar()  || vm.SectorAsArgument() || disableAll()) });
-	SectorCompareDis = ko.computed(function()  { return (vm.SectorVar() || vm.StateAsArgument()  || disableAll()) });
-	SectorXDis = ko.computed(function()        { return (vm.SectorVar() || vm.StateAsLegend()    || disableAll()) });
-
-	MeasureSelectorDis = ko.computed(function() { return disableAll() });
-	MeasureCompareDis = ko.computed(function()  { return (vm.MeasureAsLegend() || vm.StateAsArgument() || disableAll()) });
-
-	StateSelectorDis = ko.computed(function() { return (vm.us() || vm.StateAsArgument() || disableAll()) });
-	StateCompareDis = ko.computed(function()  { return  (vm.StateVar() || vm.SectorAsArgument() || disableAll()) });
-	StateXDis = ko.computed(function()        { return (vm.StateVar() || disableAll()) });
-
-	YearSelectorDis = ko.computed(function() { return (vm.YearAsArgument() || disableAll()) });
-	YearCompareDis = ko.computed(function()  { return (vm.YearVar() || vm.StateAsArgument() || disableAll()) });
-	YearXDis = ko.computed(function()        { return  (vm.YearVar() || disableAll()) });
-
-	FcharSelectorDis = ko.computed(function() { return (vm.StateAsArgument() || disableAll()) });
-	FcharCompareDis = ko.computed(function()  { return (vm.FirmCharVar() || vm.StateAsArgument() || disableAll()) });
-	FcharXDis = ko.computed(function()        { return (vm.FirmCharVar() || disableAll()) });
-
 	//Subscribe to input changes
 	//Any change in the input select fields triggers request to the server, followed by data processing and making of a new plot
-
-	this.SelectedStates.subscribe(function() {vm.getBDSdata();});
-	this.SelectedMeasures.subscribe(function() {vm.getBDSdata();});
-	this.SelectedSectors.subscribe(function() {vm.getBDSdata();});
-	this.SelectedYears.subscribe(function() {vm.getBDSdata();});
+	var varnames=['state','measure','sic1','year2'];
+	for (var i in varnames) {
+		this.SelectedOpts[varnames[i]].subscribe(function() {vm.getBDSdata();});
+	}
 	this.fchar.subscribe(function() {vm.getBDSdata();});
 
 	//Call initial plot

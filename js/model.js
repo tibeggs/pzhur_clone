@@ -1,6 +1,23 @@
 var BDSVis = BDSVis || {};
 
 BDSVis.Model = {
+	variables : [
+		{"name" : "sic1",
+		 "fullname" : "Sector",
+		 "type" : "categorical"},
+		{"name" : "measure",
+		 "fullname" : "Measure",
+		 "type" : "categorical"},
+		{"name" : "state",
+		 "fullname" : "State",
+		 "type" : "categorical"},
+		{"name" : "year2",
+		 "fullname" : "Year",
+		 "type" : "continuous"},
+		{"name" : "fchar",
+		 "fullname" : "Firm Characteristic",
+		 "type" : "variablegroup"}
+	],
 	state : [
 		{"code" : "00", "name" : "United States", "st":"US"},
 		{"code" : "01", "name" : "Alabama", "st" : "AL" },
@@ -132,6 +149,7 @@ BDSVis.Model = {
 		"state" : "State",
 		"year2" : "Year",
 		"measure" : "Measure",
+		"fchar" : "Firm Characteristic"
 	},
 
 	measlookup : {},

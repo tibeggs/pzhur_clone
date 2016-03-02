@@ -9,23 +9,23 @@ BDSVis.getAPIdata = function (vm) {
 		
 		//Calculate whether to request single state or multiple, and remove the 00 code for the US in selector
 		var StateRequested;
-		var multiple = vm.SelectedStates().length>1; //Whether multiple states are selected
-		var firstUS = vm.SelectedStates()[0]==="00"; //Whether "United States" is selected
+		var multiple = vm.SelectedOpts['state']().length>1; //Whether multiple states are selected
+		var firstUS = vm.SelectedOpts['state']()[0]==="00"; //Whether "United States" is selected
 
-		if ((multiple) && (firstUS)) StateRequested = vm.SelectedStates().slice(1); //Remove "United States" if many states are selected
+		if ((multiple) && (firstUS)) StateRequested = vm.SelectedOpts['state']().slice(1); //Remove "United States" if many states are selected
 		//Otherwise return all selected states or one, depending on whether state is the c-variable
-		else StateRequested = (vm.StateAsLegend())?vm.SelectedStates():[vm.SelectedStates()[0]]; 
+		else StateRequested = (vm.StateAsLegend())?vm.SelectedOpts['state']():[vm.SelectedOpts['state']()[0]]; 
 
 		return {
 			//If by-state request, then only send "Economy Wide", otherwise send all selected sectors or a single sector depending on whether sector is the c-variable(legend). If in map regime (StateAsArgument) send only one measure
-			sic1 : vm.StateAsLegend()?([0]):(vm.SectorAsLegend()?vm.SelectedSectors():[vm.SelectedSectors()[0]]),
+			sic1 : vm.StateAsLegend()?([0]):(vm.SectorAsLegend()?vm.SelectedOpts['sic1']():[vm.SelectedOpts['sic1']()[0]]),
 			//See state calculation above for StateRequested
 			state : StateRequested,
 			//Send all selected measures or a single one depending on whether measure is the c-variable and whether it's a geo map regime.
-			measure : (vm.MeasureAsLegend() && !vm.StateAsArgument())?vm.SelectedMeasures():[vm.SelectedMeasures()[0]],
+			measure : (vm.MeasureAsLegend() && !vm.StateAsArgument())?vm.SelectedOpts['measure']():[vm.SelectedOpts['measure']()[0]],
 			fchar : vm.fchar(),
 			//Send all selected years or a single one depending on whether year is the c-variable.
-			year2 : vm.YearAsLegend()?vm.SelectedYears():[vm.SelectedYears()[0]],
+			year2 : vm.YearAsLegend()?vm.SelectedOpts['year2']():[vm.SelectedOpts['year2']()[0]],
 			//"fchar" is actually one of 3: fage4, fsize, ifsize. So that should be sent instead of "fchar"
 			xvar : (vm.xvar()==="fchar")?(vm.fchar()):(vm.xvar()),
 			cvar : (vm.cvar()==="fchar")?(vm.fchar()):(vm.cvar()),
