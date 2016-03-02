@@ -45,5 +45,10 @@ BDSVis.PlotView = {
 		this.xaxislabel=d3.select("#chartsvg").append("text")
 			.attr("class","xaxislabel")
 			.attr("y",(height + margin.top + this.xaxislabelheight + this.titleheight));
+
+		//Y-axis label
+		this.yaxislabel=d3.select("#chartsvg").append("text")
+			.attr("class","yaxislabel")
+			.attr("transform","translate("+16+","+.5*(height + margin.top + this.xaxislabelheight + this.titleheight)+")rotate(-90)")
 	}
 };

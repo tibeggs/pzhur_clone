@@ -1,5 +1,12 @@
 var BDSVis = BDSVis || {};
 
+var selectors = d3.select('.selectors');
+selectors.append("h4").text('Firm Characteristic:');
+selectors.append("select").attr("data-bind","options: model.fchar, optionsText: 'name', optionsValue: 'code', value: fchar, disable: FcharSelectorDis");
+selectors.append("button").attr("data-bind","click: function(variable) {setcvar('fchar')},  css: {activebutton: FirmCharAsLegend()}, disable: FcharCompareDis, text: FcharCompButtonText").text("Make X-axis");
+selectors.append("button").attr("data-bind","click: function(variable) {setxvar('fchar')}, disable: FcharXDis, css: {activebutton: vars.isxvar('fchar')}").text("Make X-axis");
+selectors.append("br")
+
 BDSVis.ViewModel = function() {
 	var vm = this;
 
@@ -56,29 +63,23 @@ BDSVis.ViewModel = function() {
 	disableAll = ko.computed(function () { //Disable all the input elements (used in Time Lapse regime and when the app is waiting for data from server)
 		return (vm.waiting4api() || vm.timelapse());
 	});
+
 	
 	//The following functions set cvar (Legend/Comparison/Color variable) and xvar (X-axis variable)
-	//////////////////
-	this.setsectorcvar = function () {vm.cvar("sic1"); vm.getBDSdata(); }
-	this.setsectorxvar = function () {
-		vm.xvar("sic1");
-		if (vm.StateAsLegend()) vm.cvar("measure"); //Since "sector" and "state" cannot both be variables, change c-var to "measure"
+	this.setcvar = function (variable) {
+		vm.cvar(variable);
+		if (variable==="sic1")
+			vm.SelectedStates([this.model.state[0].code]);
+		else if (variable==="state")
+			vm.SelectedSectors([this.model.sic1[0].code]);
+		else vm.getBDSdata();
+	};
+
+	this.setxvar = function (variable) {
+		vm.xvar(variable);
+		if (((variable==="sic1") && vm.StateAsLegend()) || variable==="state") vm.cvar("measure");
 		vm.getBDSdata();
 	};
-	this.setstatecvar = function () {vm.cvar("state"); vm.getBDSdata(); };
-	this.setstatexvar = function () {
-		//This moves the app to the geo map regime. There isn't a c-variable in that regime, but something should be set as one for the getBDSdata function.
-		vm.cvar("measure");
-		vm.xvar("state");
-		vm.getBDSdata();
-	};
-	this.setyearcvar = function () {vm.cvar("year2"); vm.getBDSdata(); };
-	this.setyearxvar = function () {vm.xvar("year2"); vm.getBDSdata(); };
-	this.setmeasurecvar = function () {vm.cvar("measure"); vm.getBDSdata(); };
-	this.setmeasurexvar = function () {vm.xvar("measure"); vm.getBDSdata(); };
-	this.setfcharcvar = function () {vm.cvar("fchar"); vm.getBDSdata(); };
-	this.setfcharxvar = function () {vm.xvar("fchar"); vm.getBDSdata(); };
-	//////////////////////////////////////////////////////////////////////////////////
     
 	//Initial values of what is selected in the input selectors
 	this.SelectedStates = ko.observableArray([this.model.state[0].code]);
@@ -103,7 +104,14 @@ BDSVis.ViewModel = function() {
 	this.SectorAsArgument = ko.computed( function () {return vm.xvar()==="sic1";});
 	this.StateAsArgument = ko.computed( function () {return vm.xvar()==="state";}); //When "state" is x-var, it is the geo map regime
 	this.YearAsArgument = ko.computed( function () {return vm.xvar()==="year2";});
+	//this.YearAsArgument = ko.computed( function (xvar) {return vm.xvar()===xvar;});
 	this.FirmCharAsArgument = ko.computed( function () {return vm.xvar()==="fchar";});
+
+	this.vars=ko.observable(0);
+
+	this.vars.isxvar = function(variable) {
+		return ko.computed(function() { return vm.xvar()===variable }, this);	
+	}.bind(this.vars);
 
 	//Whether a variable is either X- or C-
 	this.SectorVar = ko.computed( function () {return (vm.SectorAsLegend() || vm.SectorAsArgument());});
@@ -114,12 +122,12 @@ BDSVis.ViewModel = function() {
 	this.FcharCompButtonText = ko.computed( function() {return "Compare "+vm.model.NameLookUp(vm.fchar(),"var");});
 
  	//Whether to show the state selector (and also to send the "us:*" request or by individual states ("state:*"))
-	this.us = ko.computed(function(){
+	this.us = function(){
 		if (vm.StateAsLegend()) return false; //If states are Legend, we need many states, so request NOT general, but by state
 		else if (vm.SectorVar()) return true; //If sector is either c- or x- variable, then there is no by-state data, so YES
 		else if (vm.SelectedSectors()[0]===0) return false; //If "Economy Wide" is selected in sectors, then by state
 		else return true; //Else means a sector is selected, so there can not be by-state request
-	});
+	};
 
 	//For active-highlighted and disabled controls
 	SectorSelectorDis = ko.computed(function() { return (vm.StateVar()  || vm.SectorAsArgument() || disableAll()) });
@@ -140,9 +148,6 @@ BDSVis.ViewModel = function() {
 	FcharSelectorDis = ko.computed(function() { return (vm.StateAsArgument() || disableAll()) });
 	FcharCompareDis = ko.computed(function()  { return (vm.FirmCharVar() || vm.StateAsArgument() || disableAll()) });
 	FcharXDis = ko.computed(function()        { return (vm.FirmCharVar() || disableAll()) });
-
-
-
 
 	//Subscribe to input changes
 	//Any change in the input select fields triggers request to the server, followed by data processing and making of a new plot

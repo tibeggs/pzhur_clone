@@ -180,6 +180,11 @@ BDSVis.makePlot = function (data,request,vm) {
 	pv.xaxislabel
 		.text(vm.model.NameLookUp(request.xvar,"var"))
 		.attr("x",function(d) { return (pv.margin.left+pv.margin.right+width-this.getComputedTextLength())/2.; })
+
+	//Y-axis label
+	//debugger;
+	if ((measure!="value") && (vm.model.NameLookUp(measure,"measure").indexOf("rate")!=-1))
+		pv.yaxislabel.text("% change")
 		
 
 	//Making Legend
