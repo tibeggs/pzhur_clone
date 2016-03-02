@@ -4,13 +4,20 @@ var selectors = d3.select('.selectors');
 
 var varnames=['sic1','measure','state','year2'];
 
-for (var i in varnames) {
-	var varname=varnames[i];
-	var varfullname=BDSVis.Model.NameLookUp(varname,"var");
-	var multiple="vars.multiple('"+varname+"')";
-	var so="SelectedOpts['"+varname+"']";
+for (var i in BDSVis.Model.variables) {
+	var variable=BDSVis.Model.variables[i],
+		varname=variable.name,
+		varfullname=variable.fullname,
+		multiple="vars.multiple('"+varname+"')",
+		so="SelectedOpts['"+varname+"']",
+		optionstext="",
+		optionsvalue="";
+	if (variable.type==="continuous") {optionstext="$data"; optionsvalues="$data"};
+	if (variable.type==="categorical") {optionstext="'name'"; optionsvalues="'code'"};
+	
+	
 	selectors.append("h4").text(varfullname+":");
-	selectors.append("select").attr("data-bind","options: model."+varname+", optionsText: 'name', optionsValue: 'code', value: "+so+"()[0], selectedOptions: "+so+", attr: {multiple: "+multiple+"}, css: {tallselector: "+multiple+"}, disable:  vars.disabled('"+varname+"','selector')");
+	selectors.append("select").attr("data-bind","options: model."+varname+", optionsText: "+optionstext+", optionsValue: '"+optionsvalue+"', value: "+so+"()[0], selectedOptions: "+so+", attr: {multiple: "+multiple+"}, css: {tallselector: "+multiple+"}, disable:  vars.disabled('"+varname+"','selector')");
 	selectors.append("button").attr("data-bind","click: function(variable) {setcvar('"+varname+"')}, disable: vars.disabled('"+varname+"','cbutton'), css: {activebutton: "+multiple+"}").text("Compare "+varfullname+"s");//, text: FcharCompButtonText");
 	selectors.append("button").attr("data-bind","click: function(variable) {setxvar('"+varname+"')}, disable: vars.disabled('"+varname+"','xbutton'), css: {activebutton: vars.isvar('"+varname+"','x')}").text("Make X-axis");
 	selectors.append("br");
@@ -35,7 +42,7 @@ BDSVis.ViewModel = function() {
 	//Reference to the model, which contains variable names and name look up tables/functions (in model.js file)
 	this.model = BDSVis.Model;
 	this.model.InitModel();
-
+	
 	//Reference to the visual elements of the plot: SVGs for the graph/map and legend
 	this.PlotView = BDSVis.PlotView;
 

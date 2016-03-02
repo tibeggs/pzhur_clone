@@ -2,21 +2,64 @@ var BDSVis = BDSVis || {};
 
 BDSVis.Model = {
 	variables : [
-		{"name" : "sic1",
-		 "fullname" : "Sector",
-		 "type" : "categorical"},
-		{"name" : "measure",
-		 "fullname" : "Measure",
-		 "type" : "categorical"},
-		{"name" : "state",
-		 "fullname" : "State",
-		 "type" : "categorical"},
-		{"name" : "year2",
-		 "fullname" : "Year",
-		 "type" : "continuous"},
-		{"name" : "fchar",
-		 "fullname" : "Firm Characteristic",
-		 "type" : "variablegroup"}
+		{
+			"name" : "sic1",
+			"fullname" : "Sector",
+			"type" : "categorical",
+			"aslegend" : true,
+			"asaxis" : true,
+			"incompatible" : ["state"]
+		},
+		{
+			"name" : "measure",
+			"fullname" : "Measure",
+			"type" : "categorical",
+			"aslegend" : true,
+			"asaxis" : false 
+		},
+		{
+			"name" : "state",
+			"fullname" : "State",
+			"type" : "categorical",
+			"aslegend" : true,
+			"asaxis" : true,
+			"incompatible" : ["sic1"]
+		},
+		{
+			"name" : "year2",
+			"fullname" : "Year",
+			"type" : "continuous",
+			"aslegend" : true,
+			"asaxis" : true
+		},
+		{
+			"name" : "fchar",
+			"fullname" : "Firm Characteristic",
+			"type" : "variablegroup",
+			"variables" : [
+				 {
+					"name" : "fage4",
+					"fullname" : "Firm Age",
+					"type" : "categorical",
+					"aslegend" : true,
+					"asaxis" : true
+				 },
+				 {
+					"name" : "fsize",
+					"fullname" : "Firm Size",
+					"type" : "categorical",
+					"aslegend" : true,
+					"asaxis" : true
+				 },
+				 {
+					"name" : "ifsize",
+					"fullname" : "Initial Firm Size",
+					"type" : "categorical",
+					"aslegend" : true,
+					"asaxis" : true
+				 }
+
+			]}
 	],
 	state : [
 		{"code" : "00", "name" : "United States", "st":"US"},
@@ -158,6 +201,7 @@ BDSVis.Model = {
  	fsizelookup: {},
  	sic1lookup: {},
  	fcharlookup: {},
+	VarLookUp: {},
 
  	year2: [],
 
@@ -166,6 +210,10 @@ BDSVis.Model = {
 	fsizecolor: [],
 
 	InitModel : function() {
+		for (var i in this.variables) {
+			this.VarLookUp[this.variables[i].name]=i;
+		}
+			
 		//Create dictionaries/hashmaps to lookup names of categorical variable values
 		for (var i in this.state)
 			this.statelookup[this.state[i].code]=this.state[i].name;
