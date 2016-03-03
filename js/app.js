@@ -1,41 +1,5 @@
 var BDSVis = BDSVis || {};
 
-var selectors = d3.select('.selectors');
-
-var varnames=['sic1','measure','state','year2'];
-
-for (var i in BDSVis.Model.variables) {
-	var variable=BDSVis.Model.variables[i],
-		varname=variable.name,
-		varfullname=variable.fullname,
-		multiple="vars.multiple('"+varname+"')",
-		so="SelectedOpts['"+varname+"']",
-		optionstext="",
-		optionsvalue="";
-	if (variable.type==="continuous") {optionstext="$data"; optionsvalue="$data"};
-	if (variable.type==="categorical") {optionstext="'name'"; optionsvalue="'code'"};
-	
-	if (variable.type!="variablegroup") {
-		selectors.append("h4").text(varfullname+":");
-		selectors.append("select").attr("data-bind","options: model."+varname+", optionsText: "+optionstext+", optionsValue: "+optionsvalue+", value: "+so+"()[0], selectedOptions: "+so+", attr: {multiple: "+multiple+"}, css: {tallselector: "+multiple+"}, disable:  vars.disabled('"+varname+"','selector')");
-		selectors.append("button").attr("data-bind","click: function(variable) {setcvar('"+varname+"')}, disable: vars.disabled('"+varname+"','cbutton'), css: {activebutton: "+multiple+"}").text("Compare "+varfullname+"s");//, text: FcharCompButtonText");
-		selectors.append("button").attr("data-bind","click: function(variable) {setxvar('"+varname+"')}, disable: vars.disabled('"+varname+"','xbutton'), css: {activebutton: vars.isvar('"+varname+"','x')}").text("Make X-axis");
-		selectors.append("br");
-	}
-}
-
-varnames=['fchar'];
-
-for (var i in varnames) {
-	var varname=varnames[i];
-	var multiple="vars.multiple('"+varname+"')";
-	selectors.append("h4").text(BDSVis.Model.NameLookUp(varname,"var")+":");
-	selectors.append("select").attr("data-bind","options: model."+varname+", optionsText: 'name', optionsValue: 'code', value: "+varname+", disable: vars.disabled('"+varname+"','selector')");
-	selectors.append("button").attr("data-bind","click: function(variable) {setcvar('"+varname+"')}, disable: vars.disabled('"+varname+"','cbutton'), css: {activebutton: "+multiple+"}, text: FcharCompButtonText");
-	selectors.append("button").attr("data-bind","click: function(variable) {setxvar('"+varname+"')}, disable: vars.disabled('"+varname+"','xbutton'), css: {activebutton: vars.isvar('"+varname+"','x')}").text("Make X-axis");
-	selectors.append("br");
-}
-
 
 BDSVis.ViewModel = function() {
 	var vm = this;
@@ -43,6 +7,49 @@ BDSVis.ViewModel = function() {
 	//Reference to the model, which contains variable names and name look up tables/functions (in model.js file)
 	this.model = BDSVis.Model;
 	this.model.InitModel();
+	
+	var selectors = d3.select('.selectors');
+	
+	for (var i in this.model.variables) {
+		var variable=this.model.variables[i],
+			varname=variable.name,
+			varfullname=variable.fullname,
+			multiple="vars.multiple('"+varname+"')",
+			so="SelectedOpts['"+varname+"']",
+			optionstext="",
+			optionsvalue="";
+		if (variable.type==="continuous") {optionstext="$data"; optionsvalue="$data"};
+		if ((variable.type==="categorical") || (variable.type==="variablegroup")) {optionstext="'name'"; optionsvalue="'code'"};
+	
+		var databind="options: model."+varname
+					+", optionsText: "+optionstext
+					+", optionsValue: "+optionsvalue
+					+", disable: vars.disabled('"+varname+"','selector'),";
+	
+		selectors.append("h4").text(varfullname+":");
+	
+		if (variable.type==="variablegroup")
+			databind+="value: "+varname;
+		else
+			databind+="value: "+so+"()[0]"
+					+", selectedOptions: "+so
+					+", attr: {multiple: "+multiple+"}"
+					+", css: {tallselector: "+multiple+"}";
+
+		selectors.append("select").attr("data-bind", databind);
+	
+		if (variable.aslegend)
+			selectors.append("button")
+					.attr("data-bind","click: function(variable) {setcvar('"+varname+"')}"
+									+", disable: vars.disabled('"+varname+"','cbutton')"
+									+", css: {activebutton: "+multiple+"}").text("Compare "+varfullname+"s");
+		if (variable.asaxis)
+			selectors.append("button")
+					.attr("data-bind","click: function(variable) {setxvar('"+varname+"')}"
+									+", disable: vars.disabled('"+varname+"','xbutton')"
+									+", css: {activebutton: vars.isvar('"+varname+"','x')}").text("Make X-axis");
+		selectors.append("br");
+	}
 	
 	//Reference to the visual elements of the plot: SVGs for the graph/map and legend
 	this.PlotView = BDSVis.PlotView;
@@ -181,7 +188,6 @@ BDSVis.ViewModel = function() {
 	this.SectorAsArgument = ko.computed( function () {return vm.xvar()==="sic1";});
 	this.StateAsArgument = ko.computed( function () {return vm.xvar()==="state";}); //When "state" is x-var, it is the geo map regime
 	this.YearAsArgument = ko.computed( function () {return vm.xvar()==="year2";});
-	//this.YearAsArgument = ko.computed( function (xvar) {return vm.xvar()===xvar;});
 	this.FirmCharAsArgument = ko.computed( function () {return vm.xvar()==="fchar";});
 
 	//Whether a variable is either X- or C-
@@ -189,8 +195,6 @@ BDSVis.ViewModel = function() {
 	this.StateVar = ko.computed( function () {return (vm.StateAsLegend() || vm.StateAsArgument());});
 	this.YearVar = ko.computed( function () {return (vm.YearAsLegend() || vm.YearAsArgument());});
 	this.FirmCharVar = ko.computed( function () {return (vm.FirmCharAsLegend() || vm.FirmCharAsArgument());});
-
-	this.FcharCompButtonText = ko.computed( function() {return "Compare "+vm.model.NameLookUp(vm.fchar(),"var");});
 
 	this.us = function(){
 		if (vm.StateAsLegend()) return false; //If states are Legend, we need many states, so request NOT general, but by state

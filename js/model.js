@@ -36,6 +36,8 @@ BDSVis.Model = {
 			"name" : "fchar",
 			"fullname" : "Firm Characteristic",
 			"type" : "variablegroup",
+			"aslegend" : true,
+			"asaxis" : true,
 			"variables" : [
 				 {
 					"name" : "fage4",
