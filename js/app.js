@@ -7,7 +7,7 @@ BDSVis.ViewModel = function() {
 	//Reference to the model, which contains variable names and name look up tables/functions (in model.js file)
 	this.model = BDSVis.Model;
 	this.model.InitModel();
-	
+
 	var selectors = d3.select('.selectors');
 	
 	for (var i in this.model.variables) {
@@ -133,7 +133,8 @@ BDSVis.ViewModel = function() {
 
 	//For disabled controls
 	this.vars.disabled = function (varname,uielement) {
-		var varr=vm.model.variables[vm.model.VarLookUp[varname]];
+	
+		var varr=vm.model.LookUpVar(varname);
 
 		var IncompExists = function(list, xc) { //Check an element exists in the list, which is x-, c- or any variable
 			var disabled = false;

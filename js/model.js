@@ -189,21 +189,8 @@ BDSVis.Model = {
 		{"code" : "ifsize", "name" : "Initial firm size"}
 	],
 
-	varnames : {
-		"sic1" : "Sector",
-		"state" : "State",
-		"year2" : "Year",
-		"measure" : "Measure",
-		"fchar" : "Firm Characteristic"
-	},
 
 	dicts:{},
-
-	measlookup : {},
- 	statelookup : {},
- 	fagelookup : {},
- 	fsizelookup: {},
- 	sic1lookup: {},
  	fcharlookup: {},
 	VarLookUp: {},
 
@@ -217,24 +204,20 @@ BDSVis.Model = {
 		var tmod=this;
 		this.ifsize=this.fsize;
 
-		//Create lookup table for variable by name to get index, by which one can access all the properties in this.variables
-		for (var i in this.variables)
-			this.VarLookUp[this.variables[i].name]=i;
+		// //Create lookup table for variable by name to get index, by which one can access all the properties in this.variables
+		// for (var i in this.variables)
+		// 	this.VarLookUp[this.variables[i].name]=i;
 
 		//Create dictionaries/hashmaps to lookup names of categorical variable values
-		var CreateDicts = function (varlist) {
-			
+		var CreateDicts = function (varlist) {		
 			for (var i in varlist) {
-				
 				var varr=varlist[i];
 				var name=varr.name;
-
 				if ((varr.type==='categorical') || (varr.type==='variablegroup')) {
 					tmod.dicts[name]={};
 					for (var j in tmod[name])
 						tmod.dicts[name][tmod[name][j].code]=tmod[name][j].name;
 				}
-
 				if (varr.type==='variablegroup')
 					CreateDicts(varr.variables);
 			}
@@ -242,18 +225,6 @@ BDSVis.Model = {
 
 		CreateDicts(this.variables);
 		
-			
-		
-		for (var i in this.state)
-			this.statelookup[this.state[i].code]=this.state[i].name;
-		for (var i in this.measure)
-			this.measlookup[this.measure[i].code]=this.measure[i].name;
-		for (var i in this.fage4)
-			this.fagelookup[this.fage4[i].code]=this.fage4[i].name;
-		for (var i in this.fsize)
-			this.fsizelookup[this.fsize[i].code]=this.fsize[i].name;
-		for (var i in this.sic1)
-			this.sic1lookup[this.sic1[i].code]=this.sic1[i].name;
 		for (var i in this.fchar)
 			this.fcharlookup[this.fchar[i].code]=this.fchar[i].name;
 
@@ -275,21 +246,25 @@ BDSVis.Model = {
 	},
 
 	GetDomain : function(v) {
-		if ((v==="fsize") || (v==="ifsize"))
-			return this.fsize.map(function(d) { return d.name; })
-		else
-			return this[v].map(function(d) { return d.name; });
+		return this[v].map(function(d) { return d.name; });
+	},
+
+	flatlookup : function (varname,arr) {
+		return arr[arr.map(function(d) {return d.name}).indexOf(varname)]; //Find object in array arr by field such that object.name==varname
+	},
+
+	LookUpVar : function (varname) { //This is not efficient with respect to performance, but is just one line of code
+		return this.flatlookup(varname, this.variables) || //If variable is found in the top level of hierarchy, return, otherwise
+		//Find all "variablegroup" objects, and pull their variables out, flatten and find the variable by using the "flatlookup" function above
+		this.flatlookup(varname,[].concat.apply([],this.variables.filter(function(d) {return d.type==="variablegroup"}).map(function(d) {return d.variables;})));
 	},
 
 	NameLookUp : function(d,v) {
-		if (v==="var") {
-			if ((d==="fsize") || (d==="ifsize") || (d==="fage4"))
-				return this.fcharlookup[d];
-			else return this.variables[this.VarLookUp[d]].fullname;
-		} else if (v==="year2")
+		if (v==="var")
+			return this.LookUpVar(d).fullname;	
+		else if (v==="year2")
 			return d; 
 		else return this.dicts[v][d];
-
 	},
 
 	//This is a general use function for whenever the number should be printed in format with fixed significant digits and M and k for millions and thousands
