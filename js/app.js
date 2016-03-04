@@ -133,24 +133,36 @@ BDSVis.ViewModel = function() {
 
 	//For disabled controls
 	this.vars.disabled = function (varname,uielement) {
+		var varr=vm.model.variables[vm.model.VarLookUp[varname]];
+
+		var IncompExists = function(list, xc) { //Check an element exists in the list, which is x-, c- or any variable
+			var disabled = false;
+			for (var i in list)
+				//If the variable in incombatible list is x/c/a
+				if (vm.vars.isvar(list[i],xc)()) disabled = true;
+				//If it's not, but the value selected is not 0 (standing for all, like "United States" or "Economy Wide")
+				else if (vm.SelectedOpts[list[i]]()[0]!=vm.model[list[i]][0].code) disabled = true;
+			return disabled;
+			
+		}
+		
 		if (disableAll()) return true;
-		else if (uielement==='selector') {
-			if (vm.vars.isvar(varname,'x')() && (varname!="fchar")) return true; //Disable selector is variable is on x-axis
-			if (varname==='sic1') {
-				if (vm.vars.isvar('state','any')()) return true; //Disable simultaneous sector and state choice
-			} else if (varname==='state') {
-				if (vm.vars.isvar('sic1','any')()) return true; //Disable simultaneous sector and state choice
-			}
+
+		else if (uielement==='selector') {		
+			if (vm.vars.isvar(varname,'x')() && (varr.type!="variablegroup")) return true; //Disable selector if variable is on x-axis
+			else return IncompExists(varr.incompatible,'any'); //Disable selector if an incompatible variable is xvar or cvar
+
 		} else if (uielement==='xbutton') {
-			return vm.vars.isvar(varname,'any'); //Disable 'Make X' button is variable is xvar or cvar
+
+			if (vm.vars.isvar(varname,'any')()) return true; //Disable 'Make X' button is variable is xvar or cvar
+			else return IncompExists(varr.incompatible,'c');  //Disable 'Make X' if the cvar is incompatible
+
 		} else if (uielement==='cbutton') {
-			if (vm.vars.isvar('state','x')()) return true; //Disable 'Compare' button is variable is xvar or cvar or in geomap regime
-			else if (varname==='sic1') {
-				if (vm.vars.isvar('state','any')()) return true; //Disable simultaneous sector and state choice
-			} else if (varname==='state') {
-				if (vm.vars.isvar('sic1','x')()) return true; //Disable simultaneous sector and state choice
-			}
-			else return vm.vars.isvar(varname,'any');
+
+			if (vm.vars.isvar(varname,'any')()) return true; //Disable 'Compare' button is variable is xvar or cvar
+			else if (vm.vars.isvar('state','x')()) return true; //Disable 'Compare' button is variable is xvar or cvar or in geomap regime
+			else return IncompExists(varr.incompatible,'x')  //Disable 'Compare' if the xvar is incompatible
+		
 		} else return false;
 
 	}.bind(this.vars);
@@ -162,12 +174,11 @@ BDSVis.ViewModel = function() {
 		return multiple; 
 	}.bind(this.vars);
     
-	//Initial values of what is selected in the input selectors
-	this.SelectedOpts = {
-		state:ko.observableArray([this.model.state[0].code]),
-		sic1:ko.observableArray([this.model.sic1[0].code]),
-		measure:ko.observableArray([this.model.measure[11].code]),
-		year2:ko.observableArray([this.model.year2[36]])
+	//Knockout observables for input selectors
+	this.SelectedOpts = {};
+	for (var i in this.model.variables) {
+		var varr=this.model.variables[i];
+		vm.SelectedOpts[varr.name]=ko.observableArray([vm.model[varr.name][0].code]);
 	}
 	
 	this.fchar = ko.observable(this.model.fchar[0].code);
@@ -205,9 +216,10 @@ BDSVis.ViewModel = function() {
 
 	//Subscribe to input changes
 	//Any change in the input select fields triggers request to the server, followed by data processing and making of a new plot
-	var varnames=['state','measure','sic1','year2'];
-	for (var i in varnames) {
-		this.SelectedOpts[varnames[i]].subscribe(function() {vm.getBDSdata();});
+	for (var i in this.model.variables) {
+		var varr=this.model.variables[i];
+		if (varr.type!="variablegroup")
+			this.SelectedOpts[varr.name].subscribe(function() {vm.getBDSdata();});
 	}
 	this.fchar.subscribe(function() {vm.getBDSdata();});
 

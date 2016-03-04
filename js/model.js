@@ -197,6 +197,8 @@ BDSVis.Model = {
 		"fchar" : "Firm Characteristic"
 	},
 
+	dicts:{},
+
 	measlookup : {},
  	statelookup : {},
  	fagelookup : {},
@@ -212,11 +214,36 @@ BDSVis.Model = {
 	fsizecolor: [],
 
 	InitModel : function() {
-		for (var i in this.variables) {
+		var tmod=this;
+		this.ifsize=this.fsize;
+
+		//Create lookup table for variable by name to get index, by which one can access all the properties in this.variables
+		for (var i in this.variables)
 			this.VarLookUp[this.variables[i].name]=i;
-		}
-			
+
 		//Create dictionaries/hashmaps to lookup names of categorical variable values
+		var CreateDicts = function (varlist) {
+			
+			for (var i in varlist) {
+				
+				var varr=varlist[i];
+				var name=varr.name;
+
+				if ((varr.type==='categorical') || (varr.type==='variablegroup')) {
+					tmod.dicts[name]={};
+					for (var j in tmod[name])
+						tmod.dicts[name][tmod[name][j].code]=tmod[name][j].name;
+				}
+
+				if (varr.type==='variablegroup')
+					CreateDicts(varr.variables);
+			}
+		}
+
+		CreateDicts(this.variables);
+		
+			
+		
 		for (var i in this.state)
 			this.statelookup[this.state[i].code]=this.state[i].name;
 		for (var i in this.measure)
@@ -255,26 +282,13 @@ BDSVis.Model = {
 	},
 
 	NameLookUp : function(d,v) {
-		if (v==="fage4")
-			return this.fagelookup[d]
-		else if ((v==="fsize") || (v==="ifsize"))
-			return this.fsizelookup[d]
-		else if (v==="measure")
-			return this.measlookup[d]
-		else if (v==="state")
-			return this.statelookup[d]
-		else if (v==="sic1")
-			return this.sic1lookup[d]
-		else if (v==="year2")
-			return d
-		else if (v==="fchar")
-			return this.fcharlookup[d]
-		else if (v==="var") {
+		if (v==="var") {
 			if ((d==="fsize") || (d==="ifsize") || (d==="fage4"))
-				return this.fcharlookup[d]
-			else return this.varnames[d]
-		}
-		else return "Variable is not among: fage4,fsize,ifsize,measure,state"
+				return this.fcharlookup[d];
+			else return this.variables[this.VarLookUp[d]].fullname;
+		} else if (v==="year2")
+			return d; 
+		else return this.dicts[v][d];
 
 	},
 
