@@ -3,62 +3,66 @@ var BDSVis = BDSVis || {};
 BDSVis.Model = {
 	variables : [
 		{
-			"name" : "sic1",
-			"fullname" : "Sector",
+			"code" : "sic1",
+			"name" : "Sector",
 			"type" : "categorical",
 			"aslegend" : true,
 			"asaxis" : true,
 			"incompatible" : ["state"]
 		},
 		{
-			"name" : "measure",
-			"fullname" : "Measure",
+			"code" : "measure",
+			"name" : "Measure",
 			"type" : "categorical",
 			"aslegend" : true,
 			"asaxis" : false 
 		},
 		{
-			"name" : "state",
-			"fullname" : "State",
+			"code" : "state",
+			"name" : "State",
 			"type" : "categorical",
 			"aslegend" : true,
 			"asaxis" : true,
 			"incompatible" : ["sic1"]
 		},
 		{
-			"name" : "year2",
-			"fullname" : "Year",
+			"code" : "year2",
+			"name" : "Year",
 			"type" : "continuous",
+			"range" : [1977,2014,1],
 			"aslegend" : true,
 			"asaxis" : true
 		},
 		{
-			"name" : "fchar",
-			"fullname" : "Firm Characteristic",
+			"code" : "fchar",
+			"name" : "Firm Characteristic",
 			"type" : "variablegroup",
 			"aslegend" : true,
 			"asaxis" : true,
 			"variables" : [
 				 {
-					"name" : "fage4",
-					"fullname" : "Firm Age",
+					"code" : "fage4",
+					"name" : "Firm Age",
 					"type" : "categorical",
 					"aslegend" : true,
-					"asaxis" : true
+					"asaxis" : true,
+					"customcolor" : true
 				 },
 				 {
-					"name" : "fsize",
-					"fullname" : "Firm Size",
+					"code" : "fsize",
+					"name" : "Firm Size",
 					"type" : "categorical",
 					"aslegend" : true,
-					"asaxis" : true
+					"asaxis" : true,
+					"customcolor" : true
 				 },
 				 {
-					"name" : "ifsize",
-					"fullname" : "Initial Firm Size",
+					"code" : "ifsize",
+					"name" : "Initial Firm Size",
 					"type" : "categorical",
 					"aslegend" : true,
-					"asaxis" : true
+					"asaxis" : true,
+					"customcolor" : true
 				 }
 
 			]}
@@ -183,66 +187,67 @@ BDSVis.Model = {
 		{"code" : "firmdeath_estabs", "name" : "Establishment exit due to firm death" },
 		{"code" : "firmdeath_emp", "name" : "Job destruction from firm exit" }],
 
-	fchar : [
-		{"code" : "fage4", "name" : "Firm age"},
-		{"code" : "fsize", "name" : "Firm size"},
-		{"code" : "ifsize", "name" : "Initial firm size"}
-	],
-
-
-	dicts:{},
- 	fcharlookup: {},
-	VarLookUp: {},
-
- 	year2: [],
-
-//Color schemes
-	fage4color: [],
-	fsizecolor: [],
-
 	InitModel : function() {
 		var tmod=this;
+		
+////////		//Customization of variables: copying of code/name tables, creating colorscales etc
 		this.ifsize=this.fsize;
+		var CreateCustomColorScale = function (varname) {
+			var colorscale=[];
+			if (varname=="fage4") {
+				var scage=d3.scale.pow().exponent(1.).domain([0,26]).range(["#CB2027","#265DAB"]);
+				var fages=[0,1,2,3,4,5,10,15,20,25,30];
+				for (var ifage in fages) colorscale.push(scage(fages[ifage]));
+				colorscale.push("green");
+				colorscale.push("black");
+			};
+			
+			if ((varname=="fsize") || (varname=="ifsize")) {
+				var scsize=d3.scale.log().domain([1,10000]).range(["#CB2027","#265DAB"]);
+				var fsizes=[1,5,10,30,50,100,250,500,1000,2500,5000,10000];
+				for (var ifsize in fsizes ) colorscale.push(scsize(fsizes[ifsize]));
+				colorscale.push("black");
+			};
+			return colorscale;
+		};
+/////////////////////////
+
 
 		// //Create lookup table for variable by name to get index, by which one can access all the properties in this.variables
 		// for (var i in this.variables)
-		// 	this.VarLookUp[this.variables[i].name]=i;
+		// 	this.VarLookUp[this.variables[i].code]=i;
 
 		//Create dictionaries/hashmaps to lookup names of categorical variable values
-		var CreateDicts = function (varlist) {		
+		this.dicts={};
+		var CreateDicts = function (varlist) {
+					
 			for (var i in varlist) {
+
 				var varr=varlist[i];
-				var name=varr.name;
+				var name=varr.code;
 				if ((varr.type==='categorical') || (varr.type==='variablegroup')) {
 					tmod.dicts[name]={};
 					for (var j in tmod[name])
 						tmod.dicts[name][tmod[name][j].code]=tmod[name][j].name;
 				}
 				if (varr.type==='variablegroup')
+				{
+					tmod[varr.code]=[];
 					CreateDicts(varr.variables);
+					for (var j in varr.variables) 
+						tmod[varr.code].push(varr.variables[j]);
+				}
+				if (varr.type==='continuous')
+				{
+					tmod[varr.code]=[];
+					for (var j=varr.range[0]; j<varr.range[1]; j+=varr.range[2]) tmod[varr.code].push(j);
+				}
+				if (varr.customcolor) varr.colorscale=CreateCustomColorScale(varr.code);
 			}
 		}
 
 		CreateDicts(this.variables);
 		
-		for (var i in this.fchar)
-			this.fcharlookup[this.fchar[i].code]=this.fchar[i].name;
-
-		//Create list of years
-		for (var i=1977; i<2014; i++)
-			this.year2.push(i);
-
-		//Generate color scales for fage4 and fsize
-		var scage=d3.scale.pow().exponent(1.).domain([0,26]).range(["#CB2027","#265DAB"]);
-		var fages=[0,1,2,3,4,5,10,15,20,25,30];
-		for (var ifage in fages) this.fage4color.push(scage(fages[ifage]));
-		this.fage4color.push("green");
-		this.fage4color.push("black");
-
-		var scsize=d3.scale.log().domain([1,10000]).range(["#CB2027","#265DAB"]);
-		var fsizes=[1,5,10,30,50,100,250,500,1000,2500,5000,10000];
-		for (var ifsize in fsizes ) this.fsizecolor.push(scsize(fsizes[ifsize]));
-		this.fsizecolor.push("black");
 	},
 
 	GetDomain : function(v) {
@@ -250,7 +255,7 @@ BDSVis.Model = {
 	},
 
 	flatlookup : function (varname,arr) {
-		return arr[arr.map(function(d) {return d.name}).indexOf(varname)]; //Find object in array arr by field such that object.name==varname
+		return arr[arr.map(function(d) {return d.code}).indexOf(varname)]; //Find object in array arr by field such that object.name==varname
 	},
 
 	LookUpVar : function (varname) { //This is not efficient with respect to performance, but is just one line of code
@@ -261,8 +266,8 @@ BDSVis.Model = {
 
 	NameLookUp : function(d,v) {
 		if (v==="var")
-			return this.LookUpVar(d).fullname;	
-		else if (v==="year2")
+			return this.LookUpVar(d).name;	
+		else if (this.LookUpVar(v).type==="continuous")
 			return d; 
 		else return this.dicts[v][d];
 	},

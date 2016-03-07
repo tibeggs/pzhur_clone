@@ -12,8 +12,8 @@ BDSVis.ViewModel = function() {
 	
 	for (var i in this.model.variables) {
 		var variable=this.model.variables[i],
-			varname=variable.name,
-			varfullname=variable.fullname,
+			varname=variable.code,
+			varfullname=variable.name,
 			multiple="vars.multiple('"+varname+"')",
 			so="SelectedOpts['"+varname+"']",
 			optionstext="",
@@ -29,7 +29,7 @@ BDSVis.ViewModel = function() {
 		selectors.append("h4").text(varfullname+":");
 	
 		if (variable.type==="variablegroup")
-			databind+="value: "+varname;
+			databind+="value: "+so+"()";
 		else
 			databind+="value: "+so+"()[0]"
 					+", selectedOptions: "+so
@@ -133,7 +133,6 @@ BDSVis.ViewModel = function() {
 
 	//For disabled controls
 	this.vars.disabled = function (varname,uielement) {
-	
 		var varr=vm.model.LookUpVar(varname);
 
 		var IncompExists = function(list, xc) { //Check an element exists in the list, which is x-, c- or any variable
@@ -179,11 +178,10 @@ BDSVis.ViewModel = function() {
 	this.SelectedOpts = {};
 	for (var i in this.model.variables) {
 		var varr=this.model.variables[i];
-		vm.SelectedOpts[varr.name]=ko.observableArray([vm.model[varr.name][0].code]);
+		if (varr.type!="variablegroup")
+			vm.SelectedOpts[varr.code]=ko.observableArray([vm.model[varr.code][0].code]);
+		else vm.SelectedOpts[varr.code]=ko.observable(vm.model[varr.code][0].code)
 	}
-	
-	this.fchar = ko.observable(this.model.fchar[0].code);
-	//this.SelectedFchar = ko.observableArray([this.fchar()]);
 
 	//Initial values of X-axis variable and C- variable
 	this.xvar = ko.observable("fchar");
@@ -219,10 +217,9 @@ BDSVis.ViewModel = function() {
 	//Any change in the input select fields triggers request to the server, followed by data processing and making of a new plot
 	for (var i in this.model.variables) {
 		var varr=this.model.variables[i];
-		if (varr.type!="variablegroup")
-			this.SelectedOpts[varr.name].subscribe(function() {vm.getBDSdata();});
+		this.SelectedOpts[varr.code].subscribe(function() {vm.getBDSdata();});
 	}
-	this.fchar.subscribe(function() {vm.getBDSdata();});
+	//this.fchar.subscribe(function() {vm.getBDSdata();});
 
 	//Call initial plot
 	//Get the geographic map from the shape file in JSON format

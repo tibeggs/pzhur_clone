@@ -23,12 +23,12 @@ BDSVis.getAPIdata = function (vm) {
 			state : StateRequested,
 			//Send all selected measures or a single one depending on whether measure is the c-variable and whether it's a geo map regime.
 			measure : (vm.MeasureAsLegend() && !vm.StateAsArgument())?vm.SelectedOpts['measure']():[vm.SelectedOpts['measure']()[0]],
-			fchar : vm.fchar(),
+			fchar : vm.SelectedOpts['fchar'](),
 			//Send all selected years or a single one depending on whether year is the c-variable.
 			year2 : vm.YearAsLegend()?vm.SelectedOpts['year2']():[vm.SelectedOpts['year2']()[0]],
 			//"fchar" is actually one of 3: fage4, fsize, ifsize. So that should be sent instead of "fchar"
-			xvar : (vm.xvar()==="fchar")?(vm.fchar()):(vm.xvar()),
-			cvar : (vm.cvar()==="fchar")?(vm.fchar()):(vm.cvar()),
+			xvar : (vm.xvar()==="fchar")?(vm.SelectedOpts['fchar']()):(vm.xvar()),
+			cvar : (vm.cvar()==="fchar")?(vm.SelectedOpts['fchar']()):(vm.cvar()),
 			//The following 3 lines are just for the case when Firm Characterstic is c-variable.
 			fage4 : vm.model.GetDomain("fage4"),
 			fsize : vm.model.GetDomain("fsize"),
@@ -93,7 +93,7 @@ BDSVis.processAPIdata = function(data,request,vm) {
 	for (var i in data) {
 
 		data[i][xvar] = vm.model.NameLookUp(data[i][xvar],xvar); //Replace code strings with actual category names for x-variable
-		
+
 		data[i][cvar] = vm.model.NameLookUp(data[i][cvar],cvar); //Replace code strings with actual category names for c-variable
 
 		if (vm.MeasureAsLegend()) 
