@@ -24,15 +24,13 @@ BDSVis.ViewModel = function() {
 		var databind="options: model."+varname
 					+", optionsText: "+optionstext
 					+", optionsValue: "+optionsvalue
-					+", disable: vars.disabled('"+varname+"','selector'),";
+					+", disable: vars.disabled('"+varname+"','selector')"
+					+", value: "+so+"()[0]"
+					+", selectedOptions: "+so;
 	
 		selectors.append("h4").text(varfullname+":");
 	
-		if (variable.type==="variablegroup")
-			databind+="value: "+so+"()";
-		else
-			databind+="value: "+so+"()[0]"
-					+", selectedOptions: "+so
+		if ((variable.type!="variablegroup") && (variable.aslegend))
 					+", attr: {multiple: "+multiple+"}"
 					+", css: {tallselector: "+multiple+"}";
 
@@ -187,10 +185,11 @@ BDSVis.ViewModel = function() {
 	this.SelectedOpts = {};
 	for (var i in this.model.variables) {
 		var varr=this.model.variables[i];
-		if (varr.type!="variablegroup")
+		//if (varr.type!="variablegroup")
 			vm.SelectedOpts[varr.code]=ko.observableArray([vm.model[varr.code][0].code]);
-		else vm.SelectedOpts[varr.code]=ko.observable(vm.model[varr.code][0].code)
+		//else vm.SelectedOpts[varr.code]=ko.observable(vm.model[varr.code][0].code)
 	}
+	
 
 	//Initial values of X-axis variable and C- variable
 	this.xvar = ko.observable("fchar");
@@ -228,6 +227,7 @@ BDSVis.ViewModel = function() {
 		var varr=this.model.variables[i];
 		this.SelectedOpts[varr.code].subscribe(function() {vm.getBDSdata();});
 	}
+	//this.SelectedOpts['fchar'].subscribe(function() {vm.getBDSdata();});
 	//this.fchar.subscribe(function() {vm.getBDSdata();});
 
 	//Call initial plot
