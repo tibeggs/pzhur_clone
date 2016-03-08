@@ -104,12 +104,21 @@ BDSVis.ViewModel = function() {
 	
 	//The following functions set cvar (Legend/Comparison/Color variable) and xvar (X-axis variable)
 	this.setcvar = function (varname) {
+		var varr=vm.model.LookUpVar(varname);
+		
 		vm.cvar(varname);
-		if (varname==="sic1")
-			vm.SelectedOpts['state']([this.model.state[0].code]);
-		else if (varname==="state")
-			vm.SelectedOpts['sic1']([this.model.sic1[0].code]);
-		else vm.getBDSdata();
+		var incompatible_changed=false;
+		for (var i in varr.incombatible) {
+			var incmp=varr.incombatible[i];
+			vm.SelectedOpts[incmp.code]([this.model[incmp.code][0].code]);
+			incompatible_changed=true;
+		}
+		if (!incompatible_changed) vm.getBDSdata();
+		// if (varname==="sic1")
+// 			vm.SelectedOpts['state']([this.model.state[0].code]);
+// 		else if (varname==="state")
+// 			vm.SelectedOpts['sic1']([this.model.sic1[0].code]);
+// 		else vm.getBDSdata();
 	};
 
 	this.setxvar = function (varname) {
