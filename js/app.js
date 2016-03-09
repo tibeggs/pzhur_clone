@@ -1,6 +1,5 @@
 var BDSVis = BDSVis || {};
 
-
 BDSVis.ViewModel = function() {
 	var vm = this;
 
@@ -31,7 +30,7 @@ BDSVis.ViewModel = function() {
 		selectors.append("h4").text(varfullname+":");
 	
 		if ((variable.type!="variablegroup") && (variable.aslegend))
-					+", attr: {multiple: "+multiple+"}"
+			databind+=", attr: {multiple: "+multiple+"}"
 					+", css: {tallselector: "+multiple+"}";
 
 		selectors.append("select").attr("data-bind", databind);
@@ -112,11 +111,6 @@ BDSVis.ViewModel = function() {
 			incompatible_changed=true;
 		}
 		if (!incompatible_changed) vm.getBDSdata();
-		// if (varname==="sic1")
-// 			vm.SelectedOpts['state']([this.model.state[0].code]);
-// 		else if (varname==="state")
-// 			vm.SelectedOpts['sic1']([this.model.sic1[0].code]);
-// 		else vm.getBDSdata();
 	};
 
 	this.setxvar = function (varname) {
@@ -185,11 +179,9 @@ BDSVis.ViewModel = function() {
 	this.SelectedOpts = {};
 	for (var i in this.model.variables) {
 		var varr=this.model.variables[i];
-		//if (varr.type!="variablegroup")
-			vm.SelectedOpts[varr.code]=ko.observableArray([vm.model[varr.code][0].code]);
-		//else vm.SelectedOpts[varr.code]=ko.observable(vm.model[varr.code][0].code)
+		var initial = (varr.type==="continuous")?[vm.model[varr.code][0]]:[vm.model[varr.code][0].code];
+		vm.SelectedOpts[varr.code]=ko.observableArray(initial);
 	}
-	
 
 	//Initial values of X-axis variable and C- variable
 	this.xvar = ko.observable("fchar");
@@ -227,15 +219,14 @@ BDSVis.ViewModel = function() {
 		var varr=this.model.variables[i];
 		this.SelectedOpts[varr.code].subscribe(function() {vm.getBDSdata();});
 	}
-	//this.SelectedOpts['fchar'].subscribe(function() {vm.getBDSdata();});
-	//this.fchar.subscribe(function() {vm.getBDSdata();});
 
 	//Call initial plot
 	//Get the geographic map from the shape file in JSON format
-	d3.json("../json/gz_2010_us_040_00_20m.json", function(geo_data) {
-		vm.geo_data=geo_data;
-		vm.getBDSdata();
-	});
+	// d3.json("../json/gz_2010_us_040_00_20m.json", function(geo_data) {
+	// 	vm.geo_data=geo_data;
+	// 	vm.getBDSdata();
+	// });
+	vm.getBDSdata();
 }
 
 ko.applyBindings(new BDSVis.ViewModel());

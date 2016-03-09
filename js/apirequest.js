@@ -15,7 +15,7 @@ BDSVis.getAPIdata = function (vm) {
 		if ((multiple) && (firstUS)) StateRequested = vm.SelectedOpts['state']().slice(1); //Remove "United States" if many states are selected
 		//Otherwise return all selected states or one, depending on whether state is the c-variable
 		else StateRequested = (vm.StateAsLegend())?vm.SelectedOpts['state']():[vm.SelectedOpts['state']()[0]]; 
-
+		
 		return {
 			//If by-state request, then only send "Economy Wide", otherwise send all selected sectors or a single sector depending on whether sector is the c-variable(legend). If in map regime (StateAsArgument) send only one measure
 			sic1 : vm.StateAsLegend()?([0]):(vm.SectorAsLegend()?vm.SelectedOpts['sic1']():[vm.SelectedOpts['sic1']()[0]]),
