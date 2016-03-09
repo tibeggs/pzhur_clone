@@ -1,6 +1,8 @@
 var BDSVis = BDSVis || {};
 
 BDSVis.Model = {
+	timevar : "year2",
+	geomapvar : "state",
 	variables : [
 		{
 			"code" : "sic1",

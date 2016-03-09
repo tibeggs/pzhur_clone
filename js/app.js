@@ -35,11 +35,14 @@ BDSVis.ViewModel = function() {
 
 		selectors.append("select").attr("data-bind", databind);
 	
-		if (variable.aslegend)
-			selectors.append("button")
-					.attr("data-bind","click: function(variable) {setcvar('"+varname+"')}"
+		if (variable.aslegend) {
+			var cbutdbind="click: function(variable) {setcvar('"+varname+"')}"
 									+", disable: vars.disabled('"+varname+"','cbutton')"
-									+", css: {activebutton: "+multiple+"}").text("Compare "+varfullname+"s");
+									+", css: {activebutton: "+multiple+"}";
+			if (variable.type=="variablegroup") cbutdbind+=", text: 'Compare '+model.NameLookUp("+so+"()[0],'var')";
+			selectors.append("button")
+					.attr("data-bind",cbutdbind).text("Compare "+varfullname+"s");
+		}
 		if (variable.asaxis)
 			selectors.append("button")
 					.attr("data-bind","click: function(variable) {setxvar('"+varname+"')}"
@@ -75,7 +78,8 @@ BDSVis.ViewModel = function() {
 		if (vm.timelapse()) {
 			vm.timelapse(false);
 			clearInterval(vm.tlint); //Stop the animation
-			vm.SelectedOpts['year2']([vm.TimeLapseCurrYear-1]);	//Set the year to the year currently shown in animation
+			vm.SelectedOpts[vm.model.timevar]([vm.TimeLapseCurrYear-1]); //Set the year to the year currently shown in animation
+			//vm.SelectedOpts['year2']([vm.TimeLapseCurrYear-1]);	
 		} else {
 			vm.timelapse(true);
 			vm.getBDSdata();
@@ -90,6 +94,11 @@ BDSVis.ViewModel = function() {
 		//Toggle whether to plot the graph in log or linear scale
 		vm.logscale(!vm.logscale());
 		vm.getBDSdata();
+	};
+
+	//Geo Map regime
+	this.geomap = function() {
+		return vm.vars.isvar(vm.model.geomapvar,'x')();
 	};
 
 	this.waiting4api = ko.observable(false);    //Whether message "Waiting for data from server" is shown
@@ -115,7 +124,7 @@ BDSVis.ViewModel = function() {
 
 	this.setxvar = function (varname) {
 		vm.xvar(varname);
-		if (((varname==="sic1") && vm.StateAsLegend()) || varname==="state") vm.cvar("measure");
+		//if (varname==="state") vm.cvar("measure");
 		vm.getBDSdata();
 	};
 
@@ -170,9 +179,7 @@ BDSVis.ViewModel = function() {
 
 	//Whether selector is multiple (basically, amounts to being c-variable) and "Compare" button active
 	this.vars.multiple = function (varname) {
-		var multiple = vm.vars.isvar(varname,'c')();
-		if (varname==='measure') multiple = multiple && (!vm.vars.isvar('state','x')());
-		return multiple; 
+		return vm.geomap()?false:vm.vars.isvar(varname,'c')(); 
 	}.bind(this.vars);
     
 	//Knockout observables for input selectors
