@@ -106,6 +106,7 @@ BDSVis.ViewModel = function() {
 	disableAll = ko.computed(function () { //Disable all the input elements (used in Time Lapse regime and when the app is waiting for data from server)
 		return (vm.waiting4api() || vm.timelapse());
 	});
+
 	
 	//The following functions set cvar (Legend/Comparison/Color variable) and xvar (X-axis variable)
 	this.setcvar = function (varname) {
@@ -144,13 +145,17 @@ BDSVis.ViewModel = function() {
 	this.vars.disabled = function (varname,uielement) {
 		var varr=vm.model.LookUpVar(varname);
 
-		var IncompExists = function(list, xc) { //Check an element exists in the list, which is x-, c- or any variable;
+		var IncompExists = function(list, xc) { 
+			//Check that among incompatible variables, there is one that is x- or c- and/or has a non-generic value selected
+			//Example: There is no by-state+by-sector data. So, if "state" is x- or c- var, then selector and cbutton and xbutton for "sector" (sic1) should be disabled, unless "United States" is selected for the "state"		
 			var disabled = false;
-			for (var i in list)
+			for (var i in list) {
+				//If the value selected is not 0 (standing for all, like "United States" or "Economy Wide")
+				var toplinenot0 = (vm.SelectedOpts[list[i]]()[0]!=vm.model[list[i]][0].code);
 				//If the variable in incombatible list is x/c/a
-				if ((vm.vars.isvar(list[i],xc)()) && ((vm.SelectedOpts[list[i]]()[0]!=vm.model[list[i]][0].code))) disabled = true;
-				//If it's not, but the value selected is not 0 (standing for all, like "United States" or "Economy Wide")
-				else if (vm.SelectedOpts[list[i]]()[0]!=vm.model[list[i]][0].code) disabled = true;
+				if ((vm.vars.isvar(list[i],xc)()) && (toplinenot0)) disabled = true;
+				else if (toplinenot0) disabled = true;	
+			}
 			return disabled;
 			
 		}
@@ -162,7 +167,7 @@ BDSVis.ViewModel = function() {
 			else return IncompExists(varr.incompatible,'any'); //Disable selector if an incompatible variable is xvar or cvar
 
 		} else if (uielement==='xbutton') {
-			//if (varname === vm.model.geomapvar) return false; //Enable entering into geo map regime at any time
+			if (varname === vm.model.geomapvar) return false; //Enable entering into geo map regime at any time
 			if (vm.vars.isvar(varname,'any')()) return true; //Disable 'Make X' button is variable is xvar or cvar
 			else return IncompExists(varr.incompatible,'c');  //Disable 'Make X' if the cvar is incompatible
 
@@ -223,7 +228,11 @@ BDSVis.ViewModel = function() {
 	for (var i in this.model.variables) {
 		var varr=this.model.variables[i];
 		this.SelectedOpts[varr.code].subscribe(function() {vm.getBDSdata();});
-	}
+	};
+
+	this.AllOrFirst = function(varname) {
+		return vm.vars.isvar(varname,'c')()?vm.SelectedOpts[varname]():[vm.SelectedOpts[varname]()[0]];
+	};
 
 	//Call initial plot
 	//Get the geographic map from the shape file in JSON format

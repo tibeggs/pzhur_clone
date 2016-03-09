@@ -14,18 +14,18 @@ BDSVis.getAPIdata = function (vm) {
 
 		if ((multiple) && (firstUS)) StateRequested = vm.SelectedOpts['state']().slice(1); //Remove "United States" if many states are selected
 		//Otherwise return all selected states or one, depending on whether state is the c-variable
-		else StateRequested = (vm.StateAsLegend())?vm.SelectedOpts['state']():[vm.SelectedOpts['state']()[0]]; 
+		else StateRequested = vm.AllOrFirst('state'); 
 		
 		return {
 			//If by-state request, then only send "Economy Wide", otherwise send all selected sectors or a single sector depending on whether sector is the c-variable(legend). If in map regime (StateAsArgument) send only one measure
-			sic1 : vm.StateAsLegend()?([0]):(vm.SectorAsLegend()?vm.SelectedOpts['sic1']():[vm.SelectedOpts['sic1']()[0]]),
+			sic1 : vm.StateAsLegend()?([0]):vm.AllOrFirst('sic1'),
 			//See state calculation above for StateRequested
 			state : StateRequested,
 			//Send all selected measures or a single one depending on whether measure is the c-variable and whether it's a geo map regime.
-			measure : (vm.MeasureAsLegend() && !vm.StateAsArgument())?vm.SelectedOpts['measure']():[vm.SelectedOpts['measure']()[0]],
+			measure : vm.geomap()?[vm.SelectedOpts['measure']()[0]]:vm.AllOrFirst('measure'),
 			fchar : vm.SelectedOpts['fchar'](),
 			//Send all selected years or a single one depending on whether year is the c-variable.
-			year2 : vm.YearAsLegend()?vm.SelectedOpts['year2']():[vm.SelectedOpts['year2']()[0]],
+			year2 : vm.AllOrFirst('year2'),
 			//"fchar" is actually one of 3: fage4, fsize, ifsize. So that should be sent instead of "fchar"
 			xvar : (vm.xvar()==="fchar")?(vm.SelectedOpts['fchar']()[0]):(vm.xvar()),
 			cvar : (vm.cvar()==="fchar")?(vm.SelectedOpts['fchar']()[0]):(vm.cvar()),
