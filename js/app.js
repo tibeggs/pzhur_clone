@@ -186,7 +186,7 @@ BDSVis.ViewModel = function() {
 	this.SelectedOpts = {};
 	for (var i in this.model.variables) {
 		var varr=this.model.variables[i];
-		var initial = (varr.type==="continuous")?[vm.model[varr.code][0]]:[vm.model[varr.code][0].code];
+		var initial = (varr.type==="continuous")?[vm.model[varr.code][varr.default]]:[vm.model[varr.code][varr.default].code];
 		vm.SelectedOpts[varr.code]=ko.observableArray(initial);
 	}
 

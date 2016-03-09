@@ -8,6 +8,7 @@ BDSVis.Model = {
 			"code" : "sic1",
 			"name" : "Sector",
 			"type" : "categorical",
+			"default" : 0,
 			"aslegend" : true,
 			"asaxis" : true,
 			"incompatible" : ["state"]
@@ -16,6 +17,7 @@ BDSVis.Model = {
 			"code" : "measure",
 			"name" : "Measure",
 			"type" : "categorical",
+			"default" : 0,
 			"aslegend" : true,
 			"asaxis" : false 
 		},
@@ -23,6 +25,7 @@ BDSVis.Model = {
 			"code" : "state",
 			"name" : "State",
 			"type" : "categorical",
+			"default" : 0,
 			"aslegend" : true,
 			"asaxis" : true,
 			"incompatible" : ["sic1"]
@@ -32,6 +35,7 @@ BDSVis.Model = {
 			"name" : "Year",
 			"type" : "continuous",
 			"range" : [1977,2014,1],
+			"default" : 35,
 			"aslegend" : true,
 			"asaxis" : true
 		},
@@ -39,6 +43,7 @@ BDSVis.Model = {
 			"code" : "fchar",
 			"name" : "Firm Characteristic",
 			"type" : "variablegroup",
+			"default" : 0,
 			"aslegend" : true,
 			"asaxis" : true,
 			"variables" : [
@@ -46,6 +51,7 @@ BDSVis.Model = {
 					"code" : "fage4",
 					"name" : "Firm Age",
 					"type" : "categorical",
+					"default" : 0,
 					"aslegend" : true,
 					"asaxis" : true,
 					"customcolor" : true
@@ -54,6 +60,7 @@ BDSVis.Model = {
 					"code" : "fsize",
 					"name" : "Firm Size",
 					"type" : "categorical",
+					"default" : 0,
 					"aslegend" : true,
 					"asaxis" : true,
 					"customcolor" : true
@@ -62,6 +69,7 @@ BDSVis.Model = {
 					"code" : "ifsize",
 					"name" : "Initial Firm Size",
 					"type" : "categorical",
+					"default" : 0,
 					"aslegend" : true,
 					"asaxis" : true,
 					"customcolor" : true
