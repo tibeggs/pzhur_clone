@@ -106,7 +106,6 @@ BDSVis.ViewModel = function() {
 	disableAll = ko.computed(function () { //Disable all the input elements (used in Time Lapse regime and when the app is waiting for data from server)
 		return (vm.waiting4api() || vm.timelapse());
 	});
-
 	
 	//The following functions set cvar (Legend/Comparison/Color variable) and xvar (X-axis variable)
 	this.setcvar = function (varname) {
@@ -145,11 +144,11 @@ BDSVis.ViewModel = function() {
 	this.vars.disabled = function (varname,uielement) {
 		var varr=vm.model.LookUpVar(varname);
 
-		var IncompExists = function(list, xc) { //Check an element exists in the list, which is x-, c- or any variable
+		var IncompExists = function(list, xc) { //Check an element exists in the list, which is x-, c- or any variable;
 			var disabled = false;
 			for (var i in list)
 				//If the variable in incombatible list is x/c/a
-				if (vm.vars.isvar(list[i],xc)()) disabled = true;
+				if ((vm.vars.isvar(list[i],xc)()) && ((vm.SelectedOpts[list[i]]()[0]!=vm.model[list[i]][0].code))) disabled = true;
 				//If it's not, but the value selected is not 0 (standing for all, like "United States" or "Economy Wide")
 				else if (vm.SelectedOpts[list[i]]()[0]!=vm.model[list[i]][0].code) disabled = true;
 			return disabled;
@@ -163,14 +162,13 @@ BDSVis.ViewModel = function() {
 			else return IncompExists(varr.incompatible,'any'); //Disable selector if an incompatible variable is xvar or cvar
 
 		} else if (uielement==='xbutton') {
-
+			//if (varname === vm.model.geomapvar) return false; //Enable entering into geo map regime at any time
 			if (vm.vars.isvar(varname,'any')()) return true; //Disable 'Make X' button is variable is xvar or cvar
 			else return IncompExists(varr.incompatible,'c');  //Disable 'Make X' if the cvar is incompatible
 
 		} else if (uielement==='cbutton') {
 
-			if (vm.vars.isvar(varname,'any')()) return true; //Disable 'Compare' button is variable is xvar or cvar
-			else if (vm.vars.isvar('state','x')()) return true; //Disable 'Compare' button is variable is xvar or cvar or in geomap regime
+			if ((vm.vars.isvar(varname,'any')()) || (vm.vars.isvar(vm.model.geomapvar,'x')())) return true; //Disable 'Compare' button if variable is xvar or cvar or if geomap regime
 			else return IncompExists(varr.incompatible,'x')  //Disable 'Compare' if the xvar is incompatible
 		
 		} else return false;
@@ -192,7 +190,7 @@ BDSVis.ViewModel = function() {
 
 	//Initial values of X-axis variable and C- variable
 	this.xvar = ko.observable("fchar");
-	this.cvar = ko.observable("sic1");	
+	this.cvar = ko.observable("state");	
 
 	//Whether a variable is C- Variable (Legend)
 	this.SectorAsLegend = ko.computed( function () {return vm.cvar()==="sic1";});
