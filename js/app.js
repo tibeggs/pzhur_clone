@@ -229,11 +229,11 @@ BDSVis.ViewModel = function() {
 
 	//Call initial plot
 	//Get the geographic map from the shape file in JSON format
-	// d3.json("../json/gz_2010_us_040_00_20m.json", function(geo_data) {
-	// 	vm.geo_data=geo_data;
-	// 	vm.getBDSdata();
-	// });
-	vm.getBDSdata();
+	d3.json("../json/gz_2010_us_040_00_20m.json", function(geo_data) {
+		vm.geo_data=geo_data;
+		vm.getBDSdata();
+	});
+	//vm.getBDSdata();
 }
 
 ko.applyBindings(new BDSVis.ViewModel());

@@ -57,7 +57,7 @@ BDSVis.makeMap = function (data,request,vm) {
 
 	//Put the states in geo_data in the same order as they are in data
 	for (var i in data)
-		geo_data1.push(BDSVis.geo_data.features.filter(function(d) {return data[i].state===d.properties.NAME;})[0]);
+		geo_data1.push(vm.geo_data.features.filter(function(d) {return data[i].state===d.properties.NAME;})[0]);
 
 	var path = d3.geo.path().projection(projection);
 
