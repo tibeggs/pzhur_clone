@@ -26,6 +26,7 @@ BDSVis.Model = {
 			"name" : "State",
 			"type" : "categorical",
 			"default" : 0,
+			"removetotal" : true,
 			"aslegend" : true,
 			"asaxis" : true,
 			"incompatible" : ["sic1"]
@@ -35,7 +36,7 @@ BDSVis.Model = {
 			"name" : "Year",
 			"type" : "continuous",
 			"range" : [1977,2014,1],
-			"default" : 35,
+			"default" : 36,
 			"aslegend" : true,
 			"asaxis" : true
 		},

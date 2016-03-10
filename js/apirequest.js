@@ -6,21 +6,30 @@ BDSVis.getAPIdata = function (vm) {
 
 	//The list of variables to request from API. Based on this, the request URL is formed and then this list is used when plotting.
 	var APIrequest = function  () {
-		
-		//Calculate whether to request single state or multiple, and remove the 00 code for the US in selector
-		var StateRequested;
-		var multiple = vm.SelectedOpts['state']().length>1; //Whether multiple states are selected
-		var firstUS = vm.SelectedOpts['state']()[0]==="00"; //Whether "United States" is selected
 
-		if ((multiple) && (firstUS)) StateRequested = vm.SelectedOpts['state']().slice(1); //Remove "United States" if many states are selected
-		//Otherwise return all selected states or one, depending on whether state is the c-variable
-		else StateRequested = vm.AllOrFirst('state'); 
+		var varsrequested={};
+		
+		for (var i in vm.model.variables) {
+			var varr=vm.model.variables[i];
+			if (varr.removetotal) {
+				//Calculate whether to request single value of the variable or multiple, and remove the entry for the total (like US or EW) in selector
+				var VarrRequested;
+				var multiple = vm.SelectedOpts[varr.code]().length>1; //Whether multiple values are selected
+				var firstTotal = vm.SelectedOpts[varr.code]()[0]===vm.model[varr.code][0].code; //Whether total is selected
+
+				if ((multiple) && (firstTotal)) VarrRequested = vm.SelectedOpts[varr.code]().slice(1); //Remove total if many values are selected
+				//Otherwise return all selected values or one, depending on whether varr is the c-variable
+				else VarrRequested = vm.AllOrFirst(varr.code);
+				varsrequested[varr.code] = VarrRequested;
+			}
+		};
+		 
 		
 		return {
 			//If by-state request, then only send "Economy Wide", otherwise send all selected sectors or a single sector depending on whether sector is the c-variable(legend). If in map regime (StateAsArgument) send only one measure
 			sic1 : vm.StateAsLegend()?([0]):vm.AllOrFirst('sic1'),
 			//See state calculation above for StateRequested
-			state : StateRequested,
+			state : varsrequested['state'],
 			//Send all selected measures or a single one depending on whether measure is the c-variable and whether it's a geo map regime.
 			measure : vm.geomap()?[vm.SelectedOpts['measure']()[0]]:vm.AllOrFirst('measure'),
 			fchar : vm.SelectedOpts['fchar'](),

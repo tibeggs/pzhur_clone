@@ -146,15 +146,15 @@ BDSVis.ViewModel = function() {
 		var varr=vm.model.LookUpVar(varname);
 
 		var IncompExists = function(list, xc) { 
-			//Check that among incompatible variables, there is one that is x- or c- and/or has a non-generic value selected
-			//Example: There is no by-state+by-sector data. So, if "state" is x- or c- var, then selector and cbutton and xbutton for "sector" (sic1) should be disabled, unless "United States" is selected for the "state"		
+			//Check that among incompatible variables, there is one that is x- or c- and/or has a non-total value selected
+			//Example: There is no by-state+by-sector data. So, if "state" is x- or c- var, then selector and cbutton and xbutton for "sector" (sic1) should be disabled, unless "United States" is selected for the "state". Likewise, selection of "state" is disabled, unless "Economy Wide" is selected for "sector"
 			var disabled = false;
 			for (var i in list) {
-				//If the value selected is not 0 (standing for all, like "United States" or "Economy Wide")
-				var toplinenot0 = (vm.SelectedOpts[list[i]]()[0]!=vm.model[list[i]][0].code);
+				//If the value selected is not 0 (standing for total, like "United States" or "Economy Wide")
+				var toplinenottotal = (vm.SelectedOpts[list[i]]()[0]!=vm.model[list[i]][0].code);
 				//If the variable in incombatible list is x/c/a
-				if ((vm.vars.isvar(list[i],xc)()) && (toplinenot0)) disabled = true;
-				else if (toplinenot0) disabled = true;	
+				if ((vm.vars.isvar(list[i],xc)()) && (toplinenottotal)) disabled = true;
+				else if (toplinenottotal) disabled = true;	
 			}
 			return disabled;
 			
