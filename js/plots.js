@@ -10,11 +10,18 @@ BDSVis.makePlot = function (data,request,vm) {
 	var svg=pv.svg;
 	var width=pv.width;
 	var height=pv.height;
+
+	var cvar = request.cvar;
+	var cvarr=vm.model.LookUpVar(cvar);
+	var xvar = request.xvar;
+	var xvarr=vm.model.LookUpVar(xvar);
+
+	var MeasureAsLegend = (cvar === vm.model.yvars)
 	
 	//var request=vm.APIrequest();
 
 	//If measure is a (c-)variable, then we got melted data from updateBDSdata function, with all measures contained in the "value" column
-	var measure=(vm.MeasureAsLegend())?"value":request.measure;
+	var measure=MeasureAsLegend?"value":request[vm.model.yvars];
 
 	//Set the title of the plot
 	var ptitle=((request.measure.length>1)?("Various measures"):(vm.model.NameLookUp(request.measure,"measure")))+ //If many measures say "various", otherwise the measure name
@@ -35,21 +42,21 @@ BDSVis.makePlot = function (data,request,vm) {
 	maintitle.selectAll("tspan").attr("x",function(d) { return (pv.legendx-this.getComputedTextLength())/2.; })
 
 	//List of selected categories by actual name rather than code
-	var cvarlist=request[request.cvar].map(function(d) {
-		var cv=vm.FirmCharAsLegend()?d:vm.model.NameLookUp(d,request.cvar);
-		return (vm.YearAsLegend())?(cv.toString()):(cv);
+	var cvarlist=request[cvar].map(function(d) {
+		var cv=vm.FirmCharAsLegend()?d:vm.model.NameLookUp(d,cvar);
+		return (cvarr.type === 'continuous')?(cv.toString()):(cv);
 	});
 	
 
 	//Setting D3 scales
 	var xScale; var yScale; var ymin; var y0;
-	if (vm.YearAsArgument())
+	if (xvarr.type === 'continuous')
 		xScale = d3.scale.linear()
-			.domain([vm.model.year2[0],vm.model.year2[vm.model.year2.length-1]])
+			.domain([vm.model[xvar][0],vm.model[xvar][vm.model[xvar].length-1]])
 			.range([0, width]);
 	else
 		xScale = d3.scale.ordinal()
-			.domain(vm.model.GetDomain(request.xvar))
+			.domain(vm.model.GetDomain(xvar))
 			.rangeRoundBands([0, width], .1);
 
 	if (vm.logscale()) {
@@ -76,32 +83,31 @@ BDSVis.makePlot = function (data,request,vm) {
 		
 	
 	var colors = function(i) {
-		var cvarr=vm.model.LookUpVar(request.cvar);
-		if (vm.YearAsLegend()) return yearcolorscale(cvarlist[i]);
+		if (cvarr.type === 'continuous') return yearcolorscale(cvarlist[i]);
 		else if (cvarr.customcolor) return cvarr.colorscale[i];
-		else if (vm.YearAsArgument()) return colorbrewer.Dark2[8][i % 8];//colarr[i % colarr.length];
+		else if (xvarr.type === 'continuous') return colorbrewer.Dark2[8][i % 8];//colarr[i % colarr.length];
 		else return colorbrewer.BrBG[11][10 - (i % 11)];//colarr[i % colarr.length];//normscale(i);
 	};
 
 	var Tooltiptext = function(d) {
-		var ttt=vm.MeasureAsLegend()?d.measure:vm.model.NameLookUp(measure,"measure");
-		ttt+=": "+d3.format(",")(d[measure])+"\n"+vm.model.NameLookUp(request.xvar,"var")+": "+d[request.xvar];
-		if (!vm.MeasureAsLegend())
-			ttt+="\n"+vm.model.NameLookUp(request.cvar,"var")+": "+d[request.cvar];
+		var ttt=MeasureAsLegend?d[vm.model.yvars]:vm.model.NameLookUp(measure,vm.model.yvars);
+		ttt+=": "+d3.format(",")(d[measure])+"\n"+vm.model.NameLookUp(xvar,"var")+": "+d[xvar];
+		if (MeasureAsLegend)
+			ttt+="\n"+vm.model.NameLookUp(cvar,"var")+": "+d[cvar];
 		return ttt;
 	}
 	
-	if (vm.YearAsArgument()) {
+	if (xvarr.type === 'continuous') {
 		//Make a timeline scatter plot if year is x-variable
 
 		// Define the line
 		var valueline = d3.svg.line()
-    	.x(function(d) { return xScale(d.year2); })
+    	.x(function(d) { return xScale(d[xvar]); })
     	.y(function(d) { return yScale(d[measure]); });
 
 
     	//Add lines
-    	for (var icv in request[request.cvar])
+    	for (var icv in request[cvar])
     		svg.append("path")
         	.attr("class", "line")
         	.attr("fill", "none")
@@ -109,17 +115,17 @@ BDSVis.makePlot = function (data,request,vm) {
         	.attr("stroke", colors(icv))
         	.attr("d", valueline(data.filter(function(d) {
         			if (vm.FirmCharAsLegend())
-        				return d[request.cvar]===request[request.cvar][icv]; 
-        			else return d[request.cvar]===vm.model.NameLookUp(request[request.cvar][icv],request.cvar);
+        				return d[cvar]===request[cvar][icv]; 
+        			else return d[cvar]===vm.model.NameLookUp(request[cvar][icv],cvar);
         		})));
 
         //Add dots
         svg.selectAll("dot")
     	.data(data)
   		.enter().append("circle")
-  		.attr("fill", function(d) {return colors(cvarlist.indexOf(d[request.cvar]));})
+  		.attr("fill", function(d) {return colors(cvarlist.indexOf(d[cvar]));})
     	.attr("r", 5)
-    	.attr("cx", function(d) { return xScale(d.year2); })
+    	.attr("cx", function(d) { return xScale(d[xvar]); })
     	.attr("cy", function(d) { return yScale(d[measure]); })
     	.append("title").text(function(d){return Tooltiptext(d);});
 
@@ -135,12 +141,12 @@ BDSVis.makePlot = function (data,request,vm) {
 			.data(data);
 
 		bars.enter().append("rect")
-		   	.attr("fill",  function(d) {return colors(cvarlist.indexOf(d[request.cvar]));})
+		   	.attr("fill",  function(d) {return colors(cvarlist.indexOf(d[cvar]));})
 		   	.attr("stroke", "white")
 		   	.attr("stroke-width",".1")
-		   	//.attr("fill",  function(d) {return colors(d[request.cvar]);})
+		   	//.attr("fill",  function(d) {return colors(d[cvar]);})
 		   	.attr("width", barwidth)
-		   	.attr("x",function(d) {return xScale(d[request.xvar])+barwidth*cvarlist.indexOf(d[request.cvar])})
+		   	.attr("x",function(d) {return xScale(d[xvar])+barwidth*cvarlist.indexOf(d[cvar])})
 		   	// .attr("y",function(d) {return yScale(y0)})
 		   	// .attr("height",0).transition()
 		   	// .duration(500).ease("sin-in-out")
@@ -152,7 +158,7 @@ BDSVis.makePlot = function (data,request,vm) {
 	//Adding axes
 	var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
 
-	if (vm.YearAsArgument()) xAxis.tickFormat(d3.format("d"));
+	if (xvarr.type === 'continuous') xAxis.tickFormat(d3.format("d"));
 
 	var xAxis0 = d3.svg.axis().scale(xScale).tickFormat("").orient("bottom");
 
@@ -170,7 +176,7 @@ BDSVis.makePlot = function (data,request,vm) {
 		.call(xAxis)
 		.selectAll(".tick text");
 
-	if (!vm.YearAsArgument())
+	if (xvarr.type != 'continuous')
       	xAxisLabels.call(wrap,xScale.rangeBand());
 
 	svg.append("g")
@@ -179,12 +185,12 @@ BDSVis.makePlot = function (data,request,vm) {
 
 	//X-axis label
 	pv.xaxislabel
-		.text(vm.model.NameLookUp(request.xvar,"var"))
+		.text(vm.model.NameLookUp(xvar,"var"))
 		.attr("x",function(d) { return (pv.margin.left+pv.margin.right+width-this.getComputedTextLength())/2.; })
 
 	//Y-axis label
 	//debugger;
-	if ((measure!="value") && (vm.model.NameLookUp(measure,"measure").indexOf("rate")!=-1))
+	if ((measure!="value") && (vm.model.NameLookUp(measure,vm.model.yvars).indexOf("rate")!=-1))
 		pv.yaxislabel.text("% change")
 		
 
@@ -195,7 +201,7 @@ BDSVis.makePlot = function (data,request,vm) {
 
 	legendsvg.attr("height",(symbolsize+5)*cvarlist.length);
 
-	legendsvg.append("text").attr("class","legtitle").text(vm.model.NameLookUp(request.cvar,'var')+": ");
+	legendsvg.append("text").attr("class","legtitle").text(vm.model.NameLookUp(cvar,'var')+": ");
 
 	var legendlabels=legendsvg.selectAll("text .leglabel")
 		.data(cvarlist)
@@ -241,19 +247,19 @@ BDSVis.makePlot = function (data,request,vm) {
 	// Timelapse animation
 	function updateyear(yr) {
 
-		curyearmessage.transition().duration(1000).text(vm.model.year2[yr]); //Display year
+		curyearmessage.transition().duration(1000).text(vm.model[vm.model.timevar][yr]); //Display year
 
 		d3.select("#graphtitle").text("");
 
-		var dataset=data.filter(function(d) {return +d.time===vm.model.year2[yr]}); //Select data corresponding to the year
+		var dataset=data.filter(function(d) {return +d.time===vm.model[vm.model.timevar][yr]}); //Select data corresponding to the year
 		
 		//The data4bars is only needed for smooth transition in animations. There have to be rectangles of 0 height for missing data. data4bars is created
 		//empty outside this function. The following loop fills in / updates to actual data values from current year
 		for (var i in data4bars) data4bars[i][measure]=0; //Set every bar to 0 so that missing bars disappear
 			
 		for (var i in dataset) { //Set the values of existing bars
-			data4bars[xScale.domain().indexOf(dataset[i][request.xvar])*request[request.cvar].length
-					+cvarlist.indexOf(dataset[i][request.cvar])][measure]=+dataset[i][measure];
+			data4bars[xScale.domain().indexOf(dataset[i][xvar])*request[cvar].length
+					+cvarlist.indexOf(dataset[i][cvar])][measure]=+dataset[i][measure];
 		};
 		
   		var bars=svg.selectAll("rect").data(data4bars);
@@ -263,7 +269,7 @@ BDSVis.makePlot = function (data,request,vm) {
 		  
 		bars
 		   	.attr("fill",  function(d) {return colors(+d.icvar)})
-		   	.attr("x",function(d) {return xScale(d[request.xvar])+barwidth*d.icvar;})
+		   	.attr("x",function(d) {return xScale(d[xvar])+barwidth*d.icvar;})
 		   	.transition().duration(500)
 		   	.attr("y",function(d) { return yScale(Math.max(0,+d[measure]));})
 		   	.attr("height",function(d) {return Math.abs(yScale(y0)-yScale(+d[measure]));});
@@ -278,7 +284,7 @@ BDSVis.makePlot = function (data,request,vm) {
 			for (var j in cvarlist)
 				{
 					var datum4bar={}
-					datum4bar[request.xvar]=xScale.domain()[i];
+					datum4bar[xvar]=xScale.domain()[i];
 					datum4bar[measure]=0;
 					datum4bar.icvar=j;
 					data4bars.push(datum4bar);
@@ -291,8 +297,8 @@ BDSVis.makePlot = function (data,request,vm) {
 		var curyearmessage=svg.append("text").attr("x",width/2).attr("y",height/2).attr("font-size",100).attr("fill-opacity",.3);
 		vm.tlint=setInterval(function() {
   			updateyear(iy);
-  			if (iy<vm.model.year2.length) iy++; else iy=0;
-  			vm.TimeLapseCurrYear=vm.model.year2[iy];
+  			if (iy<vm.model[vm.model.timevar].length) iy++; else iy=0;
+  			vm.TimeLapseCurrYear=vm.model[vm.model.timevar][iy];
 		}, 500);
 	};
 
