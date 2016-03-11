@@ -74,13 +74,14 @@ BDSVis.makePlot = function (data,request,vm) {
 	var normscale=d3.scale.linear().domain([0,cvarlist.length-1]).range(["#265DAB","#dddddd"]);
 	//var colarr=["#265DAB","#DF5C24","#059748","#E5126F","#9D722A","#7B3A96","#C7B42E","#CB2027","#4D4D4D","#5DA5DA","#FAA43A","#60BD68","#F17CB0","#B2912F","#B276B2","#DECF3F","#F15854","#8C8C8C","#8ABDE6","#FBB258","#90CD97","#F6AAC9","#BFA554","#BC99C7","#EDDD46","#F07E6E","#000000"];
 		
+	
 	var colors = function(i) {
 		var cvarr=vm.model.LookUpVar(request.cvar);
 		if (vm.YearAsLegend()) return yearcolorscale(cvarlist[i]);
 		else if (cvarr.customcolor) return cvarr.colorscale[i];
 		else if (vm.YearAsArgument()) return colorbrewer.Dark2[8][i % 8];//colarr[i % colarr.length];
 		else return colorbrewer.BrBG[11][10 - (i % 11)];//colarr[i % colarr.length];//normscale(i);
-	}
+	};
 
 	var Tooltiptext = function(d) {
 		var ttt=vm.MeasureAsLegend()?d.measure:vm.model.NameLookUp(measure,"measure");

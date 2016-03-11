@@ -115,19 +115,21 @@ BDSVis.ViewModel = function() {
 		
 		vm.cvar(varname);
 
-		var incompatible_changed=false;
-		for (var i in varr.incombatible) {
-			var incmp=varr.incombatible[i];
-			vm.SelectedOpts[incmp.code]([this.model[incmp.code][0].code]);
-			incompatible_changed=true;
-		};
+		// var incompatible_changed=false;
+		// for (var i in varr.incombatible) {
+		// 	var incmp=varr.incombatible[i];
+		// 	vm.SelectedOpts[incmp.code]([this.model[incmp.code][this.model[incmp.code].total].code]);
+		// 	incompatible_changed=true;
+		// };
 
-		if (!incompatible_changed) vm.getBDSdata();
+		// if (!incompatible_changed) vm.getBDSdata();
+
+		vm.getBDSdata();
 	};
 
 	this.setxvar = function (varname) {
 		vm.xvar(varname);
-		//if (varname==="state") vm.cvar("measure");
+		if (vm.geomap()) vm.cvar(vm.model.yvars);
 		vm.getBDSdata();
 	};
 
@@ -154,10 +156,11 @@ BDSVis.ViewModel = function() {
 			var disabled = false;
 			for (var i in list) {
 				var totalindex = (vm.model.LookUpVar(list[i]).total || 0);
+				var selOpts = vm.SelectedOpts[list[i]]();
 				//Whether the value selected is not the option standing for total (like "United States" or "Economy Wide" or "All ages" or "All sizes")
-				var toplinenottotal = (vm.SelectedOpts[list[i]]()[0]!=vm.model[list[i]][totalindex].code);
+				var toplinenottotal = (selOpts[0]!=vm.model[list[i]][totalindex].code);
 				//Whether the variable in incombatible list is x/c/a
-				if ((vm.vars.isvar(list[i],xc)()) && (toplinenottotal)) disabled = true;
+				if ((vm.vars.isvar(list[i],xc)()) && (toplinenottotal || selOpts.length>1 )) disabled = true;
 				else if (toplinenottotal) disabled = true;	
 			}
 			return disabled;

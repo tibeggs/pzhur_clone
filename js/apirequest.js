@@ -5,47 +5,40 @@ BDSVis.getAPIdata = function (vm) {
 	//"vm" is the reference to ViewModel
 
 	//The list of variables to request from API. Based on this, the request URL is formed and then this list is used when plotting.
-	var APIrequest = function  () {
+	
 
-		var varsrequested={};
-		
-		for (var i in vm.model.variables) {
-			var varr=vm.model.variables[i];
+	var request={};
+	
+	for (var i in vm.model.variables) {
+		var varr=vm.model.variables[i];
 
-			if (!vm.vars.isvar(varr.code,'any')()) varsrequested[varr.code]=[vm.SelectedOpts[varr.code]()[0]]; //If it's not c- or x-var only take first selected option
-			else {
-				if (varr.removetotal) {
-					//Calculate whether to request single value of the variable or multiple, and remove the entry for the total (like US or EW) in selector
-					var multiple = vm.SelectedOpts[varr.code]().length>1; //Whether multiple values are selected
-					var totalindex = (varr.total || 0);
-					var firstTotal = vm.SelectedOpts[varr.code]()[0]===vm.model[varr.code][totalindex].code; //Whether total is selected
+		if (!vm.vars.isvar(varr.code,'any')()) request[varr.code]=[vm.SelectedOpts[varr.code]()[0]]; //If it's not c- or x-var only take first selected option
+		else {
+			if (varr.removetotal) {
+				//Calculate whether to request single value of the variable or multiple, and remove the entry for the total (like US or EW) in selector
+				var multiple = vm.SelectedOpts[varr.code]().length>1; //Whether multiple values are selected
+				var totalindex = (varr.total || 0);
+				var firstTotal = vm.SelectedOpts[varr.code]()[0]===vm.model[varr.code][totalindex].code; //Whether total is selected
 
-					if ((multiple) && (firstTotal)) varsrequested[varr.code] = vm.SelectedOpts[varr.code]().slice(1); //Remove total if many values are selected
-					//Otherwise return all selected values
-					else varsrequested[varr.code] = vm.SelectedOpts[varr.code]();
-				} else if (varr.type === 'variablegroup') {
-					varsrequested[varr.code] = vm.SelectedOpts[varr.code]();
-					for (var j in varr.variables)
-						varsrequested[varr.variables[j].code]=vm.model.GetDomain(varr.variables[j].code);
-				} else varsrequested[varr.code] = vm.geomap()?[vm.SelectedOpts[varr.code]()[0]]:vm.SelectedOpts[varr.code]();
-			}
-			
-			
-			// var incompatible
-			// for (var j in varr.incompatible) {
-			//	vm.StateAsLegend()?([0]):vm.AllOrFirst('sic1'),
-			// }
-		};
+				if ((multiple) && (firstTotal)) request[varr.code] = vm.SelectedOpts[varr.code]().slice(1); //Remove total if many values are selected
+				//Otherwise return all selected values
+				else request[varr.code] = vm.SelectedOpts[varr.code]();
+			} else if (varr.type === 'variablegroup') {
+				request[varr.code] = vm.SelectedOpts[varr.code]();
+				for (var j in varr.variables)
+					request[varr.variables[j].code]=vm.model.GetDomain(varr.variables[j].code);
+			} else request[varr.code] = vm.geomap()?[vm.SelectedOpts[varr.code]()[0]]:vm.SelectedOpts[varr.code]();
+		}
 
-		varsrequested.xvar = (vm.model.LookUpVar(vm.xvar()).type === 'variablegroup')?(vm.SelectedOpts[vm.xvar()]()[0]):(vm.xvar());
-		varsrequested.cvar = (vm.model.LookUpVar(vm.cvar()).type === 'variablegroup')?(vm.SelectedOpts[vm.cvar()]()[0]):(vm.cvar());
-		
-		return varsrequested;
+		// var incompatible
+		// for (var j in varr.incompatible) {
+		//	vm.StateAsLegend()?([0]):vm.AllOrFirst('sic1'),
+		// }
 	};
 
-
-	var request = APIrequest();
-
+	request.xvar = (vm.model.LookUpVar(vm.xvar()).type === 'variablegroup')?(vm.SelectedOpts[vm.xvar()]()[0]):(vm.xvar());
+	request.cvar = (vm.model.LookUpVar(vm.cvar()).type === 'variablegroup')?(vm.SelectedOpts[vm.cvar()]()[0]):(vm.cvar());
+		
     var url = "http://api.census.gov/data/bds/firms";
 
 	var geography = "state:"+request.state; 
@@ -60,25 +53,25 @@ BDSVis.getAPIdata = function (vm) {
 	else reqtime = "&"+tv.code+"="+(request[tv.code] || tv.default); //Else request for a particular time
 
 	//Put everything together
-    var geturl = url+"?get="+request[vm.model.yvars];
+    var getstring = request[vm.model.yvars];
+    var filterstring = "";
 
-    if ((request.xvar!=vm.model.geomapvar) && (request.xvar!=vm.model.yvars)) geturl+=","+request.xvar;
-    //debugger;
-    //if ((request.cvar!=vm.model.timevar) && (request.cvar!=vm.model.geomapvar) && (request.cvar!=vm.model.yvars)) geturl+=","+request.cvar;
+    if ((request.xvar!=vm.model.geomapvar) && (request.xvar!=vm.model.yvars)) getstring+=","+request.xvar;
 
-    geturl+="&for="+geography+reqtime;
-    //+((vm.us() && (!vm.SectorAsArgument()) && (!vm.StateAsArgument()))?("&sic1="+request.sic1):(""))+ //sectors, if US
-    		
+    if (!vm.geomap())
+	    for (var i in vm.model.variables) {
+	    	var varr = vm.model.variables[i];
+	    	if ((varr.code!=vm.model.geomapvar) && 
+	    		(varr.code!=vm.model.timevar) &&  
+	    		(varr.code!=vm.model.yvars))
+	    		if (varr.type==="variablegroup")
+	    			{if (vm.SelectedOpts[varr.code]()[0]===request.cvar)
+	    				getstring+=","+vm.SelectedOpts[varr.code]()[0];}
+	    		else if (varr.code!=request.xvar)
+	    				filterstring+="&"+varr.code+"="+request[varr.code];
+	    };
 
-    for (var i in vm.model.variables) {
-    	var varr = vm.model.variables[i];
-    	if ((varr.code!=request.xvar) && (varr.code!=vm.model.geomapvar) && (varr.code!=vm.model.timevar) &&  (varr.code!=vm.model.yvars) && (varr.type!="variablegroup"))
-    		geturl+="&"+varr.code+"="+request[varr.code];
-    };
-
-    geturl+="&key=93beeef146cec68880fccbd72e455fcd7135228f";
-    		
-    		
+	var geturl=url+"?get="+getstring+filterstring+"&for="+geography+reqtime+"&key=93beeef146cec68880fccbd72e455fcd7135228f";
 
     console.log(geturl);
     
@@ -111,7 +104,8 @@ BDSVis.processAPIdata = function(data,request,vm) {
 
 	var cvar = request.cvar;
 	var xvar = request.xvar;
-	var measure = request.measure;
+	var measure = request[vm.model.yvars];
+	var MeasureAsLegend = (cvar === vm.model.yvars);
 
 	var data2show = {}; // The nested object, used as an intermediate step to convert data into 2D array
 
@@ -123,7 +117,7 @@ BDSVis.processAPIdata = function(data,request,vm) {
 		
 		data[i][cvar] = vm.model.NameLookUp(data[i][cvar],cvar); //Replace code strings with actual category names for c-variable
 
-		if (vm.MeasureAsLegend()) 
+		if (MeasureAsLegend) 
 			for (var imeasure in measure) { 
 			//If comparing by measure, melt the data by measures: 
 			//combine different measure in single column and create a column indicating which measure it is (c-var)
@@ -131,7 +125,7 @@ BDSVis.processAPIdata = function(data,request,vm) {
 				var rec = {};
 				rec.value = data[i][measure[imeasure]]; //Column named "value" will contain values of all the measures
 				rec[xvar] = data[i][xvar];		//x-axis value
-				rec[cvar] = vm.model.NameLookUp(measure[imeasure],"measure"); //Column for c-variable indicates the measure
+				rec[cvar] = vm.model.NameLookUp(measure[imeasure],vm.model.yvars); //Column for c-variable indicates the measure
 				if (vm.timelapse()) rec.time = data[i].time;
 				data1.push(rec);
 			}
@@ -139,11 +133,11 @@ BDSVis.processAPIdata = function(data,request,vm) {
 		//Convert data to 2D table, so that it can be displayed
 		if (data2show[data[i][xvar]] === undefined) //Create nested objects
 			data2show[data[i][xvar]] = {};
-		if (!vm.MeasureAsLegend())
+		if (!MeasureAsLegend)
 			data2show[data[i][xvar]][data[i][cvar]] = data[i][measure]; //Fill nested objects
 		else 
 			for (var imeasure in request[cvar])
-				data2show[data[i][xvar]][vm.model.NameLookUp(request[cvar][imeasure],"measure")] = data[i][request[cvar][imeasure]];
+				data2show[data[i][xvar]][vm.model.NameLookUp(request[cvar][imeasure],vm.model.yvars)] = data[i][request[cvar][imeasure]];
 	};
 
 
@@ -165,5 +159,5 @@ BDSVis.processAPIdata = function(data,request,vm) {
 
 	if (vm.StateAsArgument())
 		BDSVis.makeMap(data,request,vm);
-	else BDSVis.makePlot((!vm.MeasureAsLegend())?data:data1,request,vm);
+	else BDSVis.makePlot((!MeasureAsLegend)?data:data1,request,vm);
 };
