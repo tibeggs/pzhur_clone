@@ -3,12 +3,14 @@ var BDSVis = BDSVis || {};
 BDSVis.Model = {
 	timevar : "year2",
 	geomapvar : "state",
+	yvars : "measure",
 	variables : [
 		{
 			"code" : "sic1",
 			"name" : "Sector",
 			"type" : "categorical",
 			"default" : 0,
+			"total" : 0,
 			"aslegend" : true,
 			"asaxis" : true,
 			"incompatible" : ["state"]
@@ -26,6 +28,7 @@ BDSVis.Model = {
 			"name" : "State",
 			"type" : "categorical",
 			"default" : 0,
+			"total" : 0,
 			"removetotal" : true,
 			"aslegend" : true,
 			"asaxis" : true,
@@ -52,7 +55,8 @@ BDSVis.Model = {
 					"code" : "fage4",
 					"name" : "Firm Age",
 					"type" : "categorical",
-					"default" : 0,
+					"default" : 12,
+					"total" : 12,
 					"aslegend" : true,
 					"asaxis" : true,
 					"customcolor" : true
@@ -61,7 +65,8 @@ BDSVis.Model = {
 					"code" : "fsize",
 					"name" : "Firm Size",
 					"type" : "categorical",
-					"default" : 0,
+					"default" : 12,
+					"total" : 12,
 					"aslegend" : true,
 					"asaxis" : true,
 					"customcolor" : true
@@ -70,7 +75,8 @@ BDSVis.Model = {
 					"code" : "ifsize",
 					"name" : "Initial Firm Size",
 					"type" : "categorical",
-					"default" : 0,
+					"default" : 12,
+					"total" : 12,
 					"aslegend" : true,
 					"asaxis" : true,
 					"customcolor" : true
@@ -131,6 +137,7 @@ BDSVis.Model = {
 		{"code" : "54", "name" : "West Virginia", "st" : "WV" },
 		{"code" : "55", "name" : "Wisconsin", "st" : "WI" },
 		{"code" : "56", "name" : "Wyoming", "st" : "WY" }],
+	
 	fage4 : [
 		{"code" : "a", "name" : "0" },
 		{"code" : "b", "name" : "1" },

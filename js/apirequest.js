@@ -11,56 +11,74 @@ BDSVis.getAPIdata = function (vm) {
 		
 		for (var i in vm.model.variables) {
 			var varr=vm.model.variables[i];
-			if (varr.removetotal) {
-				//Calculate whether to request single value of the variable or multiple, and remove the entry for the total (like US or EW) in selector
-				var VarrRequested;
-				var multiple = vm.SelectedOpts[varr.code]().length>1; //Whether multiple values are selected
-				var firstTotal = vm.SelectedOpts[varr.code]()[0]===vm.model[varr.code][0].code; //Whether total is selected
 
-				if ((multiple) && (firstTotal)) VarrRequested = vm.SelectedOpts[varr.code]().slice(1); //Remove total if many values are selected
-				//Otherwise return all selected values or one, depending on whether varr is the c-variable
-				else VarrRequested = vm.AllOrFirst(varr.code);
-				varsrequested[varr.code] = VarrRequested;
+			if (!vm.vars.isvar(varr.code,'any')()) varsrequested[varr.code]=[vm.SelectedOpts[varr.code]()[0]]; //If it's not c- or x-var only take first selected option
+			else {
+				if (varr.removetotal) {
+					//Calculate whether to request single value of the variable or multiple, and remove the entry for the total (like US or EW) in selector
+					var multiple = vm.SelectedOpts[varr.code]().length>1; //Whether multiple values are selected
+					var totalindex = (varr.total || 0);
+					var firstTotal = vm.SelectedOpts[varr.code]()[0]===vm.model[varr.code][totalindex].code; //Whether total is selected
+
+					if ((multiple) && (firstTotal)) varsrequested[varr.code] = vm.SelectedOpts[varr.code]().slice(1); //Remove total if many values are selected
+					//Otherwise return all selected values
+					else varsrequested[varr.code] = vm.SelectedOpts[varr.code]();
+				} else if (varr.type === 'variablegroup') {
+					varsrequested[varr.code] = vm.SelectedOpts[varr.code]();
+					for (var j in varr.variables)
+						varsrequested[varr.variables[j].code]=vm.model.GetDomain(varr.variables[j].code);
+				} else varsrequested[varr.code] = vm.geomap()?[vm.SelectedOpts[varr.code]()[0]]:vm.SelectedOpts[varr.code]();
 			}
+			
+			
+			// var incompatible
+			// for (var j in varr.incompatible) {
+			//	vm.StateAsLegend()?([0]):vm.AllOrFirst('sic1'),
+			// }
 		};
-		 
+
+		varsrequested.xvar = (vm.model.LookUpVar(vm.xvar()).type === 'variablegroup')?(vm.SelectedOpts[vm.xvar()]()[0]):(vm.xvar());
+		varsrequested.cvar = (vm.model.LookUpVar(vm.cvar()).type === 'variablegroup')?(vm.SelectedOpts[vm.cvar()]()[0]):(vm.cvar());
 		
-		return {
-			//If by-state request, then only send "Economy Wide", otherwise send all selected sectors or a single sector depending on whether sector is the c-variable(legend). If in map regime (StateAsArgument) send only one measure
-			sic1 : vm.StateAsLegend()?([0]):vm.AllOrFirst('sic1'),
-			//See state calculation above for StateRequested
-			state : varsrequested['state'],
-			//Send all selected measures or a single one depending on whether measure is the c-variable and whether it's a geo map regime.
-			measure : vm.geomap()?[vm.SelectedOpts['measure']()[0]]:vm.AllOrFirst('measure'),
-			fchar : vm.SelectedOpts['fchar'](),
-			//Send all selected years or a single one depending on whether year is the c-variable.
-			year2 : vm.AllOrFirst('year2'),
-			//"fchar" is actually one of 3: fage4, fsize, ifsize. So that should be sent instead of "fchar"
-			xvar : (vm.xvar()==="fchar")?(vm.SelectedOpts['fchar']()[0]):(vm.xvar()),
-			cvar : (vm.cvar()==="fchar")?(vm.SelectedOpts['fchar']()[0]):(vm.cvar()),
-			//The following 3 lines are just for the case when Firm Characterstic is c-variable.
-			fage4 : vm.model.GetDomain("fage4"),
-			fsize : vm.model.GetDomain("fsize"),
-			ifsize : vm.model.GetDomain("ifsize"),
-		}
+		return varsrequested;
 	};
+
+
 	var request = APIrequest();
 
     var url = "http://api.census.gov/data/bds/firms";
 
-	var geography = (vm.us()?("us:*"):("state:"+request.state)); 
+	var geography = "state:"+request.state; 
 	if ((request.state.length===1) && (request.state[0]==="00")) geography = "us:*"; //If only "United States" is selected then use us:*
-	if (vm.StateAsArgument()) geography = "state:*"; //In map regime use state:*
+	if (vm.geomap()) geography = "state:*"; //In map regime use state:*
 
 	//Whether to request all years or a particular year
-	var reqtime = ((vm.timelapse() || vm.YearAsArgument())?("&time=from+1977+to+2013"):("&year2="+request.year2));
+	var reqtime;
+	var tv = vm.model.LookUpVar(vm.model.timevar); //Variable denoting time (e.g. 'year2')
+	if (vm.timelapse() || vm.vars.isvar(tv.code,'x')()) //When time lapse or time variable as axis request data for all times
+		reqtime = "&time=from+"+tv.range[0]+"+to+"+tv.range[1]+"";
+	else reqtime = "&"+tv.code+"="+(request[tv.code] || tv.default); //Else request for a particular time
 
 	//Put everything together
-    var geturl = url+"?get="+request.xvar+","+request.measure+(vm.FirmCharAsLegend()?(","+request.cvar):"")+ //variables: measures and firm characteristics
-    				"&for="+geography+ //states or US
-    				reqtime+ //years
-    				((vm.us() && (!vm.SectorAsArgument()) && (!vm.StateAsArgument()))?("&sic1="+request.sic1):(""))+ //sectors, if US
-    				"&key=93beeef146cec68880fccbd72e455fcd7135228f";
+    var geturl = url+"?get="+request[vm.model.yvars];
+
+    if ((request.xvar!=vm.model.geomapvar) && (request.xvar!=vm.model.yvars)) geturl+=","+request.xvar;
+    //debugger;
+    //if ((request.cvar!=vm.model.timevar) && (request.cvar!=vm.model.geomapvar) && (request.cvar!=vm.model.yvars)) geturl+=","+request.cvar;
+
+    geturl+="&for="+geography+reqtime;
+    //+((vm.us() && (!vm.SectorAsArgument()) && (!vm.StateAsArgument()))?("&sic1="+request.sic1):(""))+ //sectors, if US
+    		
+
+    for (var i in vm.model.variables) {
+    	var varr = vm.model.variables[i];
+    	if ((varr.code!=request.xvar) && (varr.code!=vm.model.geomapvar) && (varr.code!=vm.model.timevar) &&  (varr.code!=vm.model.yvars) && (varr.type!="variablegroup"))
+    		geturl+="&"+varr.code+"="+request[varr.code];
+    };
+
+    geturl+="&key=93beeef146cec68880fccbd72e455fcd7135228f";
+    		
+    		
 
     console.log(geturl);
     
@@ -73,7 +91,7 @@ BDSVis.getAPIdata = function (vm) {
 	    		var rec = {};
 	    		if (i>0) {
 	    			for (iname in data[0]) { //Find keys, which are contained in the first line of the array returned by API
-	    				var key = (data[0][iname]==="us")?("state"):data[0][iname]; //Substitute "us" field name to "state"
+	    				var key = (data[0][iname]==="us")?("state"):(data[0][iname]); //Substitute "us" field name to "state"
 	    				rec[key] = data[i][iname]; //Fill the object
 	    			};
 	    			jsoned.push(rec);
@@ -106,7 +124,10 @@ BDSVis.processAPIdata = function(data,request,vm) {
 		data[i][cvar] = vm.model.NameLookUp(data[i][cvar],cvar); //Replace code strings with actual category names for c-variable
 
 		if (vm.MeasureAsLegend()) 
-			for (var imeasure in measure) { //If comparing by measure, melt the data by measures: combine different measure in single column and create a column indicating which measure it is (c-var)
+			for (var imeasure in measure) { 
+			//If comparing by measure, melt the data by measures: 
+			//combine different measure in single column and create a column indicating which measure it is (c-var)
+			//Possible to use melt.js library for this instead
 				var rec = {};
 				rec.value = data[i][measure[imeasure]]; //Column named "value" will contain values of all the measures
 				rec[xvar] = data[i][xvar];		//x-axis value

@@ -7,6 +7,7 @@ BDSVis.ViewModel = function() {
 	this.model = BDSVis.Model;
 	this.model.InitModel();
 
+	//Make HTML UI elements
 	var selectors = d3.select('.selectors');
 	
 	for (var i in this.model.variables) {
@@ -26,16 +27,16 @@ BDSVis.ViewModel = function() {
 					+", disable: vars.disabled('"+varname+"','selector')"
 					+", value: "+so+"()[0]"
 					+", selectedOptions: "+so;
-	
-		selectors.append("h4").text(varfullname+":");
-	
+
 		if ((variable.type!="variablegroup") && (variable.aslegend))
 			databind+=", attr: {multiple: "+multiple+"}"
 					+", css: {tallselector: "+multiple+"}";
-
-		selectors.append("select").attr("data-bind", databind);
 	
-		if (variable.aslegend) {
+		selectors.append("h4").text(varfullname+":"); //Add the title for selector
+
+		selectors.append("select").attr("data-bind", databind); //Add the selector
+	
+		if (variable.aslegend) { //Add the 'Compare' button
 			var cbutdbind="click: function(variable) {setcvar('"+varname+"')}"
 									+", disable: vars.disabled('"+varname+"','cbutton')"
 									+", css: {activebutton: "+multiple+"}";
@@ -43,7 +44,7 @@ BDSVis.ViewModel = function() {
 			selectors.append("button")
 					.attr("data-bind",cbutdbind).text("Compare "+varfullname+"s");
 		}
-		if (variable.asaxis)
+		if (variable.asaxis) //Add the 'Make X' button
 			selectors.append("button")
 					.attr("data-bind","click: function(variable) {setxvar('"+varname+"')}"
 									+", disable: vars.disabled('"+varname+"','xbutton')"
@@ -62,8 +63,9 @@ BDSVis.ViewModel = function() {
 	//SHOW DATA BUTTON
 	//The data array do be displayed as table with numbers
 	this.data = ko.observableArray();
-	//Initial value for showing data
-	this.ShowData = ko.observable(0);
+	
+	//The boolean flag for whether the data table is shown
+	this.ShowData = ko.observable(0); //Initial value
 	this.toggleshowdata = function () {
 		//This function executes in click to 'Show Data' button.
 		vm.ShowData(!vm.ShowData());
@@ -79,7 +81,6 @@ BDSVis.ViewModel = function() {
 			vm.timelapse(false);
 			clearInterval(vm.tlint); //Stop the animation
 			vm.SelectedOpts[vm.model.timevar]([vm.TimeLapseCurrYear-1]); //Set the year to the year currently shown in animation
-			//vm.SelectedOpts['year2']([vm.TimeLapseCurrYear-1]);	
 		} else {
 			vm.timelapse(true);
 			vm.getBDSdata();
@@ -87,7 +88,7 @@ BDSVis.ViewModel = function() {
 	};
 
 	//LOG SCALE BUTTON
-	//Initial value for log scale of y-axis
+	//Whether the scale of y-axis is Log or Linear
 	this.logscale = ko.observable(0); //Initial value
 	this.yscalebuttontext = ko.computed (function() {return vm.logscale()?"Linear":"Log"});  //Text on the button
 	this.toggleyscale = function () { 
@@ -113,12 +114,14 @@ BDSVis.ViewModel = function() {
 		var varr=vm.model.LookUpVar(varname);
 		
 		vm.cvar(varname);
+
 		var incompatible_changed=false;
 		for (var i in varr.incombatible) {
 			var incmp=varr.incombatible[i];
 			vm.SelectedOpts[incmp.code]([this.model[incmp.code][0].code]);
 			incompatible_changed=true;
-		}
+		};
+
 		if (!incompatible_changed) vm.getBDSdata();
 	};
 
@@ -150,15 +153,16 @@ BDSVis.ViewModel = function() {
 			//Example: There is no by-state+by-sector data. So, if "state" is x- or c- var, then selector and cbutton and xbutton for "sector" (sic1) should be disabled, unless "United States" is selected for the "state". Likewise, selection of "state" is disabled, unless "Economy Wide" is selected for "sector"
 			var disabled = false;
 			for (var i in list) {
-				//If the value selected is not 0 (standing for total, like "United States" or "Economy Wide")
-				var toplinenottotal = (vm.SelectedOpts[list[i]]()[0]!=vm.model[list[i]][0].code);
-				//If the variable in incombatible list is x/c/a
+				var totalindex = (vm.model.LookUpVar(list[i]).total || 0);
+				//Whether the value selected is not the option standing for total (like "United States" or "Economy Wide" or "All ages" or "All sizes")
+				var toplinenottotal = (vm.SelectedOpts[list[i]]()[0]!=vm.model[list[i]][totalindex].code);
+				//Whether the variable in incombatible list is x/c/a
 				if ((vm.vars.isvar(list[i],xc)()) && (toplinenottotal)) disabled = true;
 				else if (toplinenottotal) disabled = true;	
 			}
 			return disabled;
 			
-		}
+		};
 		
 		if (disableAll()) return true;
 
@@ -230,7 +234,7 @@ BDSVis.ViewModel = function() {
 		this.SelectedOpts[varr.code].subscribe(function() {vm.getBDSdata();});
 	};
 
-	this.AllOrFirst = function(varname) {
+	this.AllOrFirst = function(varname) { //Returns all the selected options if c-variable and only the top one if not
 		return vm.vars.isvar(varname,'c')()?vm.SelectedOpts[varname]():[vm.SelectedOpts[varname]()[0]];
 	};
 
