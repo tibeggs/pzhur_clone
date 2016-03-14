@@ -24,14 +24,15 @@ BDSVis.makePlot = function (data,request,vm) {
 	var measure=MeasureAsLegend?"value":request[vm.model.yvars];
 
 	//Set the title of the plot
-	var ptitle=((request.measure.length>1)?("Various measures"):(vm.model.NameLookUp(request.measure,"measure")))+ //If many measures say "various", otherwise the measure name
-				   (vm.us()?" in US":((request.state.length>1)?(" by state"):(" in "+vm.model.NameLookUp(request.state,"state")))); // The same for states
-	if (!vm.YearAsArgument())
-		ptitle=ptitle+((request.year2.length>1)?(" by year"):(" in "+vm.model.NameLookUp(request.year2,"year2"))); // the same for years
-	
-	if (!vm.SectorAsArgument())
-		//Say "by sector" if many sectors, if not "economy wide" add "in sector of"
-		ptitle=ptitle+((request.sic1.length>1)?(" by sector"):(((request.sic1[0]===0)?" ":" in sector of ")+vm.model.NameLookUp(request.sic1,"sic1")));
+	var ptitle=(MeasureAsLegend && request[vm.model.yvars].length>1)?("Various "+vm.model.yvars+"s"):(vm.model.NameLookUp(request[vm.model.yvars],vm.model.yvars)); //If many measures say "various", otherwise the measure name
+	for (var key in data[0]) {
+		//X-var should not be in the title, measure is taken care of. Also check that the name exists in model.variables (e.g. measure names don't)
+		if ((key!=xvar) && (key!=measure) && (key!=vm.model.yvars) && (vm.model.variables.map(function(d) {return d.code}).indexOf(key)>-1)) {
+			if (key!=cvar) ptitle+=" in " + vm.model.NameLookUp(data[0][key],key);
+			else if (request[cvar].length === 1) ptitle+=" in " + data[0][key];
+			else if (key!=vm.model.yvars) ptitle+=" by " + vm.model.NameLookUp(key,"var");
+		} 		
+	};
 	
 	//d3.select("#graphtitle").text(ptitle);
 	var maintitle=d3.select("#chartsvg")
@@ -43,7 +44,7 @@ BDSVis.makePlot = function (data,request,vm) {
 
 	//List of selected categories by actual name rather than code
 	var cvarlist=request[cvar].map(function(d) {
-		var cv=vm.FirmCharAsLegend()?d:vm.model.NameLookUp(d,cvar);
+		var cv=vm.model.NameLookUp(d,cvar);
 		return (cvarr.type === 'continuous')?(cv.toString()):(cv);
 	});
 	
@@ -114,9 +115,7 @@ BDSVis.makePlot = function (data,request,vm) {
         	.attr("stroke-width",2)
         	.attr("stroke", colors(icv))
         	.attr("d", valueline(data.filter(function(d) {
-        			if (vm.FirmCharAsLegend())
-        				return d[cvar]===request[cvar][icv]; 
-        			else return d[cvar]===vm.model.NameLookUp(request[cvar][icv],cvar);
+        				return d[cvar]===vm.model.NameLookUp(request[cvar][icv],cvar);
         		})));
 
         //Add dots
@@ -251,7 +250,7 @@ BDSVis.makePlot = function (data,request,vm) {
 
 		d3.select("#graphtitle").text("");
 
-		var dataset=data.filter(function(d) {return +d.time===vm.model[vm.model.timevar][yr]}); //Select data corresponding to the year
+		var dataset=data.filter(function(d) {return +d[vm.model.timevar]===vm.model[vm.model.timevar][yr]}); //Select data corresponding to the year
 		
 		//The data4bars is only needed for smooth transition in animations. There have to be rectangles of 0 height for missing data. data4bars is created
 		//empty outside this function. The following loop fills in / updates to actual data values from current year

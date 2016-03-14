@@ -26,14 +26,9 @@ BDSVis.getAPIdata = function (vm) {
 			} else if (varr.type === 'variablegroup') {
 				request[varr.code] = vm.SelectedOpts[varr.code]();
 				for (var j in varr.variables)
-					request[varr.variables[j].code]=vm.model.GetDomain(varr.variables[j].code);
+					request[varr.variables[j].code]=vm.model.GetCodes(varr.variables[j].code);
 			} else request[varr.code] = vm.geomap()?[vm.SelectedOpts[varr.code]()[0]]:vm.SelectedOpts[varr.code]();
 		}
-
-		// var incompatible
-		// for (var j in varr.incompatible) {
-		//	vm.StateAsLegend()?([0]):vm.AllOrFirst('sic1'),
-		// }
 	};
 
 	request.xvar = (vm.model.LookUpVar(vm.xvar()).type === 'variablegroup')?(vm.SelectedOpts[vm.xvar()]()[0]):(vm.xvar());
@@ -85,6 +80,7 @@ BDSVis.getAPIdata = function (vm) {
 	    		if (i>0) {
 	    			for (iname in data[0]) { //Find keys, which are contained in the first line of the array returned by API
 	    				var key = (data[0][iname]==="us")?("state"):(data[0][iname]); //Substitute "us" field name to "state"
+	    				key = (key==="time")?vm.model.timevar:key;
 	    				rec[key] = data[i][iname]; //Fill the object
 	    			};
 	    			jsoned.push(rec);
@@ -123,10 +119,13 @@ BDSVis.processAPIdata = function(data,request,vm) {
 			//combine different measure in single column and create a column indicating which measure it is (c-var)
 			//Possible to use melt.js library for this instead
 				var rec = {};
+				for (var key in data[i])
+					if (key!=measure[imeasure]) rec[key] = data[i][key];
+				
 				rec.value = data[i][measure[imeasure]]; //Column named "value" will contain values of all the measures
-				rec[xvar] = data[i][xvar];		//x-axis value
-				rec[cvar] = vm.model.NameLookUp(measure[imeasure],vm.model.yvars); //Column for c-variable indicates the measure
-				if (vm.timelapse()) rec.time = data[i].time;
+		
+				rec[vm.model.yvars] = vm.model.NameLookUp(measure[imeasure],vm.model.yvars); //Column for c-variable indicates the measure
+				
 				data1.push(rec);
 			}
 		
@@ -157,7 +156,7 @@ BDSVis.processAPIdata = function(data,request,vm) {
 		vm.data.push(xvararr);
 	};
 
-	if (vm.StateAsArgument())
+	if (vm.geomap())
 		BDSVis.makeMap(data,request,vm);
 	else BDSVis.makePlot((!MeasureAsLegend)?data:data1,request,vm);
 };

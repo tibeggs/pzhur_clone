@@ -272,6 +272,10 @@ BDSVis.Model = {
 		return this[v].map(function(d) { return d.name; });
 	},
 
+	GetCodes : function(v) {
+		return this[v].map(function(d) { return d.code; });
+	},
+
 	flatlookup : function (varname,arr) {
 		return arr[arr.map(function(d) {return d.code}).indexOf(varname)]; //Find object in array arr by field such that object.name==varname
 	},

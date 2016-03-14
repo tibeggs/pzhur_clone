@@ -11,15 +11,15 @@ BDSVis.ViewModel = function() {
 	var selectors = d3.select('.selectors');
 	
 	for (var i in this.model.variables) {
-		var variable=this.model.variables[i],
-			varname=variable.code,
-			varfullname=variable.name,
+		var varr=this.model.variables[i],
+			varname=varr.code,
+			varfullname=varr.name,
 			multiple="vars.multiple('"+varname+"')",
 			so="SelectedOpts['"+varname+"']",
 			optionstext="",
 			optionsvalue="";
-		if (variable.type==="continuous") {optionstext="$data"; optionsvalue="$data"};
-		if ((variable.type==="categorical") || (variable.type==="variablegroup")) {optionstext="'name'"; optionsvalue="'code'"};
+		if (varr.type==="continuous") {optionstext="$data"; optionsvalue="$data"};
+		if ((varr.type==="categorical") || (varr.type==="variablegroup")) {optionstext="'name'"; optionsvalue="'code'"};
 	
 		var databind="options: model."+varname
 					+", optionsText: "+optionstext
@@ -28,7 +28,7 @@ BDSVis.ViewModel = function() {
 					+", value: "+so+"()[0]"
 					+", selectedOptions: "+so;
 
-		if ((variable.type!="variablegroup") && (variable.aslegend))
+		if ((varr.type!="variablegroup") && (varr.aslegend))
 			databind+=", attr: {multiple: "+multiple+"}"
 					+", css: {tallselector: "+multiple+"}";
 	
@@ -36,19 +36,19 @@ BDSVis.ViewModel = function() {
 
 		selectors.append("select").attr("data-bind", databind); //Add the selector
 	
-		if (variable.aslegend) { //Add the 'Compare' button
+		if (varr.aslegend) { //Add the 'Compare' button
 			var cbutdbind="click: function(variable) {setcvar('"+varname+"')}"
 									+", disable: vars.disabled('"+varname+"','cbutton')"
 									+", css: {activebutton: "+multiple+"}";
-			if (variable.type=="variablegroup") cbutdbind+=", text: 'Compare '+model.NameLookUp("+so+"()[0],'var')";
+			if (varr.type=="variablegroup") cbutdbind+=", text: 'Compare '+model.NameLookUp("+so+"()[0],'var')";
 			selectors.append("button")
 					.attr("data-bind",cbutdbind).text("Compare "+varfullname+"s");
 		}
-		if (variable.asaxis) //Add the 'Make X' button
+		if (varr.asaxis) //Add the 'Make X' button
 			selectors.append("button")
 					.attr("data-bind","click: function(variable) {setxvar('"+varname+"')}"
 									+", disable: vars.disabled('"+varname+"','xbutton')"
-									+", css: {activebutton: vars.isvar('"+varname+"','x')}").text("Make X-axis");
+									+", css: {activebutton: vars.isvar('"+varname+"','x')}").text((varr.code===vm.model.geomapvar)?"See Map":"Make X-axis");
 		selectors.append("br");
 	}
 	
@@ -204,41 +204,11 @@ BDSVis.ViewModel = function() {
 	this.xvar = ko.observable("fchar");
 	this.cvar = ko.observable("state");	
 
-	//Whether a variable is C- Variable (Legend)
-	this.SectorAsLegend = ko.computed( function () {return vm.cvar()==="sic1";});
-	this.StateAsLegend = ko.computed( function () {return vm.cvar()==="state";});
-	this.MeasureAsLegend = ko.computed( function () {return vm.cvar()==="measure";});
-	this.YearAsLegend = ko.computed( function () {return vm.cvar()==="year2";});
-	this.FirmCharAsLegend = ko.computed( function () {return vm.cvar()==="fchar";});
-
-	//Whether a variable is X-axis variable
-	this.SectorAsArgument = ko.computed( function () {return vm.xvar()==="sic1";});
-	this.StateAsArgument = ko.computed( function () {return vm.xvar()==="state";}); //When "state" is x-var, it is the geo map regime
-	this.YearAsArgument = ko.computed( function () {return vm.xvar()==="year2";});
-	this.FirmCharAsArgument = ko.computed( function () {return vm.xvar()==="fchar";});
-
-	//Whether a variable is either X- or C-
-	this.SectorVar = ko.computed( function () {return (vm.SectorAsLegend() || vm.SectorAsArgument());});
-	this.StateVar = ko.computed( function () {return (vm.StateAsLegend() || vm.StateAsArgument());});
-	this.YearVar = ko.computed( function () {return (vm.YearAsLegend() || vm.YearAsArgument());});
-	this.FirmCharVar = ko.computed( function () {return (vm.FirmCharAsLegend() || vm.FirmCharAsArgument());});
-
-	this.us = function(){
-		if (vm.StateAsLegend()) return false; //If states are Legend, we need many states, so request NOT general, but by state
-		else if (vm.SectorVar()) return true; //If sector is either c- or x- variable, then there is no by-state data, so YES
-		else if (vm.SelectedOpts['sic1']()[0]===0) return false; //If "Economy Wide" is selected in sectors, then by state
-		else return true; //Else means a sector is selected, so there can not be by-state request
-	};
-
 	//Subscribe to input changes
 	//Any change in the input select fields triggers request to the server, followed by data processing and making of a new plot
 	for (var i in this.model.variables) {
 		var varr=this.model.variables[i];
 		this.SelectedOpts[varr.code].subscribe(function() {vm.getBDSdata();});
-	};
-
-	this.AllOrFirst = function(varname) { //Returns all the selected options if c-variable and only the top one if not
-		return vm.vars.isvar(varname,'c')()?vm.SelectedOpts[varname]():[vm.SelectedOpts[varname]()[0]];
 	};
 
 	//Call initial plot

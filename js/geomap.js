@@ -14,9 +14,18 @@ BDSVis.makeMap = function (data,request,vm) {
 
 	//Set graph title
 	//d3.select("#graphtitle").
+
+	//Set the title of the plot
+	var ptitle=vm.model.NameLookUp(measure,vm.model.yvars); //If many measures say "various", otherwise the measure name
+	for (var key in data[0]) {
+		//X-var should not be in the title, measure is taken care of. Also check that the name exists in model.variables (e.g. measure names don't)
+		if ((key!=vm.model.geomapvar) && (key!=vm.model.yvars) && (vm.model.variables.map(function(d) {return d.code}).indexOf(key)>-1))
+			ptitle+=" in " + vm.model.NameLookUp(data[0][key],key);	
+	};
+
 	d3.select("#chartsvg")
 		.append("text").attr("class","graph-title")
-		.text(vm.model.NameLookUp(measure,"measure")+" in "+request.year2)
+		.text(ptitle)
 		.attr("x",function(d) { return (vm.PlotView.margin.left+vm.PlotView.margin.right+width-this.getComputedTextLength())/2.; })
 		.attr("y",1+"em");
 
@@ -52,12 +61,12 @@ BDSVis.makeMap = function (data,request,vm) {
 
 	if (vm.timelapse()) { //In time lapse regime, select only the data corresponding to the current year
 		var datafull=data;
-		data=data.filter(function(d) {return +d.time===vm.model.year2[0]});
+		data=data.filter(function(d) {return +d[vm.model.timevar]===vm.model[vm.model.timevar][0]});
 	};
 
 	//Put the states in geo_data in the same order as they are in data
 	for (var i in data)
-		geo_data1.push(vm.geo_data.features.filter(function(d) {return data[i].state===d.properties.NAME;})[0]);
+		geo_data1.push(vm.geo_data.features.filter(function(d) {return data[i][vm.model.geomapvar]===d.properties.NAME;})[0]);
 
 	var path = d3.geo.path().projection(projection);
 
@@ -70,7 +79,7 @@ BDSVis.makeMap = function (data,request,vm) {
 			.style('fill', function(d) { return yScale(d[measure]);})
 			.style('stroke', 'white')
 			.style('stroke-width', 0.3)
-			.append("title").text(function(d){return d.state+": "+d3.format(",")(d[measure]);});
+			.append("title").text(function(d){return d[vm.model.geomapvar]+": "+d3.format(",")(d[measure]);});
 
 	//Making Legend
 	var legendsvg=vm.PlotView.legendsvg;
@@ -109,9 +118,9 @@ BDSVis.makeMap = function (data,request,vm) {
 
 	// Timelapse animation
 	function updateyear(yr) {
-		curyearmessage.text(vm.model.year2[yr]); //Display year
+		curyearmessage.text(vm.model[vm.model.timevar][yr]); //Display year
 		d3.select("#graphtitle").text("");
-		var dataset=datafull.filter(function(d) {return +d.time===vm.model.year2[yr]}); //Select data corresponding to the year
+		var dataset=datafull.filter(function(d) {return +d[vm.model.timevar]===vm.model[vm.model.timevar][yr]}); //Select data corresponding to the year
 		//Change the data that is displayed raw as a table
 		// var vmdata=vm.data();
 		// for (var i=1; i<dataset.length; i++)
@@ -122,7 +131,7 @@ BDSVis.makeMap = function (data,request,vm) {
 				.transition().duration(1000)
 				.style('fill', function(d) { return yScale(d[measure]);})
 
-		mapg.selectAll('title').data(dataset).text(function(d){return d.state+": "+d3.format(",")(d[measure]);});
+		mapg.selectAll('title').data(dataset).text(function(d){return d[vm.model.geomapvar]+": "+d3.format(",")(d[measure]);});
 	};
 
 	//Run timelapse animation
@@ -131,8 +140,8 @@ BDSVis.makeMap = function (data,request,vm) {
 		var curyearmessage=d3.select("#chartsvg").append("text").attr("x",0).attr("y",height*.5).attr("font-size",100).attr("fill-opacity",.3);
 		vm.tlint=setInterval(function() {
   			updateyear(iy);
-  			if (iy<vm.model.year2.length) iy++; else iy=0;
-  			vm.TimeLapseCurrYear=vm.model.year2[iy];
+  			if (iy<vm.model[vm.model.timevar].length) iy++; else iy=0;
+  			vm.TimeLapseCurrYear=vm.model[vm.model.timevar][iy];
 		}, 1000);
 	};
 };

@@ -18,7 +18,7 @@
   
     <div id="buttonsundergraph">
       <button data-bind="click: toggleshowdata, disable: timelapse">Show Data</button>
-      <button data-bind="click: toggletimelapse, text: tlbuttontext, disable: YearVar() ">Time Lapse</button>
+      <button data-bind="click: toggletimelapse, text: tlbuttontext, disable: vars.isvar(model.timevar,'any') ">Time Lapse</button>
     </div>
     
     <div id="datashowarea" data-bind="visible: ShowData">
