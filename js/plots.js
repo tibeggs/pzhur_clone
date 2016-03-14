@@ -92,7 +92,7 @@ BDSVis.makePlot = function (data,request,vm) {
 	var Tooltiptext = function(d) {
 		var ttt=MeasureAsLegend?d[vm.model.yvars]:vm.model.NameLookUp(measure,vm.model.yvars);
 		ttt+=": "+d3.format(",")(d[measure])+"\n"+vm.model.NameLookUp(xvar,"var")+": "+d[xvar];
-		if (MeasureAsLegend)
+		if (!MeasureAsLegend)
 			ttt+="\n"+vm.model.NameLookUp(cvar,"var")+": "+d[cvar];
 		return ttt;
 	}
