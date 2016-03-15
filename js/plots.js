@@ -92,9 +92,9 @@ BDSVis.makePlot = function (data,request,vm) {
 
 	var Tooltiptext = function(d) {
 		var ttt=MeasureAsLegend?d[vm.model.yvars]:vm.model.NameLookUp(measure,vm.model.yvars);
-		ttt+=": "+d3.format(",")(d[measure])+"\n"+vm.model.NameLookUp(xvar,"var")+": "+d[xvar];
+		ttt+=": "+d3.format(",")(d[measure])+"\n"+xvarr.name+": "+d[xvar];
 		if (!MeasureAsLegend)
-			ttt+="\n"+vm.model.NameLookUp(cvar,"var")+": "+d[cvar];
+			ttt+="\n"+cvarr.name+": "+d[cvar];
 		return ttt;
 	}
 	
@@ -184,7 +184,7 @@ BDSVis.makePlot = function (data,request,vm) {
 
 	//X-axis label
 	pv.xaxislabel
-		.text(vm.model.NameLookUp(xvar,"var"))
+		.text(xvarr.name)
 		.attr("x",function(d) { return (pv.margin.left+pv.margin.right+width-this.getComputedTextLength())/2.; })
 
 	//Y-axis label
@@ -194,13 +194,20 @@ BDSVis.makePlot = function (data,request,vm) {
 		
 
 	//Making Legend
+	var RemoveItem =  function(d,i) {
+			var so=vm.SelectedOpts[cvar]();
+			so.splice(i,1);
+			vm.SelectedOpts[cvar](so);
+			d3.event.stopPropagation();
+		};
+
 	var legendsvg=pv.legendsvg;
 
 	var symbolsize=15;//Math.max(Math.min(barwidth,20),15);
 
 	legendsvg.attr("height",(symbolsize+5)*cvarlist.length);
 
-	legendsvg.append("text").attr("class","legtitle").text(vm.model.NameLookUp(cvar,'var')+": ");
+	legendsvg.append("text").attr("class","legtitle").text(cvarr.name+((cvarr.APIfiltered || MeasureAsLegend)?"  (click to remove)":"")+": ");
 
 	var legendlabels=legendsvg.selectAll("text .leglabel")
 		.data(cvarlist)
@@ -213,6 +220,9 @@ BDSVis.makePlot = function (data,request,vm) {
 		//.attr("y",function(d,i) {return 1.5*i+"em";})
 		.attr("dy",1+"em")
 		.text(function(d) {return d;});
+	if (cvarlist.length>1)
+		legendlabels.on("click",function(d,i) { RemoveItem(d,i); });
+		
 
 	//Split long labels into multiple lines
 	legendlabels.call(wrap,pv.legendwidth - (symbolsize+5));
@@ -230,13 +240,16 @@ BDSVis.makePlot = function (data,request,vm) {
 		.data(tspany)
 		.attr("y",function(d) {return d+.5+'em';});
 
-	legendsvg.selectAll("rect")
+	var legendrect = legendsvg.selectAll("rect")
 		.data(cvarlist)
 		.enter()
 		.append("rect")
 		.attr("fill",  function(d,i) {return colors(i);})
 		.attr("width",symbolsize).attr("height",symbolsize)
-		.attr("y",function(d,i) {return 0.6+((i>0)?(numlines[i-1]+i*.75):0)+"em";})
+		.attr("y",function(d,i) {return 0.6+((i>0)?(numlines[i-1]+i*.75):0)+"em";});
+
+	if (cvarlist.length>1)
+		legendrect.on("click",function(d,i) { RemoveItem(d,i); });
 
 	var legendheight=d3.select(".legbox").node().getBBox().height
 	d3.select(".legbox").attr("transform","translate("+pv.legendx+","+Math.max(20,.5*(height+pv.margin.top+pv.margin.bottom+pv.titleheight-legendheight))+")")

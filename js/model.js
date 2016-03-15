@@ -11,6 +11,7 @@ BDSVis.Model = {
 			"type" : "categorical",
 			"default" : 0,
 			"total" : 0,
+			"APIfiltered" : true,
 			"aslegend" : true,
 			"asaxis" : true,
 			"incompatible" : ["state"]
@@ -30,6 +31,7 @@ BDSVis.Model = {
 			"default" : 0,
 			"total" : 0,
 			"removetotal" : true,
+			"APIfiltered" : true,
 			"aslegend" : true,
 			"asaxis" : true,
 			"incompatible" : ["sic1"]
@@ -40,6 +42,7 @@ BDSVis.Model = {
 			"type" : "continuous",
 			"range" : [1977,2014,1],
 			"default" : 36,
+			"APIfiltered" : true,
 			"aslegend" : true,
 			"asaxis" : true
 		},
@@ -57,6 +60,7 @@ BDSVis.Model = {
 					"type" : "categorical",
 					"default" : 12,
 					"total" : 12,
+					"APIfiltered" : false,
 					"aslegend" : true,
 					"asaxis" : true,
 					"customcolor" : true
@@ -67,6 +71,7 @@ BDSVis.Model = {
 					"type" : "categorical",
 					"default" : 12,
 					"total" : 12,
+					"APIfiltered" : false,
 					"aslegend" : true,
 					"asaxis" : true,
 					"customcolor" : true
@@ -77,6 +82,7 @@ BDSVis.Model = {
 					"type" : "categorical",
 					"default" : 12,
 					"total" : 12,
+					"APIfiltered" : false,
 					"aslegend" : true,
 					"asaxis" : true,
 					"customcolor" : true
