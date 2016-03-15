@@ -217,20 +217,20 @@ BDSVis.Model = {
 ////////		//Customization of variables: copying of code/name tables, creating colorscales etc
 		this.ifsize=this.fsize;
 		var CreateCustomColorScale = function (varname) {
-			var colorscale=[];
+			var colorscale={};
 			if (varname=="fage4") {
 				var scage=d3.scale.pow().exponent(1.).domain([0,26]).range(["#CB2027","#265DAB"]);
 				var fages=[0,1,2,3,4,5,10,15,20,25,30];
-				for (var ifage in fages) colorscale.push(scage(fages[ifage]));
-				colorscale.push("green");
-				colorscale.push("black");
+				for (var ifage in fages) colorscale[tmod[varname][ifage].name]=scage(fages[ifage]);
+				colorscale[tmod[varname][tmod[varname].length-2].name]="green";
+				colorscale[tmod[varname][tmod[varname].length-1].name]="black";
 			};
 			
 			if ((varname=="fsize") || (varname=="ifsize")) {
 				var scsize=d3.scale.log().domain([1,10000]).range(["#CB2027","#265DAB"]);
 				var fsizes=[1,5,10,30,50,100,250,500,1000,2500,5000,10000];
-				for (var ifsize in fsizes ) colorscale.push(scsize(fsizes[ifsize]));
-				colorscale.push("black");
+				for (var ifsize in fsizes ) colorscale[tmod[varname][ifsize].name]=scsize(fsizes[ifsize]);
+				colorscale[tmod[varname][tmod[varname].length-1].name]="black";
 			};
 			return colorscale;
 		};
@@ -271,7 +271,6 @@ BDSVis.Model = {
 		}
 
 		CreateDicts(this.variables);
-		
 	},
 
 	GetDomain : function(v) {

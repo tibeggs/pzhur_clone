@@ -25,8 +25,7 @@ BDSVis.getAPIdata = function (vm) {
 				else request[varr.code] = vm.SelectedOpts[varr.code]();
 			} else if (varr.type === 'variablegroup') {
 				request[varr.code] = vm.SelectedOpts[varr.code]();
-				for (var j in varr.variables)
-					request[varr.variables[j].code]=vm.model.GetCodes(varr.variables[j].code);
+				request[request[varr.code][0]]=vm.SelectedOpts[request[varr.code][0]]();
 			} else request[varr.code] = vm.geomap()?[vm.SelectedOpts[varr.code]()[0]]:vm.SelectedOpts[varr.code]();
 		}
 	};
@@ -59,7 +58,7 @@ BDSVis.getAPIdata = function (vm) {
 	    	if ((varr.code!=vm.model.geomapvar) && 
 	    		(varr.code!=vm.model.timevar) &&  
 	    		(varr.code!=vm.model.yvars))
-	    		if (varr.type==="variablegroup")
+	    		if (!varr.APIfiltered)
 	    			{if (vm.SelectedOpts[varr.code]()[0]===request.cvar)
 	    				getstring+=","+vm.SelectedOpts[varr.code]()[0];}
 	    		else if (varr.code!=request.xvar)
@@ -104,6 +103,10 @@ BDSVis.processAPIdata = function(data,request,vm) {
 	var MeasureAsLegend = (cvar === vm.model.yvars);
 
 	var data2show = {}; // The nested object, used as an intermediate step to convert data into 2D array
+
+	var rcvstring = request[cvar].map(function(d) {return d.toString();})
+	if (!MeasureAsLegend)
+		data = data.filter(function(d) { return rcvstring.indexOf(d[cvar])!=-1;});
 
 	var data1 = []; // The reshuffled (melted) data, with measures in the same column. Like R function "melt" from the "reshape" package
 

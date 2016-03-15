@@ -83,9 +83,9 @@ BDSVis.makePlot = function (data,request,vm) {
 	//var colarr=["#265DAB","#DF5C24","#059748","#E5126F","#9D722A","#7B3A96","#C7B42E","#CB2027","#4D4D4D","#5DA5DA","#FAA43A","#60BD68","#F17CB0","#B2912F","#B276B2","#DECF3F","#F15854","#8C8C8C","#8ABDE6","#FBB258","#90CD97","#F6AAC9","#BFA554","#BC99C7","#EDDD46","#F07E6E","#000000"];
 		
 	
-	var colors = function(i) {
+	var colors = function(d,i) {
 		if (cvarr.type === 'continuous') return yearcolorscale(cvarlist[i]);
-		else if (cvarr.customcolor) return cvarr.colorscale[i];
+		else if (cvarr.customcolor) return cvarr.colorscale[d];
 		else if (xvarr.type === 'continuous') return colorbrewer.Dark2[8][i % 8];//colarr[i % colarr.length];
 		else return colorbrewer.BrBG[11][10 - (i % 11)];//colarr[i % colarr.length];//normscale(i);
 	};
@@ -113,7 +113,7 @@ BDSVis.makePlot = function (data,request,vm) {
         	.attr("class", "line")
         	.attr("fill", "none")
         	.attr("stroke-width",2)
-        	.attr("stroke", colors(icv))
+        	.attr("stroke", colors(vm.model.NameLookUp(request[cvar][icv],cvar),icv))
         	.attr("d", valueline(data.filter(function(d) {
         				return d[cvar]===vm.model.NameLookUp(request[cvar][icv],cvar);
         		})));
@@ -122,7 +122,7 @@ BDSVis.makePlot = function (data,request,vm) {
         svg.selectAll("dot")
     	.data(data)
   		.enter().append("circle")
-  		.attr("fill", function(d) {return colors(cvarlist.indexOf(d[cvar]));})
+  		.attr("fill", function(d) {return colors(d[cvar],cvarlist.indexOf(d[cvar]));})
     	.attr("r", 5)
     	.attr("cx", function(d) { return xScale(d[xvar]); })
     	.attr("cy", function(d) { return yScale(d[measure]); })
@@ -140,10 +140,9 @@ BDSVis.makePlot = function (data,request,vm) {
 			.data(data);
 
 		bars.enter().append("rect")
-		   	.attr("fill",  function(d) {return colors(cvarlist.indexOf(d[cvar]));})
+		   	.attr("fill",  function(d) {return colors(d[cvar],cvarlist.indexOf(d[cvar]));})
 		   	.attr("stroke", "white")
 		   	.attr("stroke-width",".1")
-		   	//.attr("fill",  function(d) {return colors(d[cvar]);})
 		   	.attr("width", barwidth)
 		   	.attr("x",function(d) {return xScale(d[xvar])+barwidth*cvarlist.indexOf(d[cvar])})
 		   	// .attr("y",function(d) {return yScale(y0)})
@@ -207,7 +206,7 @@ BDSVis.makePlot = function (data,request,vm) {
 
 	legendsvg.attr("height",(symbolsize+5)*cvarlist.length);
 
-	legendsvg.append("text").attr("class","legtitle").text(cvarr.name+((cvarr.APIfiltered || MeasureAsLegend)?"  (click to remove)":"")+": ");
+	legendsvg.append("text").attr("class","legtitle").text(cvarr.name+((cvarlist.length>1)?"  (click to remove) ":"")+": ");
 
 	var legendlabels=legendsvg.selectAll("text .leglabel")
 		.data(cvarlist)
@@ -244,7 +243,7 @@ BDSVis.makePlot = function (data,request,vm) {
 		.data(cvarlist)
 		.enter()
 		.append("rect")
-		.attr("fill",  function(d,i) {return colors(i);})
+		.attr("fill",  function(d,i) {return colors(d,i);})
 		.attr("width",symbolsize).attr("height",symbolsize)
 		.attr("y",function(d,i) {return 0.6+((i>0)?(numlines[i-1]+i*.75):0)+"em";});
 
@@ -280,7 +279,7 @@ BDSVis.makePlot = function (data,request,vm) {
 		  // Update old elements as needed.
 		  
 		bars
-		   	.attr("fill",  function(d) {return colors(+d.icvar)})
+		   	.attr("fill",  function(d) {return colors(d.cvar,+d.icvar)})
 		   	.attr("x",function(d) {return xScale(d[xvar])+barwidth*d.icvar;})
 		   	.transition().duration(500)
 		   	.attr("y",function(d) { return yScale(Math.max(0,+d[measure]));})
@@ -298,6 +297,7 @@ BDSVis.makePlot = function (data,request,vm) {
 					var datum4bar={}
 					datum4bar[xvar]=xScale.domain()[i];
 					datum4bar[measure]=0;
+					datum4bar[cvar]=cvarlist[j];
 					datum4bar.icvar=j;
 					data4bars.push(datum4bar);
 				}

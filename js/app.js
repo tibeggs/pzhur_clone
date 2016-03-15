@@ -123,8 +123,10 @@ BDSVis.ViewModel = function() {
 		// };
 
 		// if (!incompatible_changed) vm.getBDSdata();
-
-		vm.getBDSdata();
+		if (varr.type === 'variablegroup') 
+			vm.SelectedOpts[vm.SelectedOpts[varr.code]()[0]](vm.model[vm.SelectedOpts[varr.code]()[0]].map(function(d){return d.code;}));
+		else
+			vm.getBDSdata();
 	};
 
 	this.setxvar = function (varname) {
@@ -198,7 +200,13 @@ BDSVis.ViewModel = function() {
 		var varr=this.model.variables[i];
 		var initial = (varr.type==="continuous")?[vm.model[varr.code][varr.default]]:[vm.model[varr.code][varr.default].code];
 		vm.SelectedOpts[varr.code]=ko.observableArray(initial);
-	}
+		if (varr.type==="variablegroup") {
+			for (var j in varr.variables) {
+				var varrj = varr.variables[j];
+				vm.SelectedOpts[varrj.code]=ko.observableArray(vm.model[varrj.code].map(function(d){return d.code;}));
+			};
+		};
+	};
 
 	//Initial values of X-axis variable and C- variable
 	this.xvar = ko.observable("fchar");
@@ -209,6 +217,9 @@ BDSVis.ViewModel = function() {
 	for (var i in this.model.variables) {
 		var varr=this.model.variables[i];
 		this.SelectedOpts[varr.code].subscribe(function() {vm.getBDSdata();});
+		if (varr.type==="variablegroup")
+			for (var j in varr.variables)
+				this.SelectedOpts[varr.variables[j].code].subscribe(function() {vm.getBDSdata();});
 	};
 
 	//Call initial plot
