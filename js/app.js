@@ -37,7 +37,7 @@ BDSVis.ViewModel = function() {
 		if (varr.type==="variablegroup") {
 			selectors.append("br");
 			selectors.append("h4");
-			selectors.append("select").attr("data-bind","options: model["+so+"()[0]], optionsText: 'name', optionsValue: 'code', value: SelectedOpts["+so+"()[0]]()[0], selectedOptions: SelectedOpts[vars.fisrtsel('"+varr.code+"')], attr: {multiple: "+multiple+"}, css: {tallselector: "+multiple+"} ");
+			selectors.append("select").attr("data-bind","options: model["+so+"()[0]], optionsText: 'name', optionsValue: 'code', selectedOptions: SelectedOpts[vars.firstsel('"+varr.code+"')], attr: {multiple: "+multiple+"}, css: {tallselector: "+multiple+"} "); //, value: SelectedOpts["+so+"()[0]]()[0]
 		}
 
 	
@@ -119,20 +119,11 @@ BDSVis.ViewModel = function() {
 	this.setcvar = function (varname) {
 		var varr=vm.model.LookUpVar(varname);
 		
-		vm.cvar(varname);
+		if (varr.type!='variablegroup')
+			vm.cvar(varname);
+		else vm.cvar(vm.SelectedOpts[varname]()[0]);
 
-		// var incompatible_changed=false;
-		// for (var i in varr.incombatible) {
-		// 	var incmp=varr.incombatible[i];
-		// 	vm.SelectedOpts[incmp.code]([this.model[incmp.code][this.model[incmp.code].total].code]);
-		// 	incompatible_changed=true;
-		// };
-
-		// if (!incompatible_changed) vm.getBDSdata();
-		// if (varr.type === 'variablegroup') 
-		// 	vm.SelectedOpts[vm.SelectedOpts[varr.code]()[0]](vm.model[vm.SelectedOpts[varr.code]()[0]].map(function(d){return d.code;}));
-		// else
-			vm.getBDSdata();
+		vm.getBDSdata();
 	};
 
 	this.setxvar = function (varname) {
@@ -215,7 +206,7 @@ BDSVis.ViewModel = function() {
 	});
 
 	//Returns the selected options for the variable that is selected in selector corresponding to varname (for variablegroup)
-	this.vars.fisrtsel = function(varname) {
+	this.vars.firstsel = function(varname) {
 		return vm.SelectedOpts[varname]()[0];
 	}.bind(this.vars);
 

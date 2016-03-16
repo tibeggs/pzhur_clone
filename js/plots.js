@@ -279,7 +279,7 @@ BDSVis.makePlot = function (data,request,vm) {
 		  // Update old elements as needed.
 		  
 		bars
-		   	.attr("fill",  function(d) {return colors(d.cvar,+d.icvar)})
+		   	.attr("fill",  function(d) {return colors(d[cvar],+d.icvar)})
 		   	.attr("x",function(d) {return xScale(d[xvar])+barwidth*d.icvar;})
 		   	.transition().duration(500)
 		   	.attr("y",function(d) { return yScale(Math.max(0,+d[measure]));})
