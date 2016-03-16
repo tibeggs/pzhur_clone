@@ -50,5 +50,8 @@ BDSVis.PlotView = {
 		this.yaxislabel=d3.select("#chartsvg").append("text")
 			.attr("class","yaxislabel")
 			.attr("transform","translate("+16+","+.5*(height + margin.top + this.xaxislabelheight + this.titleheight)+")rotate(-90)")
+	},
+	DisplayNoData : function() {
+		d3.select("#chartsvg").append("text").attr("class","graphtitle").attr("x",this.width0/2).attr("y",this.height0/2).text("No data");
 	}
 };

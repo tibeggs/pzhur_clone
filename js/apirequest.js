@@ -51,7 +51,7 @@ BDSVis.getAPIdata = function (vm) {
 
     if ((request.xvar!=vm.model.geomapvar) && (request.xvar!=vm.model.yvars)) getstring+=","+request.xvar;
 
-    if (!vm.geomap())
+    //if (!vm.geomap())
 	    vm.model.variables.forEach(function(varr) {
 	
 	    	if ((varr.code!=vm.model.geomapvar) && 
@@ -85,7 +85,11 @@ BDSVis.getAPIdata = function (vm) {
 	    		};
 	    	};
     		BDSVis.processAPIdata(jsoned,request,vm); //Continue to data processing and plotting
-    	} else console.log("Server sent empty response to " + geturl);	
+    	} else {
+    		vm.PlotView.Init();	
+    		vm.PlotView.DisplayNoData();	
+    		console.log("Server sent empty response to " + geturl);	
+    	}
     	vm.waiting4api(false); //Hide "waiting for data" message
     });
 };

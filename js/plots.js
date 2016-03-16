@@ -260,7 +260,7 @@ BDSVis.makePlot = function (data,request,vm) {
 
 		curyearmessage.transition().duration(1000).text(vm.model[vm.model.timevar][yr]); //Display year
 
-		d3.select("#graphtitle").text("");
+		maintitle.text("");
 
 		var dataset=data.filter(function(d) {return +d[vm.model.timevar]===vm.model[vm.model.timevar][yr]}); //Select data corresponding to the year
 		
