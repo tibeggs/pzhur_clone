@@ -9,8 +9,7 @@ BDSVis.getAPIdata = function (vm) {
 
 	var request={};
 	
-	for (var i in vm.model.variables) {
-		var varr=vm.model.variables[i];
+	vm.model.variables.forEach(function(varr) {
 
 		if (!vm.vars.isvar(varr.code,'any')()) request[varr.code]=[vm.SelectedOpts[varr.code]()[0]]; //If it's not c- or x-var only take first selected option
 		else {
@@ -28,7 +27,7 @@ BDSVis.getAPIdata = function (vm) {
 				request[request[varr.code][0]]=vm.SelectedOpts[request[varr.code][0]]();
 			} else request[varr.code] = vm.geomap()?[vm.SelectedOpts[varr.code]()[0]]:vm.SelectedOpts[varr.code]();
 		}
-	};
+	});
 
 	request.xvar = (vm.model.LookUpVar(vm.xvar()).type === 'variablegroup')?(vm.SelectedOpts[vm.xvar()]()[0]):(vm.xvar());
 	request.cvar = (vm.model.LookUpVar(vm.cvar()).type === 'variablegroup')?(vm.SelectedOpts[vm.cvar()]()[0]):(vm.cvar());
@@ -53,8 +52,8 @@ BDSVis.getAPIdata = function (vm) {
     if ((request.xvar!=vm.model.geomapvar) && (request.xvar!=vm.model.yvars)) getstring+=","+request.xvar;
 
     if (!vm.geomap())
-	    for (var i in vm.model.variables) {
-	    	var varr = vm.model.variables[i];
+	    vm.model.variables.forEach(function(varr) {
+	
 	    	if ((varr.code!=vm.model.geomapvar) && 
 	    		(varr.code!=vm.model.timevar) &&  
 	    		(varr.code!=vm.model.yvars))
@@ -63,7 +62,7 @@ BDSVis.getAPIdata = function (vm) {
 	    				getstring+=","+vm.SelectedOpts[varr.code]()[0];}
 	    		else if (varr.code!=request.xvar)
 	    				filterstring+="&"+varr.code+"="+request[varr.code];
-	    };
+	    });
 
 	var geturl=url+"?get="+getstring+filterstring+"&for="+geography+reqtime+"&key=93beeef146cec68880fccbd72e455fcd7135228f";
 

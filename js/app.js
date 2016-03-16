@@ -10,21 +10,19 @@ BDSVis.ViewModel = function() {
 	//Make HTML UI elements
 	var selectors = d3.select('.selectors');
 	
-	for (var i in this.model.variables) {
-		var varr=this.model.variables[i],
-			varname=varr.code,
-			varfullname=varr.name,
-			multiple="vars.multiple('"+varname+"')",
-			so="SelectedOpts['"+varname+"']",
-			optionstext="",
-			optionsvalue="";
+	this.model.variables.forEach(function(varr) {
+
+		multiple="vars.multiple('"+varr.code+"')",
+		so="SelectedOpts['"+varr.code+"']",
+		optionstext="",
+		optionsvalue="";
 		if (varr.type==="continuous") {optionstext="$data"; optionsvalue="$data"};
 		if ((varr.type==="categorical") || (varr.type==="variablegroup")) {optionstext="'name'"; optionsvalue="'code'"};
 	
-		var databind="options: model."+varname
+		var databind="options: model."+varr.code
 					+", optionsText: "+optionstext
 					+", optionsValue: "+optionsvalue
-					+", disable: vars.disabled('"+varname+"','selector')"
+					+", disable: vars.disabled('"+varr.code+"','selector')"
 					+", value: "+so+"()[0]"
 					+", selectedOptions: "+so;
 
@@ -32,26 +30,36 @@ BDSVis.ViewModel = function() {
 			databind+=", attr: {multiple: "+multiple+"}"
 					+", css: {tallselector: "+multiple+"}";
 	
-		selectors.append("h4").text(varfullname+":"); //Add the title for selector
+		selectors.append("h4").text(varr.name+":"); //Add the title for selector
 
 		selectors.append("select").attr("data-bind", databind); //Add the selector
+
+		if (varr.type==="variablegroup") {
+			selectors.append("br");
+			selectors.append("h4");//.attr("data-bind","text: model.NameLookUp("+so+"()[0],'var')+': '");
+			//selectors.append("select").attr("data-bind","options: model["+so+"()[0]], optionsText: 'name', optionsValue: 'code', value: SelectedOpts["+so+"()[0]]()[0], selectedOptions: SelectedOpts["+so+"()[0]](), attr: {multiple: "+multiple+"}, css: {tallselector: "+multiple+"} ");
+			selectors.append("select").attr("data-bind","options: model["+so+"()[0]], optionsText: 'name', optionsValue: 'code', value: SelectedOpts["+so+"()[0]]()[0], selectedOptions: SelectedOpts[a."+varr.code+"], attr: {multiple: "+multiple+"}, css: {tallselector: "+multiple+"} ");
+		}
+
 	
 		if (varr.aslegend) { //Add the 'Compare' button
-			var cbutdbind="click: function(variable) {setcvar('"+varname+"')}"
-									+", disable: vars.disabled('"+varname+"','cbutton')"
+			var cbutdbind="click: function(variable) {setcvar('"+varr.code+"')}"
+									+", disable: vars.disabled('"+varr.code+"','cbutton')"
 									+", css: {activebutton: "+multiple+"}";
 			if (varr.type=="variablegroup") cbutdbind+=", text: 'Compare '+model.NameLookUp("+so+"()[0],'var')";
 			selectors.append("button")
-					.attr("data-bind",cbutdbind).text("Compare "+varfullname+"s");
+					.attr("data-bind",cbutdbind).text("Compare "+varr.name+"s");
 		}
 		if (varr.asaxis) //Add the 'Make X' button
 			selectors.append("button")
-					.attr("data-bind","click: function(variable) {setxvar('"+varname+"')}"
-									+", disable: vars.disabled('"+varname+"','xbutton')"
-									+", css: {activebutton: vars.isvar('"+varname+"','x')}").text((varr.code===vm.model.geomapvar)?"See Map":"Make X-axis");
+					.attr("data-bind","click: function(variable) {setxvar('"+varr.code+"')}"
+									+", disable: vars.disabled('"+varr.code+"','xbutton')"
+									+", css: {activebutton: vars.isvar('"+varr.code+"','x')}").text((varr.code===vm.model.geomapvar)?"See Map":"Make X-axis");
 		selectors.append("br");
-	}
-	
+
+	});
+	//this.a = {'fchar': vm.model.variables[4].variables[0].code};
+	this.a = {'fchar': 'fage4'};
 	//Reference to the visual elements of the plot: SVGs for the graph/map and legend
 	this.PlotView = BDSVis.PlotView;
 
@@ -196,17 +204,18 @@ BDSVis.ViewModel = function() {
     
 	//Knockout observables for input selectors
 	this.SelectedOpts = {};
-	for (var i in this.model.variables) {
-		var varr=this.model.variables[i];
+	this.model.variables.forEach(function(varr) {
+
 		var initial = (varr.type==="continuous")?[vm.model[varr.code][varr.default]]:[vm.model[varr.code][varr.default].code];
 		vm.SelectedOpts[varr.code]=ko.observableArray(initial);
 		if (varr.type==="variablegroup") {
 			for (var j in varr.variables) {
 				var varrj = varr.variables[j];
 				vm.SelectedOpts[varrj.code]=ko.observableArray(vm.model[varrj.code].map(function(d){return d.code;}));
+				//vm.SelectedOpts[varrj.code]=ko.computed(function(){return vm.model[varrj.code].map(function(d){return d.code;});});
 			};
 		};
-	};
+	});
 
 	//Initial values of X-axis variable and C- variable
 	this.xvar = ko.observable("fchar");
@@ -214,13 +223,12 @@ BDSVis.ViewModel = function() {
 
 	//Subscribe to input changes
 	//Any change in the input select fields triggers request to the server, followed by data processing and making of a new plot
-	for (var i in this.model.variables) {
-		var varr=this.model.variables[i];
-		this.SelectedOpts[varr.code].subscribe(function() {vm.getBDSdata();});
+	this.model.variables.forEach(function(varr) {
+		vm.SelectedOpts[varr.code].subscribe(function() {vm.getBDSdata();});
 		if (varr.type==="variablegroup")
 			for (var j in varr.variables)
-				this.SelectedOpts[varr.variables[j].code].subscribe(function() {vm.getBDSdata();});
-	};
+				vm.SelectedOpts[varr.variables[j].code].subscribe(function() {vm.getBDSdata();});
+	});
 
 	//Call initial plot
 	//Get the geographic map from the shape file in JSON format
