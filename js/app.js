@@ -118,11 +118,7 @@ BDSVis.ViewModel = function() {
 	//The following functions set cvar (Legend/Comparison/Color variable) and xvar (X-axis variable)
 	this.setcvar = function (varname) {
 		var varr=vm.model.LookUpVar(varname);
-		
-		if (varr.type!='variablegroup')
 			vm.cvar(varname);
-		else vm.cvar(vm.SelectedOpts[varname]()[0]);
-
 		vm.getBDSdata();
 	};
 
