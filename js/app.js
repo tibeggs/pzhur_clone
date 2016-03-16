@@ -23,7 +23,7 @@ BDSVis.ViewModel = function() {
 					+", optionsText: "+optionstext
 					+", optionsValue: "+optionsvalue
 					+", disable: vars.disabled('"+varr.code+"','selector')"
-					+", value: "+so+"()[0]"
+					//+", value: "+so+"()[0]"
 					+", selectedOptions: "+so;
 
 		if ((varr.type!="variablegroup") && (varr.aslegend))
@@ -36,9 +36,8 @@ BDSVis.ViewModel = function() {
 
 		if (varr.type==="variablegroup") {
 			selectors.append("br");
-			selectors.append("h4");//.attr("data-bind","text: model.NameLookUp("+so+"()[0],'var')+': '");
-			//selectors.append("select").attr("data-bind","options: model["+so+"()[0]], optionsText: 'name', optionsValue: 'code', value: SelectedOpts["+so+"()[0]]()[0], selectedOptions: SelectedOpts["+so+"()[0]](), attr: {multiple: "+multiple+"}, css: {tallselector: "+multiple+"} ");
-			selectors.append("select").attr("data-bind","options: model["+so+"()[0]], optionsText: 'name', optionsValue: 'code', value: SelectedOpts["+so+"()[0]]()[0], selectedOptions: SelectedOpts[a."+varr.code+"], attr: {multiple: "+multiple+"}, css: {tallselector: "+multiple+"} ");
+			selectors.append("h4");
+			selectors.append("select").attr("data-bind","options: model["+so+"()[0]], optionsText: 'name', optionsValue: 'code', value: SelectedOpts["+so+"()[0]]()[0], selectedOptions: SelectedOpts[vars.fisrtsel('"+varr.code+"')], attr: {multiple: "+multiple+"}, css: {tallselector: "+multiple+"} ");
 		}
 
 	
@@ -58,8 +57,7 @@ BDSVis.ViewModel = function() {
 		selectors.append("br");
 
 	});
-	//this.a = {'fchar': vm.model.variables[4].variables[0].code};
-	this.a = {'fchar': 'fage4'};
+	
 	//Reference to the visual elements of the plot: SVGs for the graph/map and legend
 	this.PlotView = BDSVis.PlotView;
 
@@ -131,9 +129,9 @@ BDSVis.ViewModel = function() {
 		// };
 
 		// if (!incompatible_changed) vm.getBDSdata();
-		if (varr.type === 'variablegroup') 
-			vm.SelectedOpts[vm.SelectedOpts[varr.code]()[0]](vm.model[vm.SelectedOpts[varr.code]()[0]].map(function(d){return d.code;}));
-		else
+		// if (varr.type === 'variablegroup') 
+		// 	vm.SelectedOpts[vm.SelectedOpts[varr.code]()[0]](vm.model[vm.SelectedOpts[varr.code]()[0]].map(function(d){return d.code;}));
+		// else
 			vm.getBDSdata();
 	};
 
@@ -201,21 +199,25 @@ BDSVis.ViewModel = function() {
 	this.vars.multiple = function (varname) {
 		return vm.geomap()?false:vm.vars.isvar(varname,'c')(); 
 	}.bind(this.vars);
+
+	
     
 	//Knockout observables for input selectors
 	this.SelectedOpts = {};
 	this.model.variables.forEach(function(varr) {
-
 		var initial = (varr.type==="continuous")?[vm.model[varr.code][varr.default]]:[vm.model[varr.code][varr.default].code];
 		vm.SelectedOpts[varr.code]=ko.observableArray(initial);
 		if (varr.type==="variablegroup") {
-			for (var j in varr.variables) {
-				var varrj = varr.variables[j];
+			varr.variables.forEach(function(varrj){
 				vm.SelectedOpts[varrj.code]=ko.observableArray(vm.model[varrj.code].map(function(d){return d.code;}));
-				//vm.SelectedOpts[varrj.code]=ko.computed(function(){return vm.model[varrj.code].map(function(d){return d.code;});});
-			};
+			});
 		};
 	});
+
+	//Returns the selected options for the variable that is selected in selector corresponding to varname (for variablegroup)
+	this.vars.fisrtsel = function(varname) {
+		return vm.SelectedOpts[varname]()[0];
+	}.bind(this.vars);
 
 	//Initial values of X-axis variable and C- variable
 	this.xvar = ko.observable("fchar");
@@ -226,8 +228,9 @@ BDSVis.ViewModel = function() {
 	this.model.variables.forEach(function(varr) {
 		vm.SelectedOpts[varr.code].subscribe(function() {vm.getBDSdata();});
 		if (varr.type==="variablegroup")
-			for (var j in varr.variables)
-				vm.SelectedOpts[varr.variables[j].code].subscribe(function() {vm.getBDSdata();});
+				varr.variables.forEach(function(varrj){
+					vm.SelectedOpts[varrj.code].subscribe(function() {vm.getBDSdata();});
+				});
 	});
 
 	//Call initial plot
@@ -237,6 +240,6 @@ BDSVis.ViewModel = function() {
 		vm.getBDSdata();
 	});
 	//vm.getBDSdata();
-}
+};
 
 ko.applyBindings(new BDSVis.ViewModel());
