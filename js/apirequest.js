@@ -8,30 +8,35 @@ BDSVis.getAPIdata = function (vm) {
 	
 	var request={};
 
-	vm.model.variables.forEach(function(varr) {
+	vm.model.variables.forEach(function(varr1) {
+
+		var varr = vm.model.IsGroup(varr1)?vm.model.LookUpVar(vm.SelectedOpts[varr1.code]()[0]):varr1;
 
 		if (!vm.vars.isvar(varr.code,'any')()) request[varr.code]=[vm.SelectedOpts[varr.code]()[0]]; //If it's not c- or x-var only take first selected option
 		else {
-			if (varr.removetotal) {
-				//Calculate whether to request single value of the variable or multiple, and remove the entry for the total (like US or EW) in selector
-				var multiple = vm.SelectedOpts[varr.code]().length>1; //Whether multiple values are selected
-				var totalindex = (varr.total || 0);
-				var firstTotal = vm.SelectedOpts[varr.code]()[0]===vm.model[varr.code][totalindex].code; //Whether total is selected
+			// if (varr.removetotal) {
+			// 	//Calculate whether to request single value of the variable or multiple, and remove the entry for the total (like US or EW) in selector
+			// 	var multiple = vm.SelectedOpts[varr.code]().length>1; //Whether multiple values are selected
+			// 	var totalindex = (varr.total || 0);
+			// 	var firstTotal = vm.SelectedOpts[varr.code]()[0]===vm.model[varr.code][totalindex].code; //Whether total is selected
 
-				if ((multiple) && (firstTotal)) request[varr.code] = vm.SelectedOpts[varr.code]().slice(1); //Remove total if many values are selected
-				//Otherwise return all selected values
-				else request[varr.code] = vm.SelectedOpts[varr.code]();
-			} else if (vm.model.IsGroup(varr)) {
-				//debugger;
-				request[varr.code] = vm.SelectedOpts[varr.code]();
-				request[request[varr.code][0]]=vm.SelectedOpts[request[varr.code][0]]();
-			} else
-				request[varr.code] = vm.geomap()?[vm.SelectedOpts[varr.code]()[0]]:vm.SelectedOpts[varr.code]();
+			// 	if ((multiple) && (firstTotal)) request[varr.code] = vm.SelectedOpts[varr.code]().slice(1); //Remove total if many values are selected
+			// 	//Otherwise return all selected values
+			// 	else request[varr.code] = vm.SelectedOpts[varr.code]();
+			// // } else if (vm.model.IsGroup(varr)) {
+			// // 	//debugger;
+			// // 	request[varr.code] = vm.SelectedOpts[varr.code]();
+			// // 	request[request[varr.code][0]]=vm.SelectedOpts[request[varr.code][0]]();
+			// } else
+			//	request[varr.code] = vm.geomap()?[vm.SelectedOpts[varr.code]()[0]]:vm.SelectedOpts[varr.code]();
+			request[varr.code] = vm.SelectedOpts[varr.code]();
 		}
 	});
 
 	request.xvar = vm.model.IsGroup(vm.xvar())?(vm.SelectedOpts[vm.xvar()]()[0]):(vm.xvar());
 	request.cvar = vm.model.IsGroup(vm.cvar())?(vm.SelectedOpts[vm.cvar()]()[0]):(vm.cvar());
+
+	console.log(request);
 		
     var url = "http://api.census.gov/data/bds/firms";
 
@@ -59,7 +64,7 @@ BDSVis.getAPIdata = function (vm) {
 	    		(varr.code!=vm.model.timevar) &&  
 	    		(varr.code!=vm.model.yvars))
 	    		if (!varr.APIfiltered)
-	    			{if (vm.SelectedOpts[varr.code]()[0]===request.cvar)
+	    			{//if (vm.SelectedOpts[varr.code]()[0]===request.cvar)
 	    				getstring+=","+vm.SelectedOpts[varr.code]()[0];}
 	    		else if (varr.code!=request.xvar)
 	    				filterstring+="&"+varr.code+"="+request[varr.code];
