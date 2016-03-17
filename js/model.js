@@ -299,6 +299,12 @@ BDSVis.Model = {
 		else return this.dicts[v][d];
 	},
 
+	VarExists : function (varname) {
+		if (this.variables.map(function(d) {return d.code}).indexOf(varname)!=-1) return true;
+		else 
+			return ([].concat.apply([],this.variables.filter(function(d) {return d.type==="variablegroup"}).map(function(d) {return d.variables;})).map(function(d) {return d.code}).indexOf(varname)!=-1);
+	},
+
 	IsGroup : function (varr) {
 		if (typeof(varr)==="object") return (varr.type==="variablegroup");
 		else if (typeof(varr)==="string") return (this.LookUpVar(varr).type==="variablegroup");

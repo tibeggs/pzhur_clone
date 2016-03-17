@@ -27,7 +27,7 @@ BDSVis.makePlot = function (data,request,vm) {
 	var ptitle=(MeasureAsLegend && request[vm.model.yvars].length>1)?("Various "+vm.model.yvars+"s"):(vm.model.NameLookUp(request[vm.model.yvars],vm.model.yvars)); //If many measures say "various", otherwise the measure name
 	for (var key in data[0]) {
 		//X-var should not be in the title, measure is taken care of. Also check that the name exists in model.variables (e.g. measure names don't)
-		if ((key!=xvar) && (key!=measure) && (key!=vm.model.yvars) && (vm.model.variables.map(function(d) {return d.code}).indexOf(key)>-1)) {
+		if ((key!=xvar) && (key!=measure) && (key!=vm.model.yvars) && (vm.model.VarExists(key))) {
 			if (key!=cvar) ptitle+=" in " + vm.model.NameLookUp(data[0][key],key);
 			else if (request[cvar].length === 1) ptitle+=" in " + data[0][key];
 			else if (key!=vm.model.yvars) ptitle+=" by " + vm.model.NameLookUp(key,"var");
