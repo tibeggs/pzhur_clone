@@ -45,13 +45,13 @@ BDSVis.makePlot = function (data,request,vm) {
 	//List of selected categories by actual name rather than code
 	var cvarlist=request[cvar].map(function(d) {
 		var cv=vm.model.NameLookUp(d,cvar);
-		return (cvarr.type === 'continuous')?(cv.toString()):(cv);
+		return (vm.model.IsContinuous(cvarr))?(cv.toString()):(cv);
 	});
 	
 
 	//Setting D3 scales
 	var xScale; var yScale; var ymin; var y0;
-	if (xvarr.type === 'continuous')
+	if (vm.model.IsContinuous(xvarr))
 		xScale = d3.scale.linear()
 			.domain([vm.model[xvar][0],vm.model[xvar][vm.model[xvar].length-1]])
 			.range([0, width]);
@@ -84,9 +84,9 @@ BDSVis.makePlot = function (data,request,vm) {
 		
 	
 	var colors = function(d,i) {
-		if (cvarr.type === 'continuous') return yearcolorscale(cvarlist[i]);
+		if (vm.model.IsContinuous(cvarr)) return yearcolorscale(cvarlist[i]);
 		else if (cvarr.customcolor) return cvarr.colorscale[d];
-		else if (xvarr.type === 'continuous') return colorbrewer.Dark2[8][i % 8];//colarr[i % colarr.length];
+		else if (vm.model.IsContinuous(xvarr)) return colorbrewer.Dark2[8][i % 8];//colarr[i % colarr.length];
 		else return colorbrewer.BrBG[11][10 - (i % 11)];//colarr[i % colarr.length];//normscale(i);
 	};
 
@@ -98,7 +98,7 @@ BDSVis.makePlot = function (data,request,vm) {
 		return ttt;
 	}
 	
-	if (xvarr.type === 'continuous') {
+	if (vm.model.IsContinuous(xvarr)) {
 		//Make a timeline scatter plot if year is x-variable
 
 		// Define the line
@@ -156,7 +156,7 @@ BDSVis.makePlot = function (data,request,vm) {
 	//Adding axes
 	var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
 
-	if (xvarr.type === 'continuous') xAxis.tickFormat(d3.format("d"));
+	if (vm.model.IsContinuous(xvarr)) xAxis.tickFormat(d3.format("d"));
 
 	var xAxis0 = d3.svg.axis().scale(xScale).tickFormat("").orient("bottom");
 
@@ -174,7 +174,7 @@ BDSVis.makePlot = function (data,request,vm) {
 		.call(xAxis)
 		.selectAll(".tick text");
 
-	if (xvarr.type != 'continuous')
+	if (vm.model.IsCategorical(xvarr))
       	xAxisLabels.call(wrap,xScale.rangeBand());
 
 	svg.append("g")

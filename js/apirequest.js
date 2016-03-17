@@ -6,9 +6,8 @@ BDSVis.getAPIdata = function (vm) {
 
 	//The list of variables to request from API. Based on this, the request URL is formed and then this list is used when plotting.
 	
-
 	var request={};
-	
+
 	vm.model.variables.forEach(function(varr) {
 
 		if (!vm.vars.isvar(varr.code,'any')()) request[varr.code]=[vm.SelectedOpts[varr.code]()[0]]; //If it's not c- or x-var only take first selected option
@@ -22,15 +21,17 @@ BDSVis.getAPIdata = function (vm) {
 				if ((multiple) && (firstTotal)) request[varr.code] = vm.SelectedOpts[varr.code]().slice(1); //Remove total if many values are selected
 				//Otherwise return all selected values
 				else request[varr.code] = vm.SelectedOpts[varr.code]();
-			} else if (varr.type === 'variablegroup') {
+			} else if (vm.model.IsGroup(varr)) {
+				//debugger;
 				request[varr.code] = vm.SelectedOpts[varr.code]();
 				request[request[varr.code][0]]=vm.SelectedOpts[request[varr.code][0]]();
-			} else request[varr.code] = vm.geomap()?[vm.SelectedOpts[varr.code]()[0]]:vm.SelectedOpts[varr.code]();
+			} else
+				request[varr.code] = vm.geomap()?[vm.SelectedOpts[varr.code]()[0]]:vm.SelectedOpts[varr.code]();
 		}
 	});
 
-	request.xvar = (vm.model.LookUpVar(vm.xvar()).type === 'variablegroup')?(vm.SelectedOpts[vm.xvar()]()[0]):(vm.xvar());
-	request.cvar = (vm.model.LookUpVar(vm.cvar()).type === 'variablegroup')?(vm.SelectedOpts[vm.cvar()]()[0]):(vm.cvar());
+	request.xvar = vm.model.IsGroup(vm.xvar())?(vm.SelectedOpts[vm.xvar()]()[0]):(vm.xvar());
+	request.cvar = vm.model.IsGroup(vm.cvar())?(vm.SelectedOpts[vm.cvar()]()[0]):(vm.cvar());
 		
     var url = "http://api.census.gov/data/bds/firms";
 
@@ -53,7 +54,7 @@ BDSVis.getAPIdata = function (vm) {
 
     //if (!vm.geomap())
 	    vm.model.variables.forEach(function(varr) {
-	
+			
 	    	if ((varr.code!=vm.model.geomapvar) && 
 	    		(varr.code!=vm.model.timevar) &&  
 	    		(varr.code!=vm.model.yvars))
@@ -106,10 +107,23 @@ BDSVis.processAPIdata = function(data,request,vm) {
 	var MeasureAsLegend = (cvar === vm.model.yvars);
 
 	var data2show = {}; // The nested object, used as an intermediate step to convert data into 2D array
-
-	var rcvstring = request[cvar].map(function(d) {return d.toString();})
-	if (!MeasureAsLegend)
-		data = data.filter(function(d) { return rcvstring.indexOf(d[cvar])!=-1;});
+	
+	for (var key in request) {
+	
+    	if ((key!=xvar) && (key!=vm.model.yvars) &&
+    		(key!="cvar") &&
+    		(key!="xvar") && (!vm.model.IsGroup(key))) {
+    		//debugger;
+    		data = data.filter(function(d) { return request[key].map(function(d) {return d.toString();}).indexOf(d[key])!=-1;});
+    	}
+			//data = data.filter(function(d) { return request[key].indexOf(d[key])!=-1;});
+	};
+	
+	if (data.length<1) {
+		vm.PlotView.Init();
+		vm.PlotView.DisplayNoData();
+		return;	
+	};
 
 	var data1 = []; // The reshuffled (melted) data, with measures in the same column. Like R function "melt" from the "reshape" package
 

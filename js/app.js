@@ -16,8 +16,8 @@ BDSVis.ViewModel = function() {
 		so="SelectedOpts['"+varr.code+"']",
 		optionstext="",
 		optionsvalue="";
-		if (varr.type==="continuous") {optionstext="$data"; optionsvalue="$data"};
-		if ((varr.type==="categorical") || (varr.type==="variablegroup")) {optionstext="'name'"; optionsvalue="'code'"};
+		if (vm.model.IsContinuous(varr)) {optionstext="$data"; optionsvalue="$data"};
+		if ((vm.model.IsCategorical(varr)) || (vm.model.IsGroup(varr))) {optionstext="'name'"; optionsvalue="'code'"};
 	
 		var databind="options: model."+varr.code
 					+", optionsText: "+optionstext
@@ -26,7 +26,7 @@ BDSVis.ViewModel = function() {
 					//+", value: "+so+"()[0]"
 					+", selectedOptions: "+so;
 
-		if ((varr.type!="variablegroup") && (varr.aslegend))
+		if ((!vm.model.IsGroup(varr)) && (varr.aslegend))
 			databind+=", attr: {multiple: "+multiple+"}"
 					+", css: {tallselector: "+multiple+"}";
 	
@@ -34,7 +34,7 @@ BDSVis.ViewModel = function() {
 
 		selectors.append("select").attr("data-bind", databind); //Add the selector
 
-		if (varr.type==="variablegroup") {
+		if (vm.model.IsGroup(varr)) {
 			selectors.append("br");
 			selectors.append("h4");
 			selectors.append("select").attr("data-bind","options: model["+so+"()[0]], optionsText: 'name', optionsValue: 'code', selectedOptions: SelectedOpts[vars.firstsel('"+varr.code+"')], attr: {multiple: "+multiple+"}, css: {tallselector: "+multiple+"} "); //, value: SelectedOpts["+so+"()[0]]()[0]
@@ -45,7 +45,7 @@ BDSVis.ViewModel = function() {
 			var cbutdbind="click: function(variable) {setcvar('"+varr.code+"')}"
 									+", disable: vars.disabled('"+varr.code+"','cbutton')"
 									+", css: {activebutton: "+multiple+"}";
-			if (varr.type=="variablegroup") cbutdbind+=", text: 'Compare '+model.NameLookUp("+so+"()[0],'var')";
+			if (vm.model.IsGroup(varr)) cbutdbind+=", text: 'Compare '+model.NameLookUp("+so+"()[0],'var')";
 			selectors.append("button")
 					.attr("data-bind",cbutdbind).text("Compare "+varr.name+"s");
 		}
@@ -165,7 +165,7 @@ BDSVis.ViewModel = function() {
 		if (disableAll()) return true;
 
 		else if (uielement==='selector') {		
-			if (vm.vars.isvar(varname,'x')() && (varr.type!="variablegroup")) return true; //Disable selector if variable is on x-axis
+			if (vm.vars.isvar(varname,'x')() && (!vm.model.IsGroup(varr))) return true; //Disable selector if variable is on x-axis
 			else return IncompExists(varr.incompatible,'any'); //Disable selector if an incompatible variable is xvar or cvar
 
 		} else if (uielement==='xbutton') {
@@ -192,9 +192,9 @@ BDSVis.ViewModel = function() {
 	//Knockout observables for input selectors
 	this.SelectedOpts = {};
 	this.model.variables.forEach(function(varr) {
-		var initial = (varr.type==="continuous")?[vm.model[varr.code][varr.default]]:[vm.model[varr.code][varr.default].code];
+		var initial = (vm.model.IsContinuous(varr))?[vm.model[varr.code][varr.default]]:[vm.model[varr.code][varr.default].code];
 		vm.SelectedOpts[varr.code]=ko.observableArray(initial);
-		if (varr.type==="variablegroup") {
+		if (vm.model.IsGroup(varr)) {
 			varr.variables.forEach(function(varrj){
 				vm.SelectedOpts[varrj.code]=ko.observableArray(vm.model[varrj.code].map(function(d){return d.code;}));
 			});
@@ -214,7 +214,7 @@ BDSVis.ViewModel = function() {
 	//Any change in the input select fields triggers request to the server, followed by data processing and making of a new plot
 	this.model.variables.forEach(function(varr) {
 		vm.SelectedOpts[varr.code].subscribe(function() {vm.getBDSdata();});
-		if (varr.type==="variablegroup")
+		if (vm.model.IsGroup(varr))
 				varr.variables.forEach(function(varrj){
 					vm.SelectedOpts[varrj.code].subscribe(function() {vm.getBDSdata();});
 				});

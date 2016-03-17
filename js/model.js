@@ -299,6 +299,24 @@ BDSVis.Model = {
 		else return this.dicts[v][d];
 	},
 
+	IsGroup : function (varr) {
+		if (typeof(varr)==="object") return (varr.type==="variablegroup");
+		else if (typeof(varr)==="string") return (this.LookUpVar(varr).type==="variablegroup");
+		else console.log("Variable is neither string nor object");
+	},
+
+	IsContinuous : function (varr) {
+		if (typeof(varr)==="object") return (varr.type==="continuous");
+		else if (typeof(varr)==="string") return (this.LookUpVar(varr).type==="continuous");
+		else console.log("Variable is neither string nor object");
+	},
+
+	IsCategorical : function (varr) {
+		if (typeof(varr)==="object") return (varr.type==="categorical");
+		else if (typeof(varr)==="string") return (this.LookUpVar(varr).type==="categorical");
+		else console.log("Variable is neither string nor object");
+	},
+
 	//This is a general use function for whenever the number should be printed in format with fixed significant digits and M and k for millions and thousands
 	NumFormat : function(d,sigdig) {
 		//"sigdig" is how many digits to show
