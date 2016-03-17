@@ -37,7 +37,7 @@ BDSVis.ViewModel = function() {
 		if (vm.model.IsGroup(varr)) {
 			selectors.append("br");
 			selectors.append("h4");
-			selectors.append("select").attr("data-bind","options: model["+so+"()[0]], optionsText: 'name', optionsValue: 'code', selectedOptions: SelectedOpts[vars.firstsel('"+varr.code+"')], attr: {multiple: "+multiple+"}, css: {tallselector: "+multiple+"} "); //, value: SelectedOpts["+so+"()[0]]()[0]
+			selectors.append("select").attr("data-bind","options: model["+so+"()[0]], optionsText: 'name', optionsValue: 'code', selectedOptions: SelectedOpts[vars.firstsel('"+varr.code+"')], attr: {multiple: "+multiple+"}, css: {tallselector: "+multiple+"}, disable: vars.disabled('"+varr.code+"','subselector')"); //, value: SelectedOpts["+so+"()[0]]()[0]
 		}
 
 	
@@ -168,6 +168,10 @@ BDSVis.ViewModel = function() {
 			if (vm.vars.isvar(varname,'x')() && (!vm.model.IsGroup(varr))) return true; //Disable selector if variable is on x-axis
 			else return IncompExists(varr.incompatible,'any'); //Disable selector if an incompatible variable is xvar or cvar
 
+		} else if (uielement==='subselector') {		
+			if (vm.vars.isvar(varname,'x')()) return true; //Disable selector if variable is on x-axis
+			else return IncompExists(varr.incompatible,'any');
+
 		} else if (uielement==='xbutton') {
 			if (varname === vm.model.geomapvar) return false; //Enable entering into geo map regime at any time
 			if (vm.vars.isvar(varname,'any')()) return true; //Disable 'Make X' button is variable is xvar or cvar
@@ -196,7 +200,9 @@ BDSVis.ViewModel = function() {
 		vm.SelectedOpts[varr.code]=ko.observableArray(initial);
 		if (vm.model.IsGroup(varr)) {
 			varr.variables.forEach(function(varrj){
-				vm.SelectedOpts[varrj.code]=ko.observableArray(vm.model[varrj.code].map(function(d){return d.code;}));
+				//vm.SelectedOpts[varrj.code]=ko.observableArray(vm.model[varrj.code].map(function(d){return d.code;}));
+				var initial = (vm.model.IsContinuous(varrj))?[vm.model[varrj.code][varrj.default]]:[vm.model[varrj.code][varrj.default].code];
+				vm.SelectedOpts[varrj.code]=ko.observableArray(initial);
 			});
 		};
 	});
