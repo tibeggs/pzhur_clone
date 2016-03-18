@@ -19,7 +19,7 @@ BDSVis.makeMap = function (data,request,vm) {
 	var ptitle=vm.model.NameLookUp(measure,vm.model.yvars); //If many measures say "various", otherwise the measure name
 	for (var key in data[0]) {
 		//X-var should not be in the title, measure is taken care of. Also check that the name exists in model.variables (e.g. measure names don't)
-		if ((key!=vm.model.geomapvar) && (key!=vm.model.yvars) && (vm.model.variables.map(function(d) {return d.code}).indexOf(key)>-1))
+		if ((key!=vm.model.geomapvar) && (key!=vm.model.yvars) && (vm.model.VarExists(key)))
 			ptitle+=" in " + vm.model.NameLookUp(data[0][key],key);	
 	};
 
@@ -58,10 +58,14 @@ BDSVis.makeMap = function (data,request,vm) {
 			.translate([width / 2, height / 2.]);
 
 	var geo_data1=[];
+		timerange = d3.min(data, function(d) { return +d[vm.model.timevar] });
+
+	debugger;
 
 	if (vm.timelapse()) { //In time lapse regime, select only the data corresponding to the current year
 		var datafull=data;
-		data=data.filter(function(d) {return +d[vm.model.timevar]===vm.model[vm.model.timevar][0]});
+		data=data.filter(function(d) {return +d[vm.model.timevar]===timerange[0];});
+		console.log(timerange[0],data);
 	};
 
 	//Put the states in geo_data in the same order as they are in data

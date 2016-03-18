@@ -106,7 +106,7 @@ BDSVis.processAPIdata = function(data,request,vm) {
 	for (var key in request) { //Filter the obtained data, so that only what is requested remains (API does not filter all the variables)
     	if ((key!=xvar) && (key!=vm.model.yvars) &&
     		(key!="cvar") &&
-    		(key!="xvar") && (!vm.model.IsGroup(key))) {
+    		(key!="xvar") && (!vm.model.IsGroup(key)) && !(vm.timelapse() && (key===vm.model.timevar))) {
     		data = data.filter(function(d) { return request[key].map(function(d) {return d.toString();}).indexOf(d[key])!=-1;});
     	}
 	};

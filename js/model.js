@@ -14,7 +14,8 @@ BDSVis.Model = {
 			"APIfiltered" : true,
 			"aslegend" : true,
 			"asaxis" : true,
-			"incompatible" : ["state"]
+			"incompatible" : ["state"],
+			"printtitle" : {"pref":" in ", "postf":"", "totalpref":"", "totalpostf":""}
 		},
 		{
 			"code" : "measure",
@@ -34,7 +35,8 @@ BDSVis.Model = {
 			"APIfiltered" : true,
 			"aslegend" : true,
 			"asaxis" : true,
-			"incompatible" : ["sic1"]
+			"incompatible" : ["sic1"],
+			"printtitle" : {"pref":" in ", "postf":"", "totalpref":" in ", "totalpostf":""}
 		},
 		{
 			"code" : "year2",
@@ -44,7 +46,8 @@ BDSVis.Model = {
 			"default" : 36,
 			"APIfiltered" : true,
 			"aslegend" : true,
-			"asaxis" : true
+			"asaxis" : true,
+			"printtitle" : {"pref":" in ", "postf":"", "totalpref":" in ", "totalpostf":""}
 		},
 		{
 			"code" : "fchar",
@@ -63,7 +66,8 @@ BDSVis.Model = {
 					"APIfiltered" : false,
 					"aslegend" : true,
 					"asaxis" : true,
-					"customcolor" : true
+					"customcolor" : true,
+					"printtitle" : {"pref":"", "postf":" y.o. ", "totalpref":" of ", "totalpostf":""}
 				 },
 				 {
 					"code" : "fsize",
@@ -74,7 +78,8 @@ BDSVis.Model = {
 					"APIfiltered" : false,
 					"aslegend" : true,
 					"asaxis" : true,
-					"customcolor" : true
+					"customcolor" : true,
+					"printtitle" : {"pref":" with ", "postf":" employees ", "totalpref":" of ", "totalpostf":""}
 				 },
 				 {
 					"code" : "ifsize",
@@ -85,7 +90,8 @@ BDSVis.Model = {
 					"APIfiltered" : false,
 					"aslegend" : true,
 					"asaxis" : true,
-					"customcolor" : true
+					"customcolor" : true,
+					"printtitle" : {"pref":" with ", "postf":" employees ", "totalpref":" of ", "totalpostf":""}
 				 }
 
 			]}
