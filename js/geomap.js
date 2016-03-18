@@ -58,14 +58,11 @@ BDSVis.makeMap = function (data,request,vm) {
 			.translate([width / 2, height / 2.]);
 
 	var geo_data1=[];
-		timerange = d3.min(data, function(d) { return +d[vm.model.timevar] });
-
-	debugger;
+		timerange = d3.extent(data, function(d) { return +d[vm.model.timevar] });
 
 	if (vm.timelapse()) { //In time lapse regime, select only the data corresponding to the current year
 		var datafull=data;
 		data=data.filter(function(d) {return +d[vm.model.timevar]===timerange[0];});
-		console.log(timerange[0],data);
 	};
 
 	//Put the states in geo_data in the same order as they are in data
@@ -122,9 +119,10 @@ BDSVis.makeMap = function (data,request,vm) {
 
 	// Timelapse animation
 	function updateyear(yr) {
-		curyearmessage.text(vm.model[vm.model.timevar][yr]); //Display year
+		//curyearmessage.text(vm.model[vm.model.timevar][yr]); //Display year
+		curyearmessage.text(yr); //Display year
 		d3.select("#graphtitle").text("");
-		var dataset=datafull.filter(function(d) {return +d[vm.model.timevar]===vm.model[vm.model.timevar][yr]}); //Select data corresponding to the year
+		var dataset=datafull.filter(function(d) {return +d[vm.model.timevar]===yr}); //Select data corresponding to the year
 		//Change the data that is displayed raw as a table
 		// var vmdata=vm.data();
 		// for (var i=1; i<dataset.length; i++)
@@ -140,12 +138,13 @@ BDSVis.makeMap = function (data,request,vm) {
 
 	//Run timelapse animation
 	if (vm.timelapse()) {
-		var iy=0;
+		var iy=timerange[0];
+		var step=vm.model.LookUpVar(vm.model.timevar).range[2];
 		var curyearmessage=d3.select("#chartsvg").append("text").attr("x",0).attr("y",height*.5).attr("font-size",100).attr("fill-opacity",.3);
 		vm.tlint=setInterval(function() {
   			updateyear(iy);
-  			if (iy<vm.model[vm.model.timevar].length) iy++; else iy=0;
-  			vm.TimeLapseCurrYear=vm.model[vm.model.timevar][iy];
+  			if (iy<timerange[1]) iy+=step; else iy=timerange[0];
+  			vm.TimeLapseCurrYear=iy;//vm.model[vm.model.timevar][iy];
 		}, 1000);
 	};
 };

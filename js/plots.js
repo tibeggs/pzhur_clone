@@ -258,11 +258,11 @@ BDSVis.makePlot = function (data,request,vm) {
 	// Timelapse animation
 	function updateyear(yr) {
 
-		curyearmessage.transition().duration(1000).text(vm.model[vm.model.timevar][yr]); //Display year
+		curyearmessage.transition().duration(1000).text(yr); //Display year
 
 		maintitle.text("");
 
-		var dataset=data.filter(function(d) {return +d[vm.model.timevar]===vm.model[vm.model.timevar][yr]}); //Select data corresponding to the year
+		var dataset=data.filter(function(d) {return +d[vm.model.timevar]===yr}); //Select data corresponding to the year
 		
 		//The data4bars is only needed for smooth transition in animations. There have to be rectangles of 0 height for missing data. data4bars is created
 		//empty outside this function. The following loop fills in / updates to actual data values from current year
@@ -290,6 +290,8 @@ BDSVis.makePlot = function (data,request,vm) {
 	//Run timelapse animation
 	if (vm.timelapse()) {
 		//These loops are only needed for smooth transition in animations. There have to be bars of 0 height for missing data.
+		var timerange = d3.extent(data, function(d) { return +d[vm.model.timevar] });
+		var step=vm.model.LookUpVar(vm.model.timevar).range[2];
 		var data4bars=[]
 		for (var i in xScale.domain())
 			for (var j in cvarlist)
@@ -305,12 +307,12 @@ BDSVis.makePlot = function (data,request,vm) {
 		svg.selectAll("rect").remove();
 		svg.selectAll("rect").data(data4bars).enter().append("rect").attr("width", barwidth);
 
-		var iy=0;
+		var iy=timerange[0];
 		var curyearmessage=svg.append("text").attr("x",width/2).attr("y",height/2).attr("font-size",100).attr("fill-opacity",.3);
 		vm.tlint=setInterval(function() {
   			updateyear(iy);
-  			if (iy<vm.model[vm.model.timevar].length) iy++; else iy=0;
-  			vm.TimeLapseCurrYear=vm.model[vm.model.timevar][iy];
+  			if (iy<timerange[1]) iy+=step; else iy=timerange[0];
+  			vm.TimeLapseCurrYear=iy;//vm.model[vm.model.timevar][iy];
 		}, 500);
 	};
 
