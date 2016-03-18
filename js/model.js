@@ -15,7 +15,7 @@ BDSVis.Model = {
 			"aslegend" : true,
 			"asaxis" : true,
 			"incompatible" : ["state"],
-			"printtitle" : {"pref":" in sector of ", "postf":"", "totalpref":"", "totalpostf":""}
+			"printtitle" : {"pref":" ", "postf":" sector"}
 		},
 		{
 			"code" : "measure",
@@ -36,7 +36,7 @@ BDSVis.Model = {
 			"aslegend" : true,
 			"asaxis" : true,
 			"incompatible" : ["sic1"],
-			"printtitle" : {"pref":" in ", "postf":"", "totalpref":" in ", "totalpostf":""}
+			"printtitle" : {"pref":" in ", "postf":""}
 		},
 		{
 			"code" : "year2",
@@ -47,7 +47,7 @@ BDSVis.Model = {
 			"APIfiltered" : true,
 			"aslegend" : true,
 			"asaxis" : true,
-			"printtitle" : {"pref":" in ", "postf":"", "totalpref":" in ", "totalpostf":""}
+			"printtitle" : {"pref":" in ", "postf":""}
 		},
 		{
 			"code" : "fchar",
@@ -67,7 +67,7 @@ BDSVis.Model = {
 					"aslegend" : true,
 					"asaxis" : true,
 					"customcolor" : true,
-					"printtitle" : {"pref":" for firms of age ", "postf":"", "totalpref":" of ", "totalpostf":""}
+					"printtitle" : {"pref":" for firms of age ", "postf":" yr"}
 				 },
 				 {
 					"code" : "fsize",
@@ -79,7 +79,7 @@ BDSVis.Model = {
 					"aslegend" : true,
 					"asaxis" : true,
 					"customcolor" : true,
-					"printtitle" : {"pref":" for firms with ", "postf":" employees ", "totalpref":" of ", "totalpostf":""}
+					"printtitle" : {"pref":" for firms with ", "postf":" employees"}
 				 },
 				 {
 					"code" : "ifsize",
@@ -91,7 +91,7 @@ BDSVis.Model = {
 					"aslegend" : true,
 					"asaxis" : true,
 					"customcolor" : true,
-					"printtitle" : {"pref":" with ", "postf":" employees ", "totalpref":" of ", "totalpostf":""}
+					"printtitle" : {"pref":" for firms with ", "postf":" employees"}
 				 }
 
 			]}
@@ -162,8 +162,8 @@ BDSVis.Model = {
 		{"code" : "i", "name" : "16-20" },
 		{"code" : "j", "name" : "21-25" },
 		{"code" : "k", "name" : "26+" },
-		{"code" : "l", "name" : "Born before '76" },
-		{"code" : "m", "name" : "All Ages" }],
+		{"code" : "l", "name" : "Born before '76", "pref" : " for firms ", "postf":"" },
+		{"code" : "m", "name" : "All Ages" , "pref" : " for firms of ", "postf":""}],
 
 	fsize : [
 		{"code" : "a", "name" : "1-4" },
@@ -178,19 +178,19 @@ BDSVis.Model = {
 		{"code" : "j", "name" : "2500-4999" },
 		{"code" : "k", "name" : "5000-9999" },
 		{"code" : "l", "name" : "10000+" },
-		{"code" : "m", "name" : "All Sizes" }],
+		{"code" : "m", "name" : "All Sizes","pref" : " for firms of ", "postf":"" }],
 
 	sic1 : [
-		{"code" : 00, "acr" : "EW", "name" : "Economy Wide" },
-		{"code" : 07, "acr" : "AGR", "name" : "Agriculture, Forestry, and Fishing" },
-		{"code" : 10, "acr" : "MIN", "name" : "Mining" },
-		{"code" : 15, "acr" : "CON", "name" : "Construction" },
-		{"code" : 20, "acr" : "MAN", "name" : "Manufacturing" },
-		{"code" : 40, "acr" : "TCU", "name" : "Transportation, Communication, and Public Utilities" },
-		{"code" : 50, "acr" : "WHO", "name" : "Wholesale Trade" },
-		{"code" : 52, "acr" : "RET", "name" : "Retail Trade" },
-		{"code" : 60, "acr" : "FIRE", "name" : "Finance, Insurance, and Real Estate" },
-		{"code" : 70, "acr" : "SRV", "name" : "Services" }],
+		{"code" : "0", "acr" : "EW", "name" : "Economy Wide","pref" : " ", "postf":"" },
+		{"code" : "7", "acr" : "AGR", "name" : "Agriculture, Forestry, and Fishing" },
+		{"code" : "10", "acr" : "MIN", "name" : "Mining" },
+		{"code" : "15", "acr" : "CON", "name" : "Construction" },
+		{"code" : "20", "acr" : "MAN", "name" : "Manufacturing" },
+		{"code" : "40", "acr" : "TCU", "name" : "Transportation, Communication, and Public Utilities" },
+		{"code" : "50", "acr" : "WHO", "name" : "Wholesale Trade" },
+		{"code" : "52", "acr" : "RET", "name" : "Retail Trade" },
+		{"code" : "60", "acr" : "FIRE", "name" : "Finance, Insurance, and Real Estate" },
+		{"code" : "70", "acr" : "SRV", "name" : "Services" }],
 		
 	measure : [
 		{"code" : "firms", "name" : "Number of firms" },
@@ -332,8 +332,13 @@ BDSVis.Model = {
 	PrintTitle : function (value, varname) {
 		var varr=this.LookUpVar(varname);
 		var pref,postf;
-		if (value === this[varname][varr.total]) {pref = varr.printtitle.totalpref; postf = varr.printtitle.totalpostf;}
-		else {pref = varr.printtitle.pref; postf = varr.printtitle.postf;}
+		if (!this.IsContinuous(varr)) {
+			var ind = this[varname].map(function(d){return d.code}).indexOf(value);
+			pref = this[varname][ind].pref;
+			postf = this[varname][ind].postf;
+		}
+		if (pref===undefined) pref = varr.printtitle.pref;
+		if (postf===undefined) postf = varr.printtitle.postf;
 		return pref+this.NameLookUp(value,varname)+postf;
 	},
 
