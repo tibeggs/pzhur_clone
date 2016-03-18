@@ -15,7 +15,7 @@ BDSVis.Model = {
 			"aslegend" : true,
 			"asaxis" : true,
 			"incompatible" : ["state"],
-			"printtitle" : {"pref":" ", "postf":" sector"}
+			"printtitle" : {"pref":" in ", "postf":" sector"}
 		},
 		{
 			"code" : "measure",
