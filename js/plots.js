@@ -28,7 +28,7 @@ BDSVis.makePlot = function (data,request,vm) {
 	for (var key in data[0]) {
 		//X-var should not be in the title, measure is taken care of. Also check that the name exists in model.variables (e.g. measure names don't)
 		if ((key!=xvar) && (key!=measure) && (key!=vm.model.yvars) && (vm.model.VarExists(key))) {
-			if (key!=cvar) ptitle+=" in " + vm.model.NameLookUp(data[0][key],key);
+			if (key!=cvar) ptitle+=vm.model.PrintTitle(data[0][key],key);
 			else if (request[cvar].length === 1) ptitle+=" in " + data[0][key];
 			else if (key!=vm.model.yvars) ptitle+=" by " + vm.model.NameLookUp(key,"var");
 		} 		

@@ -15,7 +15,7 @@ BDSVis.Model = {
 			"aslegend" : true,
 			"asaxis" : true,
 			"incompatible" : ["state"],
-			"printtitle" : {"pref":" in ", "postf":"", "totalpref":"", "totalpostf":""}
+			"printtitle" : {"pref":" in sector of ", "postf":"", "totalpref":"", "totalpostf":""}
 		},
 		{
 			"code" : "measure",
@@ -67,7 +67,7 @@ BDSVis.Model = {
 					"aslegend" : true,
 					"asaxis" : true,
 					"customcolor" : true,
-					"printtitle" : {"pref":"", "postf":" y.o. ", "totalpref":" of ", "totalpostf":""}
+					"printtitle" : {"pref":" for firms of age ", "postf":"", "totalpref":" of ", "totalpostf":""}
 				 },
 				 {
 					"code" : "fsize",
@@ -79,7 +79,7 @@ BDSVis.Model = {
 					"aslegend" : true,
 					"asaxis" : true,
 					"customcolor" : true,
-					"printtitle" : {"pref":" with ", "postf":" employees ", "totalpref":" of ", "totalpostf":""}
+					"printtitle" : {"pref":" for firms with ", "postf":" employees ", "totalpref":" of ", "totalpostf":""}
 				 },
 				 {
 					"code" : "ifsize",
@@ -327,6 +327,14 @@ BDSVis.Model = {
 		if (typeof(varr)==="object") return (varr.type==="categorical");
 		else if (typeof(varr)==="string") return (this.LookUpVar(varr).type==="categorical");
 		else console.log("Variable is neither string nor object");
+	},
+
+	PrintTitle : function (value, varname) {
+		var varr=this.LookUpVar(varname);
+		var pref,postf;
+		if (value === this[varname][varr.total]) {pref = varr.printtitle.totalpref; postf = varr.printtitle.totalpostf;}
+		else {pref = varr.printtitle.pref; postf = varr.printtitle.postf;}
+		return pref+this.NameLookUp(value,varname)+postf;
 	},
 
 	//This is a general use function for whenever the number should be printed in format with fixed significant digits and M and k for millions and thousands
