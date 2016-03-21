@@ -34,13 +34,7 @@ BDSVis.makePlot = function (data,request,vm) {
 		} 		
 	};
 	
-	//d3.select("#graphtitle").text(ptitle);
-	var maintitle=d3.select("#chartsvg")
-		.append("text").attr("class","graph-title")
-		.text(ptitle)
-		.attr("dy",1+"em");
-	maintitle.call(wrap,width);
-	maintitle.selectAll("tspan").attr("x",function(d) { return (pv.legendx-this.getComputedTextLength())/2.; })
+	pv.SetPlotTitle(ptitle);
 
 	//List of selected categories by actual name rather than code
 	var cvarlist=request[cvar].map(function(d) {
@@ -99,7 +93,7 @@ BDSVis.makePlot = function (data,request,vm) {
 	}
 	
 	if (vm.model.IsContinuous(xvarr)) {
-		//Make a timeline scatter plot if year is x-variable
+		//Make a scatter plot if x-variable is continuous
 
 		// Define the line
 		var valueline = d3.svg.line()
@@ -129,7 +123,7 @@ BDSVis.makePlot = function (data,request,vm) {
     	.append("title").text(function(d){return Tooltiptext(d);});
 
 	} else {
-		//Make a bar chart if x-variable is other than year
+		//Make a bar chart if x-variable is categorical
 		
 		//Number of bars is number of categories in the legend, and barwidth is determined from that
 		var nbars=cvarlist.length;
@@ -175,7 +169,7 @@ BDSVis.makePlot = function (data,request,vm) {
 		.selectAll(".tick text");
 
 	if (vm.model.IsCategorical(xvarr))
-      	xAxisLabels.call(wrap,xScale.rangeBand());
+      	xAxisLabels.call(BDSVis.util.wrap,xScale.rangeBand());
 
 	svg.append("g")
 	.attr("class", "y axis")
@@ -187,7 +181,6 @@ BDSVis.makePlot = function (data,request,vm) {
 		.attr("x",function(d) { return (pv.margin.left+pv.margin.right+width-this.getComputedTextLength())/2.; })
 
 	//Y-axis label
-	//debugger;
 	if ((measure!="value") && (vm.model.NameLookUp(measure,vm.model.yvars).indexOf("rate")!=-1))
 		pv.yaxislabel.text("% change")
 		
@@ -224,7 +217,7 @@ BDSVis.makePlot = function (data,request,vm) {
 		
 
 	//Split long labels into multiple lines
-	legendlabels.call(wrap,pv.legendwidth - (symbolsize+5));
+	legendlabels.call(BDSVis.util.wrap,pv.legendwidth - (symbolsize+5));
 	legendlabels.selectAll("tspan").attr("x",(symbolsize+5));
 	var numlines=legendsvg.selectAll(".leglabel").selectAll("tspan").map(function(d) {return d.length;}); //Number of lines in each label
 	tspany=[]; //"y" attributes for tspans
@@ -314,32 +307,5 @@ BDSVis.makePlot = function (data,request,vm) {
   			if (iy<timerange[1]) iy+=step; else iy=timerange[0];
   			vm.TimeLapseCurrYear=iy;//vm.model[vm.model.timevar][iy];
 		}, 500);
-	};
-
-	//Automatic text wrapping function by Mike Bostock, http://bl.ocks.org/mbostock/1846692, corrected
-	function wrap(text, width) {
-	  	text.each(function() {
-		    var text = d3.select(this),
-		        words = text.text().split(/[\s]+/).reverse(),
-		        word,
-		        line = [],
-		        lineNumber = 0,
-		        lineHeight = 1.1, // ems
-		        y = text.attr("y"),
-		        dy = parseFloat(text.attr("dy")),
-		        tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em");
-	        while (word = words.pop()) {
-	        	line.push(word);
-	        	tspan.text(line.join(" "));
-	        	if (tspan.node().getComputedTextLength() > width) {
-	        		line.pop();
-	        		tspan.text(line.join(" "));
-	        		line = [word];
-	        		if (tspan.node().getComputedTextLength()>0) //Corrected to not make a new line when even the single word is too long
-	        			lineNumber++;
-		        	tspan = text.append("tspan").attr("x", 0).attr("y", y).attr("dy", lineNumber * lineHeight + dy + "em").text(word);
-	   		 	}
-			}
-	  	});
 	};
 };

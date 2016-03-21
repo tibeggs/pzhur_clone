@@ -5,10 +5,11 @@ BDSVis.makeMap = function (data,request,vm) {
 	//"vm" is the reference to ViewModel
 
 	//Initialize the SVG elements and get width and length for scales
-	vm.PlotView.Init();
-	svg=vm.PlotView.svg;
-	width=vm.PlotView.width;
-	height=vm.PlotView.height;
+	var pv=vm.PlotView;
+	pv.Init();
+	svg=pv.svg;
+	width=pv.width;
+	height=pv.height;
 	
 	var measure=request.measure;
 
@@ -20,14 +21,10 @@ BDSVis.makeMap = function (data,request,vm) {
 	for (var key in data[0]) {
 		//X-var should not be in the title, measure is taken care of. Also check that the name exists in model.variables (e.g. measure names don't)
 		if ((key!=vm.model.geomapvar) && (key!=vm.model.yvars) && (vm.model.VarExists(key)))
-			ptitle+=" in " + vm.model.NameLookUp(data[0][key],key);	
+			ptitle+=vm.model.PrintTitle(data[0][key],key);
 	};
 
-	d3.select("#chartsvg")
-		.append("text").attr("class","graph-title")
-		.text(ptitle)
-		.attr("x",function(d) { return (vm.PlotView.margin.left+vm.PlotView.margin.right+width-this.getComputedTextLength())/2.; })
-		.attr("y",1+"em");
+	pv.SetPlotTitle(ptitle);
 
 	//Set D3 scales
 	var ymin=d3.min(data, function(d) { return +d[measure]; });
@@ -103,7 +100,7 @@ BDSVis.makeMap = function (data,request,vm) {
 		.attr("width",20)
 		.attr("height",colorbar.height/colorbar.nlevels+1)
 		.attr("y",function(d) {return hScale(d);})
-		.append("title").text(function(d){return vm.model.NumFormat(+d,3);});
+		.append("title").text(function(d){return BDSVis.util.NumFormat(+d,3);});
 
 	//Make the labels of the colorbar
 	legendsvg.selectAll("text .leglabel")
@@ -115,7 +112,7 @@ BDSVis.makeMap = function (data,request,vm) {
 		.attr("font-size", colorbar.fontsize+"px")
 		.attr("x",colorbar.width+3)
 		.attr("y",function(d) {return .4*colorbar.fontsize+hScale(d);})
-		.text(function(d) {return(vm.model.NumFormat(+d,3));});
+		.text(function(d) {return(BDSVis.util.NumFormat(+d,3));});
 
 	// Timelapse animation
 	function updateyear(yr) {

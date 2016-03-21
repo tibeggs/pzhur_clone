@@ -51,7 +51,18 @@ BDSVis.PlotView = {
 			.attr("class","yaxislabel")
 			.attr("transform","translate("+16+","+.5*(height + margin.top + this.xaxislabelheight + this.titleheight)+")rotate(-90)")
 	},
+
 	DisplayNoData : function() {
 		d3.select("#chartsvg").append("text").attr("class","graphtitle").attr("x",this.width0/2).attr("y",this.height0/2).text("No data");
+	},
+
+	SetPlotTitle : function(ptitle) {
+		var pv = this;
+		var maintitle=d3.select("#chartsvg")
+			.append("text").attr("class","graph-title")
+			.text(ptitle)
+			.attr("dy",1+"em");
+		maintitle.call(BDSVis.util.wrap,width);
+		maintitle.selectAll("tspan").attr("x",function(d) { return (pv.legendx-this.getComputedTextLength())/2.; })
 	}
 };
