@@ -186,7 +186,7 @@ BDSVis.makePlot = function (data,request,vm) {
 		
 
 	//Making Legend
-	var RemoveItem =  function(d,i) {
+	var RemoveItem =  function(d,i) { //Function to remove an item from the legend
 			var so=vm.SelectedOpts[cvar]();
 			so.splice(i,1);
 			vm.SelectedOpts[cvar](so);

@@ -62,7 +62,7 @@ BDSVis.PlotView = {
 			.append("text").attr("class","graph-title")
 			.text(ptitle)
 			.attr("dy",1+"em");
-		maintitle.call(BDSVis.util.wrap,width);
+		maintitle.call(BDSVis.util.wrap,pv.width);
 		maintitle.selectAll("tspan").attr("x",function(d) { return (pv.legendx-this.getComputedTextLength())/2.; })
 	}
 };

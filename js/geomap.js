@@ -89,8 +89,12 @@ BDSVis.makeMap = function (data,request,vm) {
 
 	for (var i=0; i<colorbar.nlevels+1; i++) colorbar.levels.push(y2levelsScale.invert(i));
 
-	legendsvg.append("text").attr("class","legtitle").text(vm.model.NameLookUp(measure,"measure")).attr("x",-20).attr("y",-20);
-
+	var legendtitle = legendsvg.append("text").attr("class","legtitle").text(vm.model.NameLookUp(measure,"measure")).attr("x",-20).attr("y",-20).attr("dy","1em");
+	legendtitle.call(BDSVis.util.wrap,pv.legendwidth);
+	//legendtitle.selectAll("tspan").attr("x",function(d) { return (pv.legendwidth-this.getComputedTextLength())/2.; })
+	var titleheight = legendtitle.node().getBBox().height;
+	legendsvg=legendsvg.append("g").attr("transform","translate(0,"+titleheight+")");
+	
 	//Make the colorbar
 	legendsvg.selectAll("rect")
 		.data(colorbar.levels)
