@@ -61,8 +61,8 @@ BDSVis.PlotView = {
 		var maintitle=d3.select("#chartsvg")
 			.append("text").attr("class","graph-title")
 			.text(ptitle)
-			.attr("dy",1+"em");
+			.attr("dy",1+"em").attr("y","0");
 		maintitle.call(BDSVis.util.wrap,pv.width);
-		maintitle.selectAll("tspan").attr("x",function(d) { return (pv.legendx-this.getComputedTextLength())/2.; })
+		maintitle.selectAll("tspan").attr("x",function(d) { return (pv.legendx-this.getComputedTextLength())/2.; });
 	}
 };
