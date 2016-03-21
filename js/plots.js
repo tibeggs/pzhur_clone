@@ -78,9 +78,9 @@ BDSVis.makePlot = function (data,request,vm) {
 		
 	
 	var colors = function(d,i) {
-		if (vm.model.IsContinuous(cvarr)) return yearcolorscale(cvarlist[i]);
+		if (vm.model.IsContinuous(xvarr)) return colorbrewer.Dark2[8][i % 8];//colarr[i % colarr.length];
+		else if (vm.model.IsContinuous(cvarr)) return yearcolorscale(cvarlist[i]);
 		else if (cvarr.customcolor) return cvarr.colorscale[d];
-		else if (vm.model.IsContinuous(xvarr)) return colorbrewer.Dark2[8][i % 8];//colarr[i % colarr.length];
 		else return colorbrewer.BrBG[11][10 - (i % 11)];//colarr[i % colarr.length];//normscale(i);
 	};
 
