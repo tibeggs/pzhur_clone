@@ -153,11 +153,15 @@ BDSVis.processAPIdata = function(data,request,vm) {
 
 
 	//Convert the nested object with data to display into nested array (including field names)
-	var cvarnames = [vm.model.NameLookUp(xvar,"var")]; //Create row with names of c-variable	
+	var cvarnames = [vm.model.NameLookUp(xvar,"var")]; //Create row with names of c-variable
+	var cvarnames1={};	
 	for (var xvarkey in data2show) {
-		for (var cvarkey in data2show[xvarkey])
-			cvarnames.push(cvarkey);
-		break;
+		for (var cvarkey in data2show[xvarkey]) {
+			if (cvarnames1[cvarkey]===undefined) {
+				cvarnames.push(cvarkey);
+				cvarnames1[cvarkey]=true;
+			};
+		};
 	};
 
 	vm.data([cvarnames]); //First row of the table will contain names of c-variable
