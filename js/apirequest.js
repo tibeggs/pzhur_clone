@@ -129,18 +129,14 @@ BDSVis.processAPIdata = function(data,request,vm) {
 			for (var imeasure in measure) { 
 			//If comparing by measure, melt the data by measures: 
 			//combine different measure in single column and create a column indicating which measure it is (c-var)
-			//Possible to use melt.js library for this instead
 				var rec = {};
 				for (var key in data[i])
 					if (key!=measure[imeasure]) rec[key] = data[i][key];
-				
 				rec.value = data[i][measure[imeasure]]; //Column named "value" will contain values of all the measures
-		
 				rec[vm.model.yvars] = vm.model.NameLookUp(measure[imeasure],vm.model.yvars); //Column for c-variable indicates the measure
-				
 				data1.push(rec);
-			}
-		
+			};
+
 		//Convert data to 2D table, so that it can be displayed
 		if (data2show[data[i][xvar]] === undefined) //Create nested objects
 			data2show[data[i][xvar]] = {};
@@ -150,8 +146,7 @@ BDSVis.processAPIdata = function(data,request,vm) {
 			for (var imeasure in request[cvar])
 				data2show[data[i][xvar]][vm.model.NameLookUp(request[cvar][imeasure],vm.model.yvars)] = data[i][request[cvar][imeasure]];
 	};
-
-
+	
 	//Convert the nested object with data to display into nested array (including field names)
 	var cvarnames = [vm.model.NameLookUp(xvar,"var")]; //Create row with names of c-variable
 	var cvarnames1={};	
