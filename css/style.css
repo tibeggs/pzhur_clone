@@ -23,7 +23,13 @@
 }
 
 #buttonsundergraph {
+  font: 12px sans-serif;
   text-align: center;
+}
+
+#buttonsundergraph h4{
+  display:inline-block;
+  font-weight: normal;
 }
 
 .selectors {

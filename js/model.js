@@ -4,6 +4,13 @@ BDSVis.Model = {
 	timevar : "year2",
 	geomapvar : "state",
 	yvars : "measure",
+	timelapsespeeds : [
+		{"name":"Slowest","code":"5000"},
+		{"name":"Slow","code":"2000"},
+		{"name":"Normal","code":"1000"},
+		{"name":"Fast","code":"500"},
+		{"name":"Fastest","code":"200"}
+	],
 	variables : [
 		{
 			"code" : "sic1",

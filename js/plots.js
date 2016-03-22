@@ -251,7 +251,7 @@ BDSVis.makePlot = function (data,request,vm) {
 	// Timelapse animation
 	function updateyear(yr) {
 
-		curyearmessage.transition().duration(1000).text(yr); //Display year
+		curyearmessage.transition().duration(vm.timelapsespeed()).text(yr); //Display year
 
 		pv.maintitle.text("");
 
@@ -274,7 +274,7 @@ BDSVis.makePlot = function (data,request,vm) {
 		bars
 		   	.attr("fill",  function(d) {return colors(d[cvar],+d.icvar)})
 		   	.attr("x",function(d) {return xScale(d[xvar])+barwidth*d.icvar;})
-		   	.transition().duration(500)
+		   	.transition().duration(vm.timelapsespeed())
 		   	.attr("y",function(d) { return yScale(Math.max(0,+d[measure]));})
 		   	.attr("height",function(d) {return Math.abs(yScale(y0)-yScale(+d[measure]));});
 
@@ -300,12 +300,12 @@ BDSVis.makePlot = function (data,request,vm) {
 		svg.selectAll("rect").remove();
 		svg.selectAll("rect").data(data4bars).enter().append("rect").attr("width", barwidth);
 
-		var iy=timerange[0];
+		var iy=Math.max(timerange[0], vm.timelapsefrom());
 		var curyearmessage=svg.append("text").attr("x",width/2).attr("y",height/2).attr("font-size",100).attr("fill-opacity",.3);
 		vm.tlint=setInterval(function() {
   			updateyear(iy);
-  			if (iy<timerange[1]) iy+=step; else iy=timerange[0];
+  			if (iy<Math.min(timerange[1],vm.timelapseto())) iy+=step; else iy=Math.max(timerange[0], vm.timelapsefrom());
   			vm.TimeLapseCurrYear=iy;//vm.model[vm.model.timevar][iy];
-		}, 500);
+		}, vm.timelapsespeed());
 	};
 };

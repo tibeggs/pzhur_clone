@@ -57,6 +57,14 @@ BDSVis.ViewModel = function() {
 		selectors.append("br");
 
 	});
+
+	var bug=d3.select("#buttonsundergraph");
+	bug.append("h4").text("From:"); //Add the title for selector
+	bug.append("select").attr("data-bind", "options: model[model.timevar], optionsText: $data, optionsValue: $data, value: timelapsefrom");
+	bug.append("h4").text("To:"); //Add the title for selector
+	bug.append("select").attr("data-bind", "options: model[model.timevar], optionsText: $data, optionsValue: $data, value: timelapseto");
+	bug.append("h4").text("Speed:"); //Add the title for selector
+	bug.append("select").attr("data-bind", "options: model.timelapsespeeds, optionsText: 'name', optionsValue: 'code', value: timelapsespeed, disable: disableAll");
 	
 	//Reference to the visual elements of the plot: SVGs for the graph/map and legend
 	this.PlotView = BDSVis.PlotView;
@@ -92,6 +100,10 @@ BDSVis.ViewModel = function() {
 			vm.getBDSdata();
 		}
 	};
+
+	this.timelapsefrom = ko.observable(vm.model.LookUpVar(vm.model.timevar).range[0]);
+	this.timelapseto = ko.observable(vm.model.LookUpVar(vm.model.timevar).range[1]-1);
+	this.timelapsespeed = ko.observable(vm.model.timelapsespeeds[Math.floor(vm.model.timelapsespeeds.length / 2)].code);
 
 	//LOG SCALE BUTTON
 	//Whether the scale of y-axis is Log or Linear

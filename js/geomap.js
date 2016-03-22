@@ -131,7 +131,7 @@ BDSVis.makeMap = function (data,request,vm) {
 		// vm.data(vmdata);
 		map = mapg.selectAll('path')
 				.data(dataset)
-				.transition().duration(1000)
+				.transition().duration(vm.timelapsespeed())
 				.style('fill', function(d) { return yScale(d[measure]);})
 
 		mapg.selectAll('title').data(dataset).text(function(d){return d[vm.model.geomapvar]+": "+d3.format(",")(d[measure]);});
@@ -139,13 +139,13 @@ BDSVis.makeMap = function (data,request,vm) {
 
 	//Run timelapse animation
 	if (vm.timelapse()) {
-		var iy=timerange[0];
+		var iy=Math.max(timerange[0], vm.timelapsefrom());
 		var step=vm.model.LookUpVar(vm.model.timevar).range[2];
 		var curyearmessage=d3.select("#chartsvg").append("text").attr("x",0).attr("y",height*.5).attr("font-size",100).attr("fill-opacity",.3);
 		vm.tlint=setInterval(function() {
   			updateyear(iy);
-  			if (iy<timerange[1]) iy+=step; else iy=timerange[0];
+  			if (iy<Math.min(timerange[1],vm.timelapseto())) iy+=step; else iy=Math.max(timerange[0], vm.timelapsefrom());
   			vm.TimeLapseCurrYear=iy;//vm.model[vm.model.timevar][iy];
-		}, 1000);
+		}, vm.timelapsespeed());
 	};
 };
