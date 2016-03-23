@@ -20,7 +20,7 @@ BDSVis.makeMap = function (data,request,vm) {
 	var ptitle=vm.model.NameLookUp(measure,vm.model.yvars); //If many measures say "various", otherwise the measure name
 	for (var key in data[0]) {
 		//X-var should not be in the title, measure is taken care of. Also check that the name exists in model.variables (e.g. measure names don't)
-		if ((key!=vm.model.geomapvar) && (key!=vm.model.yvars) && (vm.model.VarExists(key)))
+		if ((key!=vm.model.geomapvar) && (key!=vm.model.yvars) && !((key===vm.model.timevar) && (vm.timelapse())) && (vm.model.VarExists(key)))
 			ptitle+=vm.model.PrintTitle(data[0][key],key);
 	};
 
@@ -122,7 +122,7 @@ BDSVis.makeMap = function (data,request,vm) {
 	function updateyear(yr) {
 		//curyearmessage.text(vm.model[vm.model.timevar][yr]); //Display year
 		curyearmessage.text(yr); //Display year
-		pv.maintitle.text("");
+		//pv.maintitle.text("");
 		var dataset=datafull.filter(function(d) {return +d[vm.model.timevar]===yr}); //Select data corresponding to the year
 		//Change the data that is displayed raw as a table
 		// var vmdata=vm.data();

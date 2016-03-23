@@ -27,7 +27,7 @@ BDSVis.makePlot = function (data,request,vm) {
 	var ptitle=(MeasureAsLegend && request[vm.model.yvars].length>1)?("Various "+vm.model.yvars+"s"):(vm.model.NameLookUp(request[vm.model.yvars],vm.model.yvars)); //If many measures say "various", otherwise the measure name
 	for (var key in data[0]) {
 		//X-var should not be in the title, measure is taken care of. Also check that the name exists in model.variables (e.g. measure names don't)
-		if ((key!=xvar) && (key!=measure) && (key!=vm.model.yvars) && (vm.model.VarExists(key))) {
+		if ((key!=xvar) && (key!=measure) && (key!=vm.model.yvars) && !((key===vm.model.timevar) && (vm.timelapse())) && (vm.model.VarExists(key))) {
 			if (key!=cvar) ptitle+=vm.model.PrintTitle(data[0][key],key);
 			else if (request[cvar].length === 1) ptitle+=" in " + data[0][key];
 			else if (key!=vm.model.yvars) ptitle+=" by " + vm.model.NameLookUp(key,"var");
@@ -253,7 +253,7 @@ BDSVis.makePlot = function (data,request,vm) {
 
 		curyearmessage.transition().duration(vm.timelapsespeed()).text(yr); //Display year
 
-		pv.maintitle.text("");
+		//pv.maintitle.text("");
 
 		var dataset=data.filter(function(d) {return +d[vm.model.timevar]===yr}); //Select data corresponding to the year
 		
