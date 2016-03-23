@@ -278,13 +278,12 @@ BDSVis.makePlot = function (data,request,vm) {
 		   	.attr("y",function(d) { return yScale(Math.max(0,+d[measure]));})
 		   	.attr("height",function(d) {return Math.abs(yScale(y0)-yScale(+d[measure]));});
 
-	}
+	};
 
 	//Run timelapse animation
 	if (vm.timelapse()) {
 		//These loops are only needed for smooth transition in animations. There have to be bars of 0 height for missing data.
-		var timerange = d3.extent(data, function(d) { return +d[vm.model.timevar] });
-		var step=vm.model.LookUpVar(vm.model.timevar).range[2];
+		
 		var data4bars=[]
 		for (var i in xScale.domain())
 			for (var j in cvarlist)
@@ -295,17 +294,22 @@ BDSVis.makePlot = function (data,request,vm) {
 					datum4bar[cvar]=cvarlist[j];
 					datum4bar.icvar=j;
 					data4bars.push(datum4bar);
-				}
+				};
 
 		svg.selectAll("rect").remove();
 		svg.selectAll("rect").data(data4bars).enter().append("rect").attr("width", barwidth);
-
+		
+		var timerange = d3.extent(data, function(d) { return +d[vm.model.timevar] });
+		var step=vm.model.LookUpVar(vm.model.timevar).range[2];
 		var iy=Math.max(timerange[0], vm.timelapsefrom());
 		var curyearmessage=svg.append("text").attr("x",width/2).attr("y",height/2).attr("font-size",100).attr("fill-opacity",.3);
-		vm.tlint=setInterval(function() {
+		var intervalfunction = function() {
   			updateyear(iy);
   			if (iy<Math.min(timerange[1],vm.timelapseto())) iy+=step; else iy=Math.max(timerange[0], vm.timelapsefrom());
   			vm.TimeLapseCurrYear=iy;//vm.model[vm.model.timevar][iy];
-		}, vm.timelapsespeed());
+			clearInterval(vm.tlint);
+			vm.tlint=setInterval(intervalfunction, vm.timelapsespeed());
+		}
+		vm.tlint=setInterval(intervalfunction, vm.timelapsespeed());
 	};
 };

@@ -122,7 +122,7 @@ BDSVis.makeMap = function (data,request,vm) {
 	function updateyear(yr) {
 		//curyearmessage.text(vm.model[vm.model.timevar][yr]); //Display year
 		curyearmessage.text(yr); //Display year
-		d3.select("#graphtitle").text("");
+		pv.maintitle.text("");
 		var dataset=datafull.filter(function(d) {return +d[vm.model.timevar]===yr}); //Select data corresponding to the year
 		//Change the data that is displayed raw as a table
 		// var vmdata=vm.data();
@@ -142,10 +142,13 @@ BDSVis.makeMap = function (data,request,vm) {
 		var iy=Math.max(timerange[0], vm.timelapsefrom());
 		var step=vm.model.LookUpVar(vm.model.timevar).range[2];
 		var curyearmessage=d3.select("#chartsvg").append("text").attr("x",0).attr("y",height*.5).attr("font-size",100).attr("fill-opacity",.3);
-		vm.tlint=setInterval(function() {
+		var intervalfunction = function() {
   			updateyear(iy);
   			if (iy<Math.min(timerange[1],vm.timelapseto())) iy+=step; else iy=Math.max(timerange[0], vm.timelapsefrom());
   			vm.TimeLapseCurrYear=iy;//vm.model[vm.model.timevar][iy];
-		}, vm.timelapsespeed());
+			clearInterval(vm.tlint);
+			vm.tlint=setInterval(intervalfunction, vm.timelapsespeed());
+		}
+		vm.tlint=setInterval(intervalfunction, vm.timelapsespeed());
 	};
 };

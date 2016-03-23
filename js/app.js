@@ -64,7 +64,7 @@ BDSVis.ViewModel = function() {
 	bug.append("h4").text("To:"); //Add the title for selector
 	bug.append("select").attr("data-bind", "options: model[model.timevar], optionsText: $data, optionsValue: $data, value: timelapseto");
 	bug.append("h4").text("Speed:"); //Add the title for selector
-	bug.append("select").attr("data-bind", "options: model.timelapsespeeds, optionsText: 'name', optionsValue: 'code', value: timelapsespeed, disable: disableAll");
+	bug.append("select").attr("data-bind", "options: model.timelapsespeeds, optionsText: 'name', optionsValue: 'code', value: timelapsespeed");
 	
 	//Reference to the visual elements of the plot: SVGs for the graph/map and legend
 	this.PlotView = BDSVis.PlotView;
