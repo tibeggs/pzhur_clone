@@ -199,7 +199,7 @@ BDSVis.makePlot = function (data,request,vm) {
 
 	legendsvg.attr("height",(symbolsize+5)*cvarlist.length);
 
-	legendsvg.append("text").attr("class","legtitle").text(cvarr.name+((cvarlist.length>1)?"  (click to remove) ":"")+": ");
+	legendsvg.append("text").attr("class","legtitle").text(cvarr.name+(((cvarlist.length>1) && !vm.timelapse())?"  (click to remove) ":"")+": ");
 
 	var legendlabels=legendsvg.selectAll("text .leglabel")
 		.data(cvarlist)
@@ -212,7 +212,7 @@ BDSVis.makePlot = function (data,request,vm) {
 		//.attr("y",function(d,i) {return 1.5*i+"em";})
 		.attr("dy",1+"em")
 		.text(function(d) {return d;});
-	if (cvarlist.length>1)
+	if ((cvarlist.length>1) && !vm.timelapse())
 		legendlabels.on("click",function(d,i) { RemoveItem(d,i); });
 		
 
@@ -240,7 +240,7 @@ BDSVis.makePlot = function (data,request,vm) {
 		.attr("width",symbolsize).attr("height",symbolsize)
 		.attr("y",function(d,i) {return 0.6+((i>0)?(numlines[i-1]+i*.75):0)+"em";});
 
-	if (cvarlist.length>1)
+	if ((cvarlist.length>1) && !vm.timelapse())
 		legendrect.on("click",function(d,i) { RemoveItem(d,i); });
 
 	var legendheight=d3.select(".legbox").node().getBBox().height
