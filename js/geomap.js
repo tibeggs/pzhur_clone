@@ -11,15 +11,15 @@ BDSVis.makeMap = function (data,request,vm) {
 	width=pv.width;
 	height=pv.height;
 	
-	var measure=request.measure;
+	var yvar=request[vm.model.yvars];
 
 	//Set graph title
 	//d3.select("#graphtitle").
 
 	//Set the title of the plot
-	var ptitle=vm.model.NameLookUp(measure,vm.model.yvars); //If many measures say "various", otherwise the measure name
+	var ptitle=vm.model.NameLookUp(yvar,vm.model.yvars); //If many yvars say "various", otherwise the yvar name
 	for (var key in data[0]) {
-		//X-var should not be in the title, measure is taken care of. Also check that the name exists in model.variables (e.g. measure names don't)
+		//X-var should not be in the title, yvar is taken care of. Also check that the name exists in model.variables (e.g. yvar names don't)
 		if ((key!=vm.model.geomapvar) && (key!=vm.model.yvars) && !((key===vm.model.timevar) && (vm.timelapse())) && (vm.model.VarExists(key)))
 			ptitle+=vm.model.PrintTitle(data[0][key],key);
 	};
@@ -27,8 +27,8 @@ BDSVis.makeMap = function (data,request,vm) {
 	pv.SetPlotTitle(ptitle);
 
 	//Set D3 scales
-	var ymin=d3.min(data, function(d) { return +d[measure]; });
-	var ymax=d3.max(data, function(d) { return +d[measure]; });
+	var ymin=d3.min(data, function(d) { return +d[yvar]; });
+	var ymax=d3.max(data, function(d) { return +d[yvar]; });
 	var ymid=(ymax+ymin)*.5;
 	var maxabs=d3.max([Math.abs(ymin),Math.abs(ymax)]);
 	
@@ -74,10 +74,10 @@ BDSVis.makeMap = function (data,request,vm) {
 			.append('path')
 			.attr('d', path)
 			.data(data)
-			.style('fill', function(d) { return yScale(d[measure]);})
+			.style('fill', function(d) { return yScale(d[yvar]);})
 			.style('stroke', 'white')
 			.style('stroke-width', 0.3)
-			.append("title").text(function(d){return d[vm.model.geomapvar]+": "+d3.format(",")(d[measure]);});
+			.append("title").text(function(d){return d[vm.model.geomapvar]+": "+d3.format(",")(d[yvar]);});
 
 	//Making Legend
 	var legendsvg=vm.PlotView.legendsvg;
@@ -89,7 +89,7 @@ BDSVis.makeMap = function (data,request,vm) {
 
 	for (var i=0; i<colorbar.nlevels+1; i++) colorbar.levels.push(y2levelsScale.invert(i));
 
-	var legendtitle = legendsvg.append("text").attr("class","legtitle").text(vm.model.NameLookUp(measure,"measure")).attr("x",-20).attr("y",-20).attr("dy","1em");
+	var legendtitle = legendsvg.append("text").attr("class","legtitle").text(vm.model.NameLookUp(yvar,vm.model.yvars)).attr("x",-20).attr("y",-20).attr("dy","1em");
 	legendtitle.call(BDSVis.util.wrap,pv.legendwidth);
 	//legendtitle.selectAll("tspan").attr("x",function(d) { return (pv.legendwidth-this.getComputedTextLength())/2.; })
 	var titleheight = legendtitle.node().getBBox().height;
@@ -127,14 +127,14 @@ BDSVis.makeMap = function (data,request,vm) {
 		//Change the data that is displayed raw as a table
 		// var vmdata=vm.data();
 		// for (var i=1; i<dataset.length; i++)
-		// 	vmdata[i][1]=dataset[i][measure];
+		// 	vmdata[i][1]=dataset[i][yvar];
 		// vm.data(vmdata);
 		map = mapg.selectAll('path')
 				.data(dataset)
 				.transition().duration(vm.timelapsespeed())
-				.style('fill', function(d) { return yScale(d[measure]);})
+				.style('fill', function(d) { return yScale(d[yvar]);})
 
-		mapg.selectAll('title').data(dataset).text(function(d){return d[vm.model.geomapvar]+": "+d3.format(",")(d[measure]);});
+		mapg.selectAll('title').data(dataset).text(function(d){return d[vm.model.geomapvar]+": "+d3.format(",")(d[yvar]);});
 	};
 
 	//Run timelapse animation

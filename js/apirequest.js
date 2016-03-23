@@ -11,7 +11,7 @@ BDSVis.getAPIdata = function (vm) {
 
 	vm.model.variables.forEach(function(varr1) { //Add variables with requested values to the request
 
-		var varr = vm.model.IsGroup(varr1)?vm.model.LookUpVar(vm.SelectedOpts[varr1.code]()[0]):varr1;
+		var varr = vm.model.IsGroup(varr1)?vm.model.LookUpVar(vm.SelectedOpts[varr1.code]()[0]):varr1; //If variable is a group variable, put variable that is selected in it instead
 
 		if (!((varr.code===request.cvar) || (varr.code===request.xvar))) request[varr.code]=[vm.SelectedOpts[varr.code]()[0]]; //If it's not c- or x-var only take first selected option
 		else {
@@ -55,9 +55,9 @@ BDSVis.getAPIdata = function (vm) {
     		(key!=vm.model.yvars))
 
     		if (!(vm.model.LookUpVar(key).APIfiltered) || (key===request.xvar))
-    			getstring+=","+key;
+    			getstring+=","+key; //Get records with all values of variable with name equal to key
     		else
-    			filterstring+="&"+key+"="+request[key];
+    			filterstring+="&"+key+"="+request[key]; //Get records with only those values of variable with name equal to key which are in the request
     };
 
 	var geturl=url+"?get="+getstring+filterstring+"&for="+geography+reqtime+"&key=93beeef146cec68880fccbd72e455fcd7135228f";
@@ -98,8 +98,8 @@ BDSVis.processAPIdata = function(data,request,vm) {
 
 	var cvar = request.cvar;
 	var xvar = request.xvar;
-	var measure = request[vm.model.yvars];
-	var MeasureAsLegend = (cvar === vm.model.yvars);
+	var yvar = request[vm.model.yvars];
+	var YvarsAsLegend = (cvar === vm.model.yvars);
 
 	var data2show = {}; // The nested object, used as an intermediate step to convert data into 2D array
 	
@@ -117,7 +117,7 @@ BDSVis.processAPIdata = function(data,request,vm) {
 		return;	
 	};
 
-	var data1 = []; // The reshuffled (melted) data, with measures in the same column. Like R function "melt" from the "reshape" package
+	var data1 = []; // The reshuffled (melted) data, with yvars in the same column. Like R function "melt" from the "reshape" package
 
 	for (var i in data) {
 
@@ -125,28 +125,28 @@ BDSVis.processAPIdata = function(data,request,vm) {
 		
 		data[i][cvar] = vm.model.NameLookUp(data[i][cvar],cvar); //Replace code strings with actual category names for c-variable
 
-		if (MeasureAsLegend) 
-			for (var imeasure in measure) { 
-			//If comparing by measure, melt the data by measures: 
-			//combine different measure in single column and create a column indicating which measure it is (c-var)
+		if (YvarsAsLegend) 
+			for (var iyvar in yvar) { 
+			//If comparing by yvar, melt the data by yvars: 
+			//combine different yvar in single column and create a column indicating which yvar it is (c-var)
 				var rec = {};
 				for (var key in data[i])
-					if (key!=measure[imeasure]) rec[key] = data[i][key];
-				rec.value = data[i][measure[imeasure]]; //Column named "value" will contain values of all the measures
-				rec[vm.model.yvars] = vm.model.NameLookUp(measure[imeasure],vm.model.yvars); //Column for c-variable indicates the measure
+					if (key!=yvar[iyvar]) rec[key] = data[i][key];
+				rec.value = data[i][yvar[iyvar]]; //Column named "value" will contain values of all the yvars
+				rec[vm.model.yvars] = vm.model.NameLookUp(yvar[iyvar],vm.model.yvars); //Column for c-variable indicates the yvar
 				data1.push(rec);
 			};
 
 		//Convert data to 2D table, so that it can be displayed
 		if (data2show[data[i][xvar]] === undefined) //Create nested objects
 			data2show[data[i][xvar]] = {};
-		if (!MeasureAsLegend)
-			data2show[data[i][xvar]][data[i][cvar]] = data[i][measure]; //Fill nested objects
+		if (!YvarsAsLegend)
+			data2show[data[i][xvar]][data[i][cvar]] = data[i][yvar]; //Fill nested objects
 		else 
-			for (var imeasure in request[cvar])
-				data2show[data[i][xvar]][vm.model.NameLookUp(request[cvar][imeasure],vm.model.yvars)] = data[i][request[cvar][imeasure]];
+			for (var iyvar in request[cvar])
+				data2show[data[i][xvar]][vm.model.NameLookUp(request[cvar][iyvar],vm.model.yvars)] = data[i][request[cvar][iyvar]];
 	};
-	
+
 	//Convert the nested object with data to display into nested array (including field names)
 	var cvarnames = [vm.model.NameLookUp(xvar,"var")]; //Create row with names of c-variable
 	var cvarnames1={};	
@@ -169,5 +169,5 @@ BDSVis.processAPIdata = function(data,request,vm) {
 
 	if (vm.geomap())
 		BDSVis.makeMap(data,request,vm);
-	else BDSVis.makePlot((!MeasureAsLegend)?data:data1,request,vm);
+	else BDSVis.makePlot((!YvarsAsLegend)?data:data1,request,vm);
 };

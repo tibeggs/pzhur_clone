@@ -16,18 +16,18 @@ BDSVis.makePlot = function (data,request,vm) {
 	var xvar = request.xvar;
 	var xvarr=vm.model.LookUpVar(xvar);
 
-	var MeasureAsLegend = (cvar === vm.model.yvars)
+	var YvarsAsLegend = (cvar === vm.model.yvars)
 	
 	//var request=vm.APIrequest();
 
-	//If measure is a (c-)variable, then we got melted data from updateBDSdata function, with all measures contained in the "value" column
-	var measure=MeasureAsLegend?"value":request[vm.model.yvars];
+	//If yvars is also a c-variable, then we got melted data from updateBDSdata function, with all yvars contained in the "value" column
+	var yvar=YvarsAsLegend?"value":request[vm.model.yvars];
 
 	//Set the title of the plot
-	var ptitle=(MeasureAsLegend && request[vm.model.yvars].length>1)?("Various "+vm.model.yvars+"s"):(vm.model.NameLookUp(request[vm.model.yvars],vm.model.yvars)); //If many measures say "various", otherwise the measure name
+	var ptitle=(YvarsAsLegend && request[vm.model.yvars].length>1)?("Various "+vm.model.yvars+"s"):(vm.model.NameLookUp(request[vm.model.yvars],vm.model.yvars)); //If many yvars say "various", otherwise the yvar name
 	for (var key in data[0]) {
-		//X-var should not be in the title, measure is taken care of. Also check that the name exists in model.variables (e.g. measure names don't)
-		if ((key!=xvar) && (key!=measure) && (key!=vm.model.yvars) && !((key===vm.model.timevar) && (vm.timelapse())) && (vm.model.VarExists(key))) {
+		//X-var should not be in the title, yvar is taken care of. Also check that the name exists in model.variables (e.g. yvar names don't)
+		if ((key!=xvar) && (key!=yvar) && (key!=vm.model.yvars) && !((key===vm.model.timevar) && (vm.timelapse())) && (vm.model.VarExists(key))) {
 			if (key!=cvar) ptitle+=vm.model.PrintTitle(data[0][key],key);
 			else if (request[cvar].length === 1) ptitle+=" in " + data[0][key];
 			else if (key!=vm.model.yvars) ptitle+=" by " + vm.model.NameLookUp(key,"var");
@@ -55,18 +55,18 @@ BDSVis.makePlot = function (data,request,vm) {
 			.rangeRoundBands([0, width], .1);
 
 	if (vm.logscale()) {
-		ymin = d3.min(data.filter(function(d) {return d[measure]>0}), function(d) { return +d[measure]; })/2.; // The bottom of the graph, a half of the smallest positive value
+		ymin = d3.min(data.filter(function(d) {return d[yvar]>0}), function(d) { return +d[yvar]; })/2.; // The bottom of the graph, a half of the smallest positive value
 		y0=ymin; //Where the 0 horizontal line is located, for the base of the bar. Since 0 can not be on a log plot, it's ymin
 		yScale = d3.scale.log();
 		 //0 and negative numbers are -infinity on log scale, replace them with "almost -infinity", so that they can be plotted, but outside of the graph limits.
-		data=data.map(function(d) {if (d[measure]<=0) d[measure]=1e-15; return d;});
+		data=data.map(function(d) {if (d[yvar]<=0) d[yvar]=1e-15; return d;});
 	} else {
 		y0=0; //Where the 0 horizontal line is located, for the base of the bar
-		ymin = Math.min(0,d3.min(data, function(d) { return +d[measure]; })); //Bars should be plotted at least from 0.
+		ymin = Math.min(0,d3.min(data, function(d) { return +d[yvar]; })); //Bars should be plotted at least from 0.
 		yScale = d3.scale.linear()
 	}
 
-	yScale.domain([ymin, d3.max(data, function(d) { return +d[measure]; })])
+	yScale.domain([ymin, d3.max(data, function(d) { return +d[yvar]; })])
 		.range([height,0]);
 
 			
@@ -85,9 +85,9 @@ BDSVis.makePlot = function (data,request,vm) {
 	};
 
 	var Tooltiptext = function(d) {
-		var ttt=MeasureAsLegend?d[vm.model.yvars]:vm.model.NameLookUp(measure,vm.model.yvars);
-		ttt+=": "+d3.format(",")(d[measure])+"\n"+xvarr.name+": "+d[xvar];
-		if (!MeasureAsLegend)
+		var ttt=YvarsAsLegend?d[vm.model.yvars]:vm.model.NameLookUp(yvar,vm.model.yvars);
+		ttt+=": "+d3.format(",")(d[yvar])+"\n"+xvarr.name+": "+d[xvar];
+		if (!YvarsAsLegend)
 			ttt+="\n"+cvarr.name+": "+d[cvar];
 		return ttt;
 	}
@@ -98,7 +98,7 @@ BDSVis.makePlot = function (data,request,vm) {
 		// Define the line
 		var valueline = d3.svg.line()
     	.x(function(d) { return xScale(d[xvar]); })
-    	.y(function(d) { return yScale(d[measure]); });
+    	.y(function(d) { return yScale(d[yvar]); });
 
 
     	//Add lines
@@ -119,7 +119,7 @@ BDSVis.makePlot = function (data,request,vm) {
   		.attr("fill", function(d) {return colors(d[cvar],cvarlist.indexOf(d[cvar]));})
     	.attr("r", 5)
     	.attr("cx", function(d) { return xScale(d[xvar]); })
-    	.attr("cy", function(d) { return yScale(d[measure]); })
+    	.attr("cy", function(d) { return yScale(d[yvar]); })
     	.append("title").text(function(d){return Tooltiptext(d);});
 
 	} else {
@@ -142,8 +142,8 @@ BDSVis.makePlot = function (data,request,vm) {
 		   	// .attr("y",function(d) {return yScale(y0)})
 		   	// .attr("height",0).transition()
 		   	// .duration(500).ease("sin-in-out")
-		   	.attr("y",function(d) {return yScale(Math.max(0,+d[measure]))})
-		   	.attr("height", function(d) {return Math.abs(yScale(y0)-yScale(+d[measure]))})
+		   	.attr("y",function(d) {return yScale(Math.max(0,+d[yvar]))})
+		   	.attr("height", function(d) {return Math.abs(yScale(y0)-yScale(+d[yvar]))})
 		   	.append("title").text(function(d){return Tooltiptext(d);});
 	}
 
@@ -181,7 +181,7 @@ BDSVis.makePlot = function (data,request,vm) {
 		.attr("x",function(d) { return (pv.margin.left+pv.margin.right+width-this.getComputedTextLength())/2.; })
 
 	//Y-axis label
-	if ((measure!="value") && (vm.model.NameLookUp(measure,vm.model.yvars).indexOf("rate")!=-1))
+	if ((yvar!="value") && (vm.model.NameLookUp(yvar,vm.model.yvars).indexOf("rate")!=-1))
 		pv.yaxislabel.text("% change")
 		
 
@@ -259,11 +259,11 @@ BDSVis.makePlot = function (data,request,vm) {
 		
 		//The data4bars is only needed for smooth transition in animations. There have to be rectangles of 0 height for missing data. data4bars is created
 		//empty outside this function. The following loop fills in / updates to actual data values from current year
-		for (var i in data4bars) data4bars[i][measure]=0; //Set every bar to 0 so that missing bars disappear
+		for (var i in data4bars) data4bars[i][yvar]=0; //Set every bar to 0 so that missing bars disappear
 			
 		for (var i in dataset) { //Set the values of existing bars
 			data4bars[xScale.domain().indexOf(dataset[i][xvar])*request[cvar].length
-					+cvarlist.indexOf(dataset[i][cvar])][measure]=+dataset[i][measure];
+					+cvarlist.indexOf(dataset[i][cvar])][yvar]=+dataset[i][yvar];
 		};
 		
   		var bars=svg.selectAll("rect").data(data4bars);
@@ -275,8 +275,8 @@ BDSVis.makePlot = function (data,request,vm) {
 		   	.attr("fill",  function(d) {return colors(d[cvar],+d.icvar)})
 		   	.attr("x",function(d) {return xScale(d[xvar])+barwidth*d.icvar;})
 		   	.transition().duration(vm.timelapsespeed())
-		   	.attr("y",function(d) { return yScale(Math.max(0,+d[measure]));})
-		   	.attr("height",function(d) {return Math.abs(yScale(y0)-yScale(+d[measure]));});
+		   	.attr("y",function(d) { return yScale(Math.max(0,+d[yvar]));})
+		   	.attr("height",function(d) {return Math.abs(yScale(y0)-yScale(+d[yvar]));});
 
 	};
 
@@ -290,7 +290,7 @@ BDSVis.makePlot = function (data,request,vm) {
 				{
 					var datum4bar={}
 					datum4bar[xvar]=xScale.domain()[i];
-					datum4bar[measure]=0;
+					datum4bar[yvar]=0;
 					datum4bar[cvar]=cvarlist[j];
 					datum4bar.icvar=j;
 					data4bars.push(datum4bar);
