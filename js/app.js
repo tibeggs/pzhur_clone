@@ -58,7 +58,7 @@ BDSVis.ViewModel = function() {
 
 	});
 
-	var bug=d3.select("#buttonsundergraph");
+	var bug=d3.select("#timelapsecontrols");
 	bug.append("h4").text("From:"); //Add the title for selector
 	bug.append("select").attr("data-bind", "options: model[model.timevar], optionsText: $data, optionsValue: $data, value: timelapsefrom");
 	bug.append("h4").text("To:"); //Add the title for selector
