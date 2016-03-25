@@ -27,10 +27,10 @@ BDSVis.makePlot = function (data,request,vm) {
 	var ptitle=(YvarsAsLegend && request[vm.model.yvars].length>1)?("Various "+vm.model.yvars+"s"):(vm.model.NameLookUp(request[vm.model.yvars],vm.model.yvars)); //If many yvars say "various", otherwise the yvar name
 	for (var key in data[0]) {
 		//X-var should not be in the title, yvar is taken care of. Also check that the name exists in model.variables (e.g. yvar names don't)
-		if ((key!=xvar) && (key!=yvar) && (key!=vm.model.yvars) && !((key===vm.model.timevar) && (vm.timelapse())) && (vm.model.VarExists(key))) {
-			if (key!=cvar) ptitle+=vm.model.PrintTitle(data[0][key],key);
+		if ((key!==xvar) && (key!==yvar) && (key!==vm.model.yvars) && !((key===vm.model.timevar) && (vm.timelapse())) && (vm.model.VarExists(key))) {
+			if (key!==cvar) ptitle+=vm.model.PrintTitle(data[0][key],key);
 			else if (request[cvar].length === 1) ptitle+=" in " + data[0][key];
-			else if (key!=vm.model.yvars) ptitle+=" by " + vm.model.NameLookUp(key,"var");
+			else if (key!==vm.model.yvars) ptitle+=" by " + vm.model.NameLookUp(key,"var");
 		} 		
 	};
 	
@@ -51,7 +51,8 @@ BDSVis.makePlot = function (data,request,vm) {
 			.range([0, width]);
 	else
 		xScale = d3.scale.ordinal()
-			.domain(vm.model.GetDomain(xvar))
+			//.domain(vm.model.GetDomain(xvar)) //For showing all the categories (even empty ones) on x-axis in any case
+			.domain(data.map(function(d) {return d[xvar]})) //For only showing categories for which data exists
 			.rangeRoundBands([0, width], .1);
 
 	if (vm.logscale()) {
@@ -181,7 +182,7 @@ BDSVis.makePlot = function (data,request,vm) {
 		.attr("x",function(d) { return (pv.margin.left+pv.margin.right+width-this.getComputedTextLength())/2.; })
 
 	//Y-axis label
-	if ((yvar!="value") && (vm.model.NameLookUp(yvar,vm.model.yvars).indexOf("rate")!=-1))
+	if ((yvar!=="value") && (vm.model.NameLookUp(yvar,vm.model.yvars).indexOf("rate")!==-1))
 		pv.yaxislabel.text("% change")
 		
 

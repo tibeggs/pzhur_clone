@@ -13,7 +13,8 @@ BDSVis.getAPIdata = function (vm) {
 
 		var varr = vm.model.IsGroup(varr1)?vm.model.LookUpVar(vm.SelectedOpts[varr1.code]()[0]):varr1; //If variable is a group variable, put variable that is selected in it instead
 
-		if (!((varr.code===request.cvar) || (varr.code===request.xvar))) request[varr.code]=[vm.SelectedOpts[varr.code]()[0]]; //If it's not c- or x-var only take first selected option
+		if (varr.code===request.xvar) request[varr.code]=vm.model[varr.code].map(function(d) {return d.code;});
+		else if (varr.code!==request.cvar) request[varr.code]=[vm.SelectedOpts[varr.code]()[0]]; //If it's not c- or x-var only take first selected option
 		else {
 			if (varr.removetotal) {
 				//Calculate whether to request single value of the variable or multiple, and remove the entry for the total (like US or EW) in selector
@@ -48,11 +49,11 @@ BDSVis.getAPIdata = function (vm) {
 
 	for (var key in request) {
 
-    	if ((key!="cvar") &&
-    		(key!="xvar") &&
-    		(key!=vm.model.geomapvar) && 
-    		(key!=vm.model.timevar) &&  
-    		(key!=vm.model.yvars))
+    	if ((key!=="cvar") &&
+    		(key!=="xvar") &&
+    		(key!==vm.model.geomapvar) && 
+    		(key!==vm.model.timevar) &&  
+    		(key!==vm.model.yvars))
 
     		if (!(vm.model.LookUpVar(key).APIfiltered) || (key===request.xvar))
     			getstring+=","+key; //Get records with all values of variable with name equal to key
@@ -104,9 +105,9 @@ BDSVis.processAPIdata = function(data,request,vm) {
 	var data2show = {}; // The nested object, used as an intermediate step to convert data into 2D array
 	
 	for (var key in request) { //Filter the obtained data, so that only what is requested remains (API does not filter all the variables)
-    	if ((key!=xvar) && (key!=vm.model.yvars) &&
-    		(key!="cvar") &&
-    		(key!="xvar") && (!vm.model.IsGroup(key)) && !(vm.timelapse() && (key===vm.model.timevar))) {
+    	if ((key!==vm.model.yvars) && (key!==xvar) && 
+    		(key!=="cvar") &&
+    		(key!=="xvar") && (!vm.model.IsGroup(key)) && !(vm.timelapse() && (key===vm.model.timevar))) {
     		data = data.filter(function(d) { return request[key].map(function(d) {return d.toString();}).indexOf(d[key])!=-1;});
     	}
 	};
@@ -131,7 +132,7 @@ BDSVis.processAPIdata = function(data,request,vm) {
 			//combine different yvar in single column and create a column indicating which yvar it is (c-var)
 				var rec = {};
 				for (var key in data[i])
-					if (key!=yvar[iyvar]) rec[key] = data[i][key];
+					if (key!==yvar[iyvar]) rec[key] = data[i][key];
 				rec.value = data[i][yvar[iyvar]]; //Column named "value" will contain values of all the yvars
 				rec[vm.model.yvars] = vm.model.NameLookUp(yvar[iyvar],vm.model.yvars); //Column for c-variable indicates the yvar
 				data1.push(rec);

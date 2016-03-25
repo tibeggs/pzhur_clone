@@ -165,7 +165,7 @@ BDSVis.ViewModel = function() {
 				var totalindex = (vm.model.LookUpVar(list[i]).total || 0);
 				var selOpts = vm.SelectedOpts[list[i]]();
 				//Whether the value selected is not the option standing for total (like "United States" or "Economy Wide" or "All ages" or "All sizes")
-				var toplinenottotal = (selOpts[0]!=vm.model[list[i]][totalindex].code);
+				var toplinenottotal = (selOpts[0]!==vm.model[list[i]][totalindex].code);
 				//Whether the variable in incombatible list is x/c/a
 				if ((vm.vars.isvar(list[i],xc)()) && (toplinenottotal || selOpts.length>1 )) disabled = true;
 				else if (toplinenottotal) disabled = true;	
@@ -202,22 +202,25 @@ BDSVis.ViewModel = function() {
 	this.vars.multiple = function (varname) {
 		return vm.geomap()?false:vm.vars.isvar(varname,'c')(); 
 	}.bind(this.vars);
-
-	
     
-	//Knockout observables for input selectors
+	//Knockout observables for input selectors and lists for exclusion/inclusion of specific values of x-variable
 	this.SelectedOpts = {};
+	this.IncludedXvarValues = {};
 	this.model.variables.forEach(function(varr) {
 		var initial = (vm.model.IsContinuous(varr))?[vm.model[varr.code][varr.default]]:[vm.model[varr.code][varr.default].code];
 		vm.SelectedOpts[varr.code]=ko.observableArray(initial);
+		vm.IncludedXvarValues[varr.code]=vm.model.GetDomain(varr.code);
 		if (vm.model.IsGroup(varr)) {
 			varr.variables.forEach(function(varrj){
 				//vm.SelectedOpts[varrj.code]=ko.observableArray(vm.model[varrj.code].map(function(d){return d.code;}));
 				var initial = (vm.model.IsContinuous(varrj))?[vm.model[varrj.code][varrj.default]]:[vm.model[varrj.code][varrj.default].code];
 				vm.SelectedOpts[varrj.code]=ko.observableArray(initial);
+				vm.IncludedXvarValues[varrj.code]=vm.model.GetDomain(varr.code);
 			});
 		};
 	});
+
+	debugger;
 
 	//Returns the selected options for the variable that is selected in selector corresponding to varname (for variablegroup)
 	this.vars.firstsel = function(varname) {

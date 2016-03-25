@@ -20,7 +20,7 @@ BDSVis.makeMap = function (data,request,vm) {
 	var ptitle=vm.model.NameLookUp(yvar,vm.model.yvars); //If many yvars say "various", otherwise the yvar name
 	for (var key in data[0]) {
 		//X-var should not be in the title, yvar is taken care of. Also check that the name exists in model.variables (e.g. yvar names don't)
-		if ((key!=vm.model.geomapvar) && (key!=vm.model.yvars) && !((key===vm.model.timevar) && (vm.timelapse())) && (vm.model.VarExists(key)))
+		if ((key!==vm.model.geomapvar) && (key!==vm.model.yvars) && !((key===vm.model.timevar) && (vm.timelapse())) && (vm.model.VarExists(key)))
 			ptitle+=vm.model.PrintTitle(data[0][key],key);
 	};
 
@@ -74,10 +74,19 @@ BDSVis.makeMap = function (data,request,vm) {
 			.append('path')
 			.attr('d', path)
 			.data(data)
-			.style('fill', function(d) { return yScale(d[yvar]);})
-			.style('stroke', 'white')
+			.style('fill', function(d) { console.log(yScale(d[yvar])); return yScale(d[yvar]);})
 			.style('stroke-width', 0.3)
+			.style('stroke', 'white')
 			.append("title").text(function(d){return d[vm.model.geomapvar]+": "+d3.format(",")(d[yvar]);});
+
+	var map1 = mapg.selectAll('path')
+			.data(vm.geo_data.features)
+			.enter()
+			.append('path')
+			.attr('d', path)
+			.style('fill', "none")
+			.style('stroke-width', 0.1)
+			.style('stroke', '#888888');
 
 	//Making Legend
 	var legendsvg=vm.PlotView.legendsvg;
