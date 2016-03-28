@@ -209,18 +209,16 @@ BDSVis.ViewModel = function() {
 	this.model.variables.forEach(function(varr) {
 		var initial = (vm.model.IsContinuous(varr))?[vm.model[varr.code][varr.default]]:[vm.model[varr.code][varr.default].code];
 		vm.SelectedOpts[varr.code]=ko.observableArray(initial);
-		vm.IncludedXvarValues[varr.code]=vm.model.GetDomain(varr.code);
+		vm.IncludedXvarValues[varr.code]=vm.model.GetCodes(varr.code);
 		if (vm.model.IsGroup(varr)) {
 			varr.variables.forEach(function(varrj){
 				//vm.SelectedOpts[varrj.code]=ko.observableArray(vm.model[varrj.code].map(function(d){return d.code;}));
 				var initial = (vm.model.IsContinuous(varrj))?[vm.model[varrj.code][varrj.default]]:[vm.model[varrj.code][varrj.default].code];
 				vm.SelectedOpts[varrj.code]=ko.observableArray(initial);
-				vm.IncludedXvarValues[varrj.code]=vm.model.GetDomain(varr.code);
+				vm.IncludedXvarValues[varrj.code]=vm.model.GetCodes(varrj.code);
 			});
 		};
 	});
-
-	debugger;
 
 	//Returns the selected options for the variable that is selected in selector corresponding to varname (for variablegroup)
 	this.vars.firstsel = function(varname) {

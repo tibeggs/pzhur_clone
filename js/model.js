@@ -287,11 +287,11 @@ BDSVis.Model = {
 	},
 
 	GetDomain : function(v) {
-		return this[v].map(function(d) { return d.name; });
+		return this[v].map(function(d) { return d.name || d; });
 	},
 
 	GetCodes : function(v) {
-		return this[v].map(function(d) { return d.code; });
+		return this[v].map(function(d) { return d.code || d; });
 	},
 
 	flatlookup : function (varname,arr) {

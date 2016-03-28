@@ -13,7 +13,7 @@ BDSVis.getAPIdata = function (vm) {
 
 		var varr = vm.model.IsGroup(varr1)?vm.model.LookUpVar(vm.SelectedOpts[varr1.code]()[0]):varr1; //If variable is a group variable, put variable that is selected in it instead
 
-		if (varr.code===request.xvar) request[varr.code]=vm.model[varr.code].map(function(d) {return d.code;});
+		if (varr.code===request.xvar) request[varr.code]=vm.IncludedXvarValues[varr.code];
 		else if (varr.code!==request.cvar) request[varr.code]=[vm.SelectedOpts[varr.code]()[0]]; //If it's not c- or x-var only take first selected option
 		else {
 			if (varr.removetotal) {
@@ -105,7 +105,7 @@ BDSVis.processAPIdata = function(data,request,vm) {
 	var data2show = {}; // The nested object, used as an intermediate step to convert data into 2D array
 	
 	for (var key in request) { //Filter the obtained data, so that only what is requested remains (API does not filter all the variables)
-    	if ((key!==vm.model.yvars) && (key!==xvar) && 
+    	if ((key!==vm.model.yvars) && //(key!==xvar) && 
     		(key!=="cvar") &&
     		(key!=="xvar") && (!vm.model.IsGroup(key)) && !(vm.timelapse() && (key===vm.model.timevar))) {
     		data = data.filter(function(d) { return request[key].map(function(d) {return d.toString();}).indexOf(d[key])!=-1;});

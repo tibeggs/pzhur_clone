@@ -12,6 +12,7 @@ BDSVis.makeMap = function (data,request,vm) {
 	height=pv.height;
 	
 	var yvar=request[vm.model.yvars];
+	var xvar=vm.model.geomapvar;
 
 	//Set graph title
 	//d3.select("#graphtitle").
@@ -54,7 +55,9 @@ BDSVis.makeMap = function (data,request,vm) {
 			.scale(800)
 			.translate([width / 2, height / 2.]);
 
-	var geo_data1=[];
+	var geo_data1=vm.geo_data.features.slice(0);
+		//geo_data_empty=[];
+		emptystates=0;
 		timerange = d3.extent(data, function(d) { return +d[vm.model.timevar] });
 
 	if (vm.timelapse()) { //In time lapse regime, select only the data corresponding to the current year
@@ -63,8 +66,15 @@ BDSVis.makeMap = function (data,request,vm) {
 	};
 
 	//Put the states in geo_data in the same order as they are in data
-	for (var i in data)
-		geo_data1.push(vm.geo_data.features.filter(function(d) {return data[i][vm.model.geomapvar]===d.properties.NAME;})[0]);
+
+	var xir = data.map(function(d) {return d[vm.model.geomapvar]});
+	for (var i in vm.geo_data.features) {
+		var iir = xir.indexOf(vm.geo_data.features[i].properties.NAME);
+		if (iir === -1) {
+			geo_data1[data.length+emptystates]=vm.geo_data.features[i];
+			emptystates++;
+		} else geo_data1[iir]=vm.geo_data.features[i]
+	};
 
 	var path = d3.geo.path().projection(projection);
 
@@ -73,20 +83,25 @@ BDSVis.makeMap = function (data,request,vm) {
 			.enter()
 			.append('path')
 			.attr('d', path)
+			.style('fill', "white")
+			.style('stroke', 'black')
+			.style('stroke-width', 0.5)
+			.on("click",function(d) {
+				var xvcode = vm.model[vm.model.geomapvar].filter(function(d1) {return d1.name===d.properties.NAME;})[0].code;
+				vm.IncludedXvarValues[xvar].push(xvcode);
+				vm.getBDSdata();
+			})
 			.data(data)
-			.style('fill', function(d) { console.log(yScale(d[yvar])); return yScale(d[yvar]);})
+			.style('fill', function(d) {return yScale(d[yvar]);})
 			.style('stroke-width', 0.3)
 			.style('stroke', 'white')
+			.on("click",function(d) {
+				var ind = vm.IncludedXvarValues[xvar].indexOf(vm.model[vm.model.geomapvar].filter(function(d1) {return d1.name===d[vm.model.geomapvar];})[0].code);
+				vm.IncludedXvarValues[xvar].splice(ind,1);
+				vm.getBDSdata();
+			})
 			.append("title").text(function(d){return d[vm.model.geomapvar]+": "+d3.format(",")(d[yvar]);});
 
-	var map1 = mapg.selectAll('path')
-			.data(vm.geo_data.features)
-			.enter()
-			.append('path')
-			.attr('d', path)
-			.style('fill', "none")
-			.style('stroke-width', 0.1)
-			.style('stroke', '#888888');
 
 	//Making Legend
 	var legendsvg=vm.PlotView.legendsvg;
