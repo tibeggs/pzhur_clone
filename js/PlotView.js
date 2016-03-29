@@ -53,7 +53,7 @@ BDSVis.PlotView = {
 
 		this.lowerrightcornertext=d3.select("#chartsvg").append("text").attr("class","leglabel")
 			.attr("x",width+margin.left+ margin.right)
-			.attr("y",this.height0-margin.bottom).text("Click on bar to remove category")
+			.attr("y",this.height0-margin.bottom);
 	},
 
 	DisplayNoData : function() {

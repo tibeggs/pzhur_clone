@@ -125,6 +125,7 @@ BDSVis.makePlot = function (data,request,vm) {
 
 	} else {
 		//Make a bar chart if x-variable is categorical
+
 		
 		//Number of bars is number of categories in the legend, and barwidth is determined from that
 		var nbars=cvarlist.length;
@@ -151,6 +152,8 @@ BDSVis.makePlot = function (data,request,vm) {
 				vm.getBDSdata();
 			})
 		   	.append("title").text(function(d){return Tooltiptext(d);});
+
+		pv.lowerrightcornertext.text("Click on bar to remove category");
 	}
 
 	//Adding axes
