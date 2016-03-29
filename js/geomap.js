@@ -44,7 +44,7 @@ BDSVis.makeMap = function (data,request,vm) {
 		yScale.domain([-maxabs,0,maxabs]).range(["#CB2027","#eeeeee","#265DAB"]);
 	else
 		//yScale.domain([ymin,ymax]).range(["#eeeeee","#265DAB"]);
-		yScale.domain([ymin,ymid,ymax]).range([golden,"#bbbbbb",purple]);
+		yScale.domain([ymin,ymid,ymax]).range([purple,"#bbbbbb",golden]);
 		//yScale.domain([ymin,ymid,ymax]).range(["red","#ccffcc","blue"]);
 	
 	//Plot the map	

@@ -145,6 +145,11 @@ BDSVis.makePlot = function (data,request,vm) {
 		   	// .duration(500).ease("sin-in-out")
 		   	.attr("y",function(d) {return yScale(Math.max(0,+d[yvar]))})
 		   	.attr("height", function(d) {return Math.abs(yScale(y0)-yScale(+d[yvar]))})
+		   	.on("click",function(d) {
+				var ind = vm.IncludedXvarValues[xvar].indexOf(vm.model[xvar].filter(function(d1) {return d1.name===d[xvar];})[0].code);
+				vm.IncludedXvarValues[xvar].splice(ind,1);
+				vm.getBDSdata();
+			})
 		   	.append("title").text(function(d){return Tooltiptext(d);});
 	}
 

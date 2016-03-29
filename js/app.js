@@ -12,12 +12,12 @@ BDSVis.ViewModel = function() {
 	
 	this.model.variables.forEach(function(varr) {
 
-		multiple="vars.multiple('"+varr.code+"')",
-		so="SelectedOpts['"+varr.code+"']",
-		optionstext="",
-		optionsvalue="";
-		if (vm.model.IsContinuous(varr)) {optionstext="$data"; optionsvalue="$data"};
-		if ((vm.model.IsCategorical(varr)) || (vm.model.IsGroup(varr))) {optionstext="'name'"; optionsvalue="'code'"};
+		var	multiple="vars.multiple('"+varr.code+"')", //Whether selector allows multiple options
+			so="SelectedOpts['"+varr.code+"']", //Options selected in the selector
+			optionstext="",
+			optionsvalue="";
+		if (vm.model.IsContinuous(varr)) {optionstext="$data"; optionsvalue="$data"}; //Continous variables values are just arrays of numbers
+		if ((vm.model.IsCategorical(varr)) || (vm.model.IsGroup(varr))) {optionstext="'name'"; optionsvalue="'code'"}; //Categorical variables values are arrays of name/code objects
 	
 		var databind="options: model."+varr.code
 					+", optionsText: "+optionstext
@@ -34,7 +34,7 @@ BDSVis.ViewModel = function() {
 
 		selectors.append("select").attr("data-bind", databind); //Add the selector
 
-		if (vm.model.IsGroup(varr)) {
+		if (vm.model.IsGroup(varr)) { //Add selector for the choice selected in the group variable selector
 			selectors.append("br");
 			selectors.append("h4");
 			selectors.append("select").attr("data-bind","options: model["+so+"()[0]], optionsText: 'name', optionsValue: 'code', selectedOptions: SelectedOpts[vars.firstsel('"+varr.code+"')], attr: {multiple: "+multiple+"}, css: {tallselector: "+multiple+"}, disable: vars.disabled('"+varr.code+"','subselector')"); //, value: SelectedOpts["+so+"()[0]]()[0]
@@ -58,16 +58,23 @@ BDSVis.ViewModel = function() {
 
 	});
 
+	//UI elements for controlling the Time Lapse
 	var bug=d3.select("#timelapsecontrols");
-	bug.append("h4").text("From:"); //Add the title for selector
+	bug.append("h4").text("From:");
 	bug.append("select").attr("data-bind", "options: model[model.timevar], optionsText: $data, optionsValue: $data, value: timelapsefrom");
-	bug.append("h4").text("To:"); //Add the title for selector
+	bug.append("h4").text("To:"); 
 	bug.append("select").attr("data-bind", "options: model[model.timevar], optionsText: $data, optionsValue: $data, value: timelapseto");
-	bug.append("h4").text("Speed:"); //Add the title for selector
+	bug.append("h4").text("Speed:");
 	bug.append("select").attr("data-bind", "options: model.timelapsespeeds, optionsText: 'name', optionsValue: 'code', value: timelapsespeed");
 	
 	//Reference to the visual elements of the plot: SVGs for the graph/map and legend
 	this.PlotView = BDSVis.PlotView;
+
+	this.ActualVarCode = function(varcode) {
+		//Checks if the varname is group variable, then returns code of the variable selected. 
+		//If not group variable just returns the input (supposedly the variable code)
+		return vm.model.IsGroup(vm.model.LookUpVar(varcode))?vm.SelectedOpts[varcode]()[0]:varcode;
+	};
 
 	// The reference to function that forms and sends API request and gets data (apirequest.js)
 	this.getBDSdata = function () {
@@ -129,14 +136,17 @@ BDSVis.ViewModel = function() {
 	
 	//The following functions set cvar (Legend/Comparison/Color variable) and xvar (X-axis variable)
 	this.setcvar = function (varname) {
-		var varr=vm.model.LookUpVar(varname);
-			vm.cvar(varname);
+		vm.cvar(varname);
 		vm.getBDSdata();
 	};
 
-	this.setxvar = function (varname) {
+	this.setxvar = function (varname) {	
 		vm.xvar(varname);
 		if (vm.geomap()) vm.cvar(vm.model.yvars);
+
+		var varname1=vm.ActualVarCode(varname);
+		vm.IncludedXvarValues[varname1]=vm.model.GetCodes(varname1);
+		
 		vm.getBDSdata();
 	};
 
