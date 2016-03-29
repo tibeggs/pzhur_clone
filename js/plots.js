@@ -182,14 +182,11 @@ BDSVis.makePlot = function (data,request,vm) {
 	.call(yAxis); 
 
 	//X-axis label
-	pv.xaxislabel
-		.text(xvarr.name)
-		.attr("x",function(d) { return (pv.margin.left+pv.margin.right+width-this.getComputedTextLength())/2.; })
+	pv.SetXaxisLabel(xvarr.name);
 
 	//Y-axis label
 	if ((yvar!=="value") && (vm.model.NameLookUp(yvar,vm.model.yvars).indexOf("rate")!==-1))
 		pv.yaxislabel.text("% change")
-		
 
 	//Making Legend
 	var RemoveItem =  function(d,i) { //Function to remove an item from the legend

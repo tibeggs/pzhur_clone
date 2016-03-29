@@ -49,7 +49,11 @@ BDSVis.PlotView = {
 		//Y-axis label
 		this.yaxislabel=d3.select("#chartsvg").append("text")
 			.attr("class","yaxislabel")
-			.attr("transform","translate("+16+","+.5*(height + margin.top + this.xaxislabelheight + this.titleheight)+")rotate(-90)")
+			.attr("transform","translate("+16+","+.5*(height + margin.top + this.xaxislabelheight + this.titleheight)+")rotate(-90)");
+
+		this.lowerrightcornertext=d3.select("#chartsvg").append("text").attr("class","leglabel")
+			.attr("x",width+margin.left+ margin.right)
+			.attr("y",this.height0-margin.bottom).text("Click on bar to remove category")
 	},
 
 	DisplayNoData : function() {
@@ -64,5 +68,12 @@ BDSVis.PlotView = {
 			.attr("dy",1+"em").attr("y","0");
 		this.maintitle.call(BDSVis.util.wrap,pv.width);
 		this.maintitle.selectAll("tspan").attr("x",function(d) { return (pv.legendx-this.getComputedTextLength())/2.; });
+	},
+
+	SetXaxisLabel : function(xlab) {
+		var pv = this;
+		this.xaxislabel
+			.text(xlab)
+			.attr("x",function(d) { return (pv.margin.left+pv.margin.right+pv.width-this.getComputedTextLength())/2.; })
 	}
 };

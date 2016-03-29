@@ -26,6 +26,7 @@ BDSVis.makeMap = function (data,request,vm) {
 	};
 
 	pv.SetPlotTitle(ptitle);
+	pv.SetXaxisLabel("Click on states to toggle");
 
 	//Set D3 scales
 	var ymin=d3.min(data, function(d) { return +d[yvar]; });
