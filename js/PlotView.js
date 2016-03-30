@@ -20,6 +20,7 @@ BDSVis.PlotView = {
 		//Select the SVG element, remove old drawings, add grouping element for the chart
 		var svgcont = d3.select("#chartsvg");
 		svgcont.selectAll("*").remove();
+
 		this.svg=svgcont.attr("width", width + margin.left + margin.right+this.legendwidth)
 			.attr("height", height + margin.top + margin.bottom + this.titleheight + this.xaxislabelheight)
 			.append('g')

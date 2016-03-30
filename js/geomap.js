@@ -176,4 +176,5 @@ BDSVis.makeMap = function (data,request,vm) {
 		}
 		vm.tlint=setInterval(intervalfunction, vm.timelapsespeed());
 	};
+	BDSVis.util.preparesavesvg();
 };

@@ -17,6 +17,7 @@
     <svg id="chartsvg" data-bind="vis1ible: (!ShowData())"></svg>
   
     <div id="buttonsundergraph">
+      <a id="savelink">Save SVG</a>
       <button data-bind="click: toggleshowdata, disable: timelapse">Show Data</button>
       <button data-bind="click: toggletimelapse, text: tlbuttontext, disable: vars.isvar(model.timevar,'any') ">Time Lapse</button>
       <span id="timelapsecontrols" data-bind="visible: timelapse"></span>
