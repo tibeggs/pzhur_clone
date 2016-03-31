@@ -43,6 +43,7 @@ BDSVis.makePlot = function (data,request,vm) {
 	});
 	
 
+
 	//Setting D3 scales
 	var xScale; var yScale; var ymin; var y0;
 	if (vm.model.IsContinuous(xvarr))
@@ -131,6 +132,15 @@ BDSVis.makePlot = function (data,request,vm) {
 		var nbars=cvarlist.length;
 		var barwidth= xScale.rangeBand()/nbars;
 
+		
+		var zoom = d3.behavior.zoom().x(xScale).y(yScale).on("zoom", refresh);
+		function refresh() {
+			//console.log(d3.event.translate)
+			// svg.select(".x.axis").call(xAxis);
+			// svg.select(".y.axis").call(yAxis);
+		}
+		svg.call(zoom);
+
 		var bars=
 		svg.selectAll("rect")
 			.data(data);
@@ -154,7 +164,7 @@ BDSVis.makePlot = function (data,request,vm) {
 		   	.append("title").text(function(d){return Tooltiptext(d);});
 
 		pv.lowerrightcornertext.text("Click on bar to remove category");
-	}
+	};
 
 	//Adding axes
 	var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
@@ -190,6 +200,8 @@ BDSVis.makePlot = function (data,request,vm) {
 	//Y-axis label
 	if ((yvar!=="value") && (vm.model.NameLookUp(yvar,vm.model.yvars).indexOf("rate")!==-1))
 		pv.yaxislabel.text("% change")
+
+	
 
 	//Making Legend
 	var RemoveItem =  function(d,i) { //Function to remove an item from the legend
