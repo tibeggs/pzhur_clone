@@ -92,8 +92,43 @@ BDSVis.makePlot = function (data,request,vm) {
 		if (!YvarsAsLegend)
 			ttt+="\n"+cvarr.name+": "+d[cvar];
 		return ttt;
-	}
-	
+	};
+
+	//Adding axes
+	var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+
+	if (vm.model.IsContinuous(xvarr)) xAxis.tickFormat(d3.format("d"));
+
+	var xAxis0 = d3.svg.axis().scale(xScale).tickFormat("").orient("bottom");
+
+	var yAxis = d3.svg.axis().scale(yScale).orient("left");
+	if (vm.logscale()) yAxis.ticks(5,d3.format(",d"));
+
+	// svg.append("g")
+	// 	.attr("class", "x axis")
+	// 	.attr("transform", "translate(0," + yScale(y0) + ")")
+	// 	.call(xAxis0);
+
+	var xAxisLabels=svg.append("g")
+		.attr("class", "x axis")
+		.attr("transform", "translate(0," + height + ")")
+		.call(xAxis)
+		.selectAll(".tick text");
+
+	if (vm.model.IsCategorical(xvarr))
+      	xAxisLabels.call(BDSVis.util.wrap,xScale.rangeBand());
+
+	svg.append("g")
+	.attr("class", "y axis")
+	.call(yAxis); 
+
+	function refresh() {
+	  svg.select(".x .axis").call(xAxis);
+	  svg.select(".y .axis").call(yAxis);
+	};
+
+	svg.call(d3.behavior.zoom().x(xScale).y(yScale).on("zoom", refresh))
+
 	if (vm.model.IsContinuous(xvarr)) {
 		//Make a scatter plot if x-variable is continuous
 
@@ -124,6 +159,8 @@ BDSVis.makePlot = function (data,request,vm) {
     	.attr("cy", function(d) { return yScale(d[yvar]); })
     	.append("title").text(function(d){return Tooltiptext(d);});
 
+    	//d3.select("body").append("text").text(JSON.stringify(data));
+
 	} else {
 		//Make a bar chart if x-variable is categorical
 
@@ -133,13 +170,19 @@ BDSVis.makePlot = function (data,request,vm) {
 		var barwidth= xScale.rangeBand()/nbars;
 
 		
-		var zoom = d3.behavior.zoom().x(xScale).y(yScale).on("zoom", refresh);
-		function refresh() {
-			//console.log(d3.event.translate)
-			// svg.select(".x.axis").call(xAxis);
-			// svg.select(".y.axis").call(yAxis);
-		}
-		svg.call(zoom);
+		// var zoom = d3.behavior.zoom().x(xScale).y(yScale).on("zoom", refresh);
+		// function refresh() {
+		// 	//console.log(d3.event.translate)
+		// 	// svg.select(".x.axis").call(xAxis);
+		// 	// svg.select(".y.axis").call(yAxis);
+		// }
+		// svg.call(zoom);
+
+		// svg.call(d3.behavior.drag().on('dragstart', function (d) {
+		//   console.log("Started moving item with data:", d);
+		// }));
+
+		 //svg.call(d3.behavior.zoom().on("zoom", refresh))
 
 		var bars=
 		svg.selectAll("rect")
@@ -166,33 +209,7 @@ BDSVis.makePlot = function (data,request,vm) {
 		pv.lowerrightcornertext.text("Click on bar to remove category");
 	};
 
-	//Adding axes
-	var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
-
-	if (vm.model.IsContinuous(xvarr)) xAxis.tickFormat(d3.format("d"));
-
-	var xAxis0 = d3.svg.axis().scale(xScale).tickFormat("").orient("bottom");
-
-	var yAxis = d3.svg.axis().scale(yScale).orient("left");
-	if (vm.logscale()) yAxis.ticks(5,d3.format(",d"));
-
-	svg.append("g")
-		.attr("class", "x axis")
-		.attr("transform", "translate(0," + yScale(y0) + ")")
-		.call(xAxis0);
-
-	var xAxisLabels=svg.append("g")
-		.attr("class", "x axis")
-		.attr("transform", "translate(0," + height + ")")
-		.call(xAxis)
-		.selectAll(".tick text");
-
-	if (vm.model.IsCategorical(xvarr))
-      	xAxisLabels.call(BDSVis.util.wrap,xScale.rangeBand());
-
-	svg.append("g")
-	.attr("class", "y axis")
-	.call(yAxis); 
+	
 
 	//X-axis label
 	pv.SetXaxisLabel(xvarr.name);
