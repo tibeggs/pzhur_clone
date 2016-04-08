@@ -15,17 +15,8 @@ BDSVis.getAPIdata = function (vm) {
 
 		if (varr.code===request.xvar) request[varr.code]=vm.IncludedXvarValues[varr.code]; //For x-var take the included values
 		else if (varr.code!==request.cvar) request[varr.code]=[vm.SelectedOpts[varr.code]()[0]]; //If it's not c- or x-var only take first selected option
-		else {
-			if (varr.removetotal) {
-				var totalindex = (varr.total || 0);
-				request[varr.code] = vm.SelectedOpts[varr.code]();
-				//Calculate whether to request single value of the variable or multiple, and remove the entry for the total (like US or EW) in selector
-				var multiple = request[varr.code].length>1; //Whether multiple values are selected
-				var firstTotal = request[varr.code][0]===vm.model[varr.code][totalindex].code; //Whether total is selected
-				if ((multiple) && (firstTotal)) request[varr.code].splice(totalindex,1); //Remove total if many values are selected
-			} else
-				request[varr.code] = vm.geomap()?[vm.SelectedOpts[varr.code]()[0]]:vm.SelectedOpts[varr.code]();
-		}
+		else request[varr.code] = vm.geomap()?[vm.SelectedOpts[varr.code]()[0]]:vm.SelectedOpts[varr.code](); //For the c-var take all selected if not in geo map regime
+	
 	});
 		
     var url = "http://api.census.gov/data/bds/firms";

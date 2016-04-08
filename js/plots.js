@@ -36,13 +36,8 @@ BDSVis.makePlot = function (data,request,vm) {
 	
 	pv.SetPlotTitle(ptitle);
 
-	//List of selected categories by actual name rather than code
-	var cvarlist=request[cvar].map(function(d) {
-		var cv=vm.model.NameLookUp(d,cvar);
-		return (vm.model.IsContinuous(cvarr))?(cv.toString()):(cv);
-	});
 	
-
+	
 
 	//Setting D3 scales
 	var xScale; var yScale; var ymin; var y0;
@@ -55,6 +50,8 @@ BDSVis.makePlot = function (data,request,vm) {
 			//.domain(vm.model.GetDomain(xvar)) //For showing all the categories (even empty ones) on x-axis in any case
 			.domain(data.map(function(d) {return d[xvar]})) //For only showing categories for which data exists
 			.rangeRoundBands([0, width], .1);
+
+
 
 	if (vm.logscale()) {
 		ymin = d3.min(data.filter(function(d) {return d[yvar]>0}), function(d) { return +d[yvar]; })/2.; // The bottom of the graph, a half of the smallest positive value
@@ -73,6 +70,9 @@ BDSVis.makePlot = function (data,request,vm) {
 
 			
 	//Set up colorscale
+	var cScale=d3.scale.ordinal().domain(data.map(function(d) {return d[cvar]}))
+	var cvarlist = cScale.domain();
+
 	var yearcolorscale = d3.scale.linear().domain([+cvarlist[0],+cvarlist[cvarlist.length-1]]).range(["#265DAB","#CB2027"]);
 	//var normscale=d3.scale.linear().domain([0,cvarlist.length/2,cvarlist.length-1]).range(["#265DAB","#dddddd","#CB2027"]);
 	var normscale=d3.scale.linear().domain([0,cvarlist.length-1]).range(["#265DAB","#dddddd"]);
