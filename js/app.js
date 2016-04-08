@@ -10,7 +10,8 @@ BDSVis.ViewModel = function() {
 	//Make HTML UI elements
 	var selectors = d3.select('.selectors');
 	
-	this.model.variables.forEach(function(varr) {
+	this.model.variables.forEach(function(varr) { //For each variable create selector and buttons
+		//Data is bound to selectors using knockout.js
 
 		var	multiple="vars.multiple('"+varr.code+"')", //Whether selector allows multiple options
 			so="SelectedOpts['"+varr.code+"']", //Options selected in the selector
@@ -26,7 +27,7 @@ BDSVis.ViewModel = function() {
 					//+", value: "+so+"()[0]"
 					+", selectedOptions: "+so;
 
-		if ((!vm.model.IsGroup(varr)) && (varr.aslegend))
+		if ((!vm.model.IsGroup(varr)) && (varr.aslegend)) //Allow multiple selection if variable is not group selector and can be used as c-/legend variable
 			databind+=", attr: {multiple: "+multiple+"}"
 					+", css: {tallselector: "+multiple+"}";
 	
