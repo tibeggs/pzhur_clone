@@ -17,7 +17,6 @@ BDSVis.Model = {
 		//"type" is "continous", "categorical" or "variablegroup" (for selectors which select variable rather than value of a variable)
 		//"default" is the value initially selected
 		//"total" is the value correspoing to total of other values (like US for states, "All Ages" for firm age, "All Sizes" for firm size etc.)
-		//"removetotal" is whether the total should be removed in from the API request. E.g. is state 00 is requested, the API will ignore it.
 		//"APIfiltered" is whether the API will take request like "&sic1=00,07,15" or you have to do "&get=sic1" and then filter yourself. It probably does for numericals and does not for strings
 		//"aslegend" is whether the variable can be cvar/legend variable
 		//"asaxis" is whether the variable can be used as x-axis
@@ -50,7 +49,6 @@ BDSVis.Model = {
 			"type" : "categorical",
 			"default" : 0,
 			"total" : 0,
-			"removetotal" : true,
 			"APIfiltered" : true,
 			"aslegend" : true,
 			"asaxis" : true,
@@ -267,32 +265,38 @@ BDSVis.Model = {
 		// 	this.VarLookUp[this.variables[i].code]=i;
 
 		//Create dictionaries/hashmaps to lookup names of categorical variable values
-		this.dicts={};
+		this.dicts={};this.revdicts={};
 		var CreateDicts = function (varlist) {
 					
-			for (var i in varlist) {
+			varlist.forEach(function(varr) {
+				
+				if ((varr.type==='categorical')) {
+					tmod.dicts[varr.code]={};
+					tmod.revdicts[varr.code]={};
+					tmod[varr.code].forEach(function(value){
+						tmod.dicts[varr.code][value.code]=value.name;
+						tmod.revdicts[varr.code][value.name]=value.code;
+					});
+						
+				};
 
-				var varr=varlist[i];
-				var name=varr.code;
-				if ((varr.type==='categorical') || (varr.type==='variablegroup')) {
-					tmod.dicts[name]={};
-					for (var j in tmod[name])
-						tmod.dicts[name][tmod[name][j].code]=tmod[name][j].name;
-				}
 				if (varr.type==='variablegroup')
 				{
 					tmod[varr.code]=[];
 					CreateDicts(varr.variables);
-					for (var j in varr.variables) 
-						tmod[varr.code].push(varr.variables[j]);
-				}
+					varr.variables.forEach(function(varrj) {
+						tmod[varr.code].push(varrj);
+					});		
+				};
+
 				if (varr.type==='continuous')
 				{
 					tmod[varr.code]=[];
 					for (var j=varr.range[0]; j<varr.range[1]; j+=varr.range[2]) tmod[varr.code].push(j);
-				}
+				};
+
 				if (varr.customcolor) varr.colorscale=CreateCustomColorScale(varr.code);
-			}
+			});
 		}
 
 		CreateDicts(this.variables);
@@ -316,20 +320,6 @@ BDSVis.Model = {
 		this.flatlookup(varname,[].concat.apply([],this.variables.filter(function(d) {return d.type==="variablegroup"}).map(function(d) {return d.variables;})));
 	},
 
-	NameLookUp : function(d,v) {
-		if (v==="var")
-			return this.LookUpVar(d).name;	
-		else if (this.LookUpVar(v).type==="continuous")
-			return d; 
-		else return this.dicts[v][d];
-	},
-
-	VarExists : function (varname) {
-		if (this.variables.map(function(d) {return d.code}).indexOf(varname)!=-1) return true;
-		else 
-			return ([].concat.apply([],this.variables.filter(function(d) {return d.type==="variablegroup"}).map(function(d) {return d.variables;})).map(function(d) {return d.code}).indexOf(varname)!=-1);
-	},
-
 	IsGroup : function (varr) {
 		if (typeof(varr)==="object") return (varr.type==="variablegroup");
 		else if (typeof(varr)==="string") return (this.LookUpVar(varr).type==="variablegroup");
@@ -346,6 +336,26 @@ BDSVis.Model = {
 		if (typeof(varr)==="object") return (varr.type==="categorical");
 		else if (typeof(varr)==="string") return (this.LookUpVar(varr).type==="categorical");
 		else console.log("Variable is neither string nor object");
+	},
+
+	NameLookUp : function(d,v) {
+		if (v==="var")
+			return this.LookUpVar(d).name;	
+		else if (this.IsContinuous(v))
+			return d; 
+		else return this.dicts[v][d];
+	},
+
+	CodeLookUp : function(d,v) {
+		if (this.IsContinuous(v))
+			return d;
+		else return this.revdicts[v][d];
+	},
+
+	VarExists : function (varname) {
+		if (this.variables.map(function(d) {return d.code}).indexOf(varname)!=-1) return true;
+		else 
+			return ([].concat.apply([],this.variables.filter(function(d) {return d.type==="variablegroup"}).map(function(d) {return d.variables;})).map(function(d) {return d.code}).indexOf(varname)!=-1);
 	},
 
 	PrintTitle : function (value, varname) {

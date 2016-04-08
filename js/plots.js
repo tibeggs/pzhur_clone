@@ -23,20 +23,6 @@ BDSVis.makePlot = function (data,request,vm) {
 	//If yvars is also a c-variable, then we got melted data from updateBDSdata function, with all yvars contained in the "value" column
 	var yvar=YvarsAsLegend?"value":request[vm.model.yvars];
 
-	//Set the title of the plot
-	var ptitle=(YvarsAsLegend && request[vm.model.yvars].length>1)?("Various "+vm.model.yvars+"s"):(vm.model.NameLookUp(request[vm.model.yvars],vm.model.yvars)); //If many yvars say "various", otherwise the yvar name
-	for (var key in data[0]) {
-		//X-var should not be in the title, yvar is taken care of. Also check that the name exists in model.variables (e.g. yvar names don't)
-		if ((key!==xvar) && (key!==yvar) && (key!==vm.model.yvars) && !((key===vm.model.timevar) && (vm.timelapse())) && (vm.model.VarExists(key))) {
-			if (key!==cvar) ptitle+=vm.model.PrintTitle(data[0][key],key);
-			else if (request[cvar].length === 1) ptitle+=" in " + data[0][key];
-			else if (key!==vm.model.yvars) ptitle+=" by " + vm.model.NameLookUp(key,"var");
-		} 		
-	};
-	
-	pv.SetPlotTitle(ptitle);
-
-	
 	
 
 	//Setting D3 scales
@@ -50,8 +36,6 @@ BDSVis.makePlot = function (data,request,vm) {
 			//.domain(vm.model.GetDomain(xvar)) //For showing all the categories (even empty ones) on x-axis in any case
 			.domain(data.map(function(d) {return d[xvar]})) //For only showing categories for which data exists
 			.rangeRoundBands([0, width], .1);
-
-
 
 	if (vm.logscale()) {
 		ymin = d3.min(data.filter(function(d) {return d[yvar]>0}), function(d) { return +d[yvar]; })/2.; // The bottom of the graph, a half of the smallest positive value
@@ -70,20 +54,21 @@ BDSVis.makePlot = function (data,request,vm) {
 
 			
 	//Set up colorscale
-	var cScale=d3.scale.ordinal().domain(data.map(function(d) {return d[cvar]}))
+	var cScale=d3.scale.ordinal().domain(data.map(function(d) {return d[cvar]}));
 	var cvarlist = cScale.domain();
+
+	if (vm.model.IsContinuous(cvarr))
+		cScale=d3.scale.linear().domain([+cvarlist[0],+cvarlist[cvarlist.length-1]]).range(["#265DAB","#CB2027"]);
 
 	var yearcolorscale = d3.scale.linear().domain([+cvarlist[0],+cvarlist[cvarlist.length-1]]).range(["#265DAB","#CB2027"]);
 	//var normscale=d3.scale.linear().domain([0,cvarlist.length/2,cvarlist.length-1]).range(["#265DAB","#dddddd","#CB2027"]);
 	var normscale=d3.scale.linear().domain([0,cvarlist.length-1]).range(["#265DAB","#dddddd"]);
-	//var colarr=["#265DAB","#DF5C24","#059748","#E5126F","#9D722A","#7B3A96","#C7B42E","#CB2027","#4D4D4D","#5DA5DA","#FAA43A","#60BD68","#F17CB0","#B2912F","#B276B2","#DECF3F","#F15854","#8C8C8C","#8ABDE6","#FBB258","#90CD97","#F6AAC9","#BFA554","#BC99C7","#EDDD46","#F07E6E","#000000"];
-		
-	
-	var colors = function(d,i) {
-		if (vm.model.IsContinuous(xvarr)) return colorbrewer.Dark2[8][i % 8];//colarr[i % colarr.length];
-		else if (vm.model.IsContinuous(cvarr)) return yearcolorscale(cvarlist[i]);
+			
+	var colors = function(d) {
+		if (vm.model.IsContinuous(xvarr)) return colorbrewer.Dark2[8][cvarlist.indexOf(d) % 8];//colarr[i % colarr.length];
+		else if (vm.model.IsContinuous(cvarr)) return cScale(d);
 		else if (cvarr.customcolor) return cvarr.colorscale[d];
-		else return colorbrewer.BrBG[11][10 - (i % 11)];//colarr[i % colarr.length];//normscale(i);
+		else return colorbrewer.BrBG[11][10 - (cvarlist.indexOf(d) % 11)];//colarr[i % colarr.length];//normscale(i);
 	};
 
 	var Tooltiptext = function(d) {
@@ -133,31 +118,29 @@ BDSVis.makePlot = function (data,request,vm) {
 		//Make a scatter plot if x-variable is continuous
 
 		// Define the line
-		var valueline = d3.svg.line()
+		var valueline = d3.svg.line().interpolate("monotone")
     	.x(function(d) { return xScale(d[xvar]); })
     	.y(function(d) { return yScale(d[yvar]); });
 
+    	//console.log();
+    	svg.selectAll("path .plotline")
+    		.data(cvarlist.map(function(d) {
+    			return {cvar: d, values: data.filter(function(d1) {return d1[cvar]===d;})}; 
+    		}))
+    		.enter()
+    		.append("path").attr("class", "plotline")
+    		.attr("stroke", function(d) {return colors(d.cvar);})
+    		.attr("d", function(d){return valueline(d.values);});
 
-    	//Add lines
-    	for (var icv in request[cvar])
-    		svg.append("path")
-        	.attr("class", "line")
-        	.attr("fill", "none")
-        	.attr("stroke-width",2)
-        	.attr("stroke", colors(vm.model.NameLookUp(request[cvar][icv],cvar),icv))
-        	.attr("d", valueline(data.filter(function(d) {
-        				return d[cvar]===vm.model.NameLookUp(request[cvar][icv],cvar);
-        		})));
 
         //Add dots
-        svg.selectAll("dot")
-    	.data(data)
-  		.enter().append("circle")
-  		.attr("fill", function(d) {return colors(d[cvar],cvarlist.indexOf(d[cvar]));})
-    	.attr("r", 5)
-    	.attr("cx", function(d) { return xScale(d[xvar]); })
-    	.attr("cy", function(d) { return yScale(d[yvar]); })
-    	.append("title").text(function(d){return Tooltiptext(d);});
+        svg.selectAll("circle .plotdot")
+	    	.data(data)
+	  		.enter().append("circle").attr("class","plotdot")
+	  		.attr("fill", function(d) {return colors(d[cvar]);})
+	    	.attr("cx", function(d) { return xScale(d[xvar]); })
+	    	.attr("cy", function(d) { return yScale(d[yvar]); })
+	    	.append("title").text(function(d){return Tooltiptext(d);});
 
     	//d3.select("body").append("text").text(JSON.stringify(data));
 
@@ -169,38 +152,19 @@ BDSVis.makePlot = function (data,request,vm) {
 		var nbars=cvarlist.length;
 		var barwidth= xScale.rangeBand()/nbars;
 
-		
-		// var zoom = d3.behavior.zoom().x(xScale).y(yScale).on("zoom", refresh);
-		// function refresh() {
-		// 	//console.log(d3.event.translate)
-		// 	// svg.select(".x.axis").call(xAxis);
-		// 	// svg.select(".y.axis").call(yAxis);
-		// }
-		// svg.call(zoom);
-
-		// svg.call(d3.behavior.drag().on('dragstart', function (d) {
-		//   console.log("Started moving item with data:", d);
-		// }));
-
-		 //svg.call(d3.behavior.zoom().on("zoom", refresh))
-
 		var bars=
 		svg.selectAll("rect")
 			.data(data);
 
 		bars.enter().append("rect")
-		   	.attr("fill",  function(d) {return colors(d[cvar],cvarlist.indexOf(d[cvar]));})
-		   	.attr("stroke", "white")
-		   	.attr("stroke-width",".1")
+		   	.attr("fill",  function(d) {return colors(d[cvar]);})
+		   	.attr("class", "plotbar")
 		   	.attr("width", barwidth)
 		   	.attr("x",function(d) {return xScale(d[xvar])+barwidth*cvarlist.indexOf(d[cvar])})
-		   	// .attr("y",function(d) {return yScale(y0)})
-		   	// .attr("height",0).transition()
-		   	// .duration(500).ease("sin-in-out")
 		   	.attr("y",function(d) {return yScale(Math.max(0,+d[yvar]))})
 		   	.attr("height", function(d) {return Math.abs(yScale(y0)-yScale(+d[yvar]))})
 		   	.on("click",function(d) {
-				var ind = vm.IncludedXvarValues[xvar].indexOf(vm.model[xvar].filter(function(d1) {return d1.name===d[xvar];})[0].code);
+				var ind = vm.IncludedXvarValues[xvar].indexOf(vm.model.CodeLookUp(d,xvar));
 				vm.IncludedXvarValues[xvar].splice(ind,1);
 				vm.getBDSdata();
 			})
@@ -211,19 +175,11 @@ BDSVis.makePlot = function (data,request,vm) {
 
 	
 
-	//X-axis label
-	pv.SetXaxisLabel(xvarr.name);
-
-	//Y-axis label
-	if ((yvar!=="value") && (vm.model.NameLookUp(yvar,vm.model.yvars).indexOf("rate")!==-1))
-		pv.yaxislabel.text("% change")
-
-	
-
 	//Making Legend
-	var RemoveItem =  function(d,i) { //Function to remove an item from the legend
+	var RemoveItem =  function(d) { //Function to remove an item from the legend
 			var so=vm.SelectedOpts[cvar]();
-			so.splice(i,1);
+			var ind=so.indexOf(vm.model.CodeLookUp(d,cvar));
+			so.splice(ind,1);
 			vm.SelectedOpts[cvar](so);
 			d3.event.stopPropagation();
 		};
@@ -248,7 +204,7 @@ BDSVis.makePlot = function (data,request,vm) {
 		.attr("dy",1+"em")
 		.text(function(d) {return d;});
 	if ((cvarlist.length>1) && !vm.timelapse())
-		legendlabels.on("click",function(d,i) { RemoveItem(d,i); });
+		legendlabels.on("click",function(d) { RemoveItem(d); });
 		
 
 	//Split long labels into multiple lines
@@ -271,16 +227,35 @@ BDSVis.makePlot = function (data,request,vm) {
 		.data(cvarlist)
 		.enter()
 		.append("rect")
-		.attr("fill",  function(d,i) {return colors(d,i);})
+		.attr("fill",  function(d) {return colors(d);})
 		.attr("width",symbolsize).attr("height",symbolsize)
 		.attr("y",function(d,i) {return 0.6+((i>0)?(numlines[i-1]+i*.75):0)+"em";});
 
 	if ((cvarlist.length>1) && !vm.timelapse())
-		legendrect.on("click",function(d,i) { RemoveItem(d,i); });
+		legendrect.on("click",function(d) { RemoveItem(d); });
 
 	var legendheight=d3.select(".legbox").node().getBBox().height
 	d3.select(".legbox").attr("transform","translate("+pv.legendx+","+Math.max(20,.5*(height+pv.margin.top+pv.margin.bottom+pv.titleheight-legendheight))+")")
 
+	//Set the title of the plot
+	var ptitle=(YvarsAsLegend && request[vm.model.yvars].length>1)?("Various "+vm.model.yvars+"s"):(vm.model.NameLookUp(request[vm.model.yvars],vm.model.yvars)); //If many yvars say "various", otherwise the yvar name
+	for (var key in data[0]) {
+		//X-var should not be in the title, yvar is taken care of. Also check that the name exists in model.variables (e.g. yvar names don't)
+		if ((key!==xvar) && (key!==yvar) && (key!==vm.model.yvars) && !((key===vm.model.timevar) && (vm.timelapse())) && (vm.model.VarExists(key))) {
+			if (key!==cvar) ptitle+=vm.model.PrintTitle(data[0][key],key);
+			else if (cvarlist.length === 1) ptitle+=" in " + data[0][key];
+			else if (key!==vm.model.yvars) ptitle+=" by " + vm.model.NameLookUp(key,"var");
+		} 		
+	};
+	
+	pv.SetPlotTitle(ptitle);
+
+	//X-axis label
+	pv.SetXaxisLabel(xvarr.name);
+
+	//Y-axis label
+	if ((yvar!=="value") && (vm.model.NameLookUp(yvar,vm.model.yvars).indexOf("rate")!==-1))
+		pv.yaxislabel.text("% change")
 	
 
 	// Timelapse animation
@@ -297,7 +272,7 @@ BDSVis.makePlot = function (data,request,vm) {
 		for (var i in data4bars) data4bars[i][yvar]=0; //Set every bar to 0 so that missing bars disappear
 			
 		for (var i in dataset) { //Set the values of existing bars
-			data4bars[xScale.domain().indexOf(dataset[i][xvar])*request[cvar].length
+			data4bars[xScale.domain().indexOf(dataset[i][xvar])*cvarlist.length
 					+cvarlist.indexOf(dataset[i][cvar])][yvar]=+dataset[i][yvar];
 		};
 		
@@ -307,7 +282,7 @@ BDSVis.makePlot = function (data,request,vm) {
 		  // Update old elements as needed.
 		  
 		bars
-		   	.attr("fill",  function(d) {return colors(d[cvar],+d.icvar)})
+		   	.attr("fill",  function(d) {return colors(d[cvar])})
 		   	.attr("x",function(d) {return xScale(d[xvar])+barwidth*d.icvar;})
 		   	.transition().duration(vm.timelapsespeed())
 		   	.attr("y",function(d) { return yScale(Math.max(0,+d[yvar]));})
@@ -332,7 +307,7 @@ BDSVis.makePlot = function (data,request,vm) {
 				};
 
 		svg.selectAll("rect").remove();
-		svg.selectAll("rect").data(data4bars).enter().append("rect").attr("width", barwidth);
+		svg.selectAll("rect").data(data4bars).enter().append("rect").attr("class", "plotbar").attr("width", barwidth);
 		
 		var timerange = d3.extent(data, function(d) { return +d[vm.model.timevar] });
 		var step=vm.model.LookUpVar(vm.model.timevar).range[2];
