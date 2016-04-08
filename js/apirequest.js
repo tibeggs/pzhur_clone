@@ -13,7 +13,7 @@ BDSVis.getAPIdata = function (vm) {
 
 		var varr = vm.model.IsGroup(varr1)?vm.model.LookUpVar(vm.SelectedOpts[varr1.code]()[0]):varr1; //If variable is a group variable, put variable that is selected in it instead
 
-		if (varr.code===request.xvar) request[varr.code]=vm.IncludedXvarValues[varr.code];
+		if (varr.code===request.xvar) request[varr.code]=vm.IncludedXvarValues[varr.code]; //For x-var take the included values
 		else if (varr.code!==request.cvar) request[varr.code]=[vm.SelectedOpts[varr.code]()[0]]; //If it's not c- or x-var only take first selected option
 		else {
 			if (varr.removetotal) {

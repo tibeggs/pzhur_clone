@@ -16,7 +16,7 @@ BDSVis.makePlot = function (data,request,vm) {
 	var xvar = request.xvar;
 	var xvarr=vm.model.LookUpVar(xvar);
 
-	var YvarsAsLegend = (cvar === vm.model.yvars)
+	var YvarsAsLegend = (cvar === vm.model.yvars);
 	
 	//var request=vm.APIrequest();
 

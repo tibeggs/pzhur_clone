@@ -1,9 +1,9 @@
 var BDSVis = BDSVis || {};
 
 BDSVis.Model = {
-	timevar : "year2",
-	geomapvar : "state",
-	yvars : "measure",
+	timevar : "year2", //Variable used in time lapse
+	geomapvar : "state", //Variable used in geo map regime
+	yvars : "measure", //Variable plotted in y-axis
 	timelapsespeeds : [
 		{"name":"Slowest","code":"5000"},
 		{"name":"Slow","code":"2000"},
@@ -12,6 +12,18 @@ BDSVis.Model = {
 		{"name":"Fastest","code":"200"}
 	],
 	variables : [
+		//"code" field is used in API request,
+		//"name" if for display
+		//"type" is "continous", "categorical" or "variablegroup" (for selectors which select variable rather than value of a variable)
+		//"default" is the value initially selected
+		//"total" is the value correspoing to total of other values (like US for states, "All Ages" for firm age, "All Sizes" for firm size etc.)
+		//"removetotal" is whether the total should be removed in from the API request. E.g. is state 00 is requested, the API will ignore it.
+		//"APIfiltered" is whether the API will take request like "&sic1=00,07,15" or you have to do "&get=sic1" and then filter yourself. It probably does for numericals and does not for strings
+		//"aslegend" is whether the variable can be cvar/legend variable
+		//"asaxis" is whether the variable can be used as x-axis
+		//"incompatible" is the list of variables for which there is no cross-data, so API will return empty data
+		//"printtitle" is how to use the variable in the graph title (look at PrintTitle() function).
+		//"customcolor" is whether to use custom color scale specific to that variable (see CreateCustomColorScale() function inside InitModel() )
 		{
 			"code" : "sic1",
 			"name" : "Sector",
