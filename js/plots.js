@@ -112,7 +112,7 @@ BDSVis.makePlot = function (data,request,vm) {
 	  svg.select(".y .axis").call(yAxis);
 	};
 
-	svg.call(d3.behavior.zoom().x(xScale).y(yScale).on("zoom", refresh))
+	//svg.call(d3.behavior.zoom().x(xScale).y(yScale).on("zoom", refresh))
 
 	if (vm.model.IsContinuous(xvarr)) {
 		//Make a scatter plot if x-variable is continuous
@@ -131,7 +131,6 @@ BDSVis.makePlot = function (data,request,vm) {
     		.append("path").attr("class", "plotline")
     		.attr("stroke", function(d) {return colors(d.cvar);})
     		.attr("d", function(d){return valueline(d.values);});
-
 
         //Add dots
         svg.selectAll("circle .plotdot")
@@ -164,7 +163,8 @@ BDSVis.makePlot = function (data,request,vm) {
 		   	.attr("y",function(d) {return yScale(Math.max(0,+d[yvar]))})
 		   	.attr("height", function(d) {return Math.abs(yScale(y0)-yScale(+d[yvar]))})
 		   	.on("click",function(d) {
-				var ind = vm.IncludedXvarValues[xvar].indexOf(vm.model.CodeLookUp(d,xvar));
+		   		//debugger;
+				var ind = vm.IncludedXvarValues[xvar].indexOf(vm.model.CodeLookUp(d[xvar],xvar));
 				vm.IncludedXvarValues[xvar].splice(ind,1);
 				vm.getBDSdata();
 			})
@@ -323,5 +323,5 @@ BDSVis.makePlot = function (data,request,vm) {
 		vm.tlint=setInterval(intervalfunction, vm.timelapsespeed());
 	};
 
-	BDSVis.util.preparesavesvg();
+	//BDSVis.util.preparesavesvg();
 };

@@ -36,6 +36,21 @@
   height: 250px;
 }
 
+.datatable table, th, td {
+        border: 1px solid black;
+        border-collapse: collapse;
+        padding: 2px;
+}
+
+/*.datatable table tbody { height:200px; overflow-y:scroll; display:block; }
+.datatable table thead { display:block; }*/
+
+#datashowareatable {
+  display:block; 
+  overflow:auto; 
+  height: 200px;
+}
+
 #buttonsundergraph {
   font: 12px sans-serif;
   text-align: center;

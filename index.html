@@ -17,25 +17,27 @@
     <svg id="chartsvg" data-bind="vis1ible: (!ShowData())"></svg>
   
     <div id="buttonsundergraph">
-      <a id="savelink">Save SVG</a>
+      <!-- <a id="savelink">Save SVG</a> -->
+      <button onclick="BDSVis.util.savesvg('svg');" data-bind="disable: timelapse">Save SVG</button>
+      <button onclick="BDSVis.util.savesvg('png');" data-bind="disable: timelapse">Save PNG</button>
       <button data-bind="click: toggleshowdata, disable: timelapse">Show Data</button>
       <button data-bind="click: toggletimelapse, text: tlbuttontext, disable: vars.isvar(model.timevar,'any') ">Time Lapse</button>
       <span id="timelapsecontrols" data-bind="visible: timelapse"></span>
     </div>
     
-    <div id="datashowarea" data-bind="visible: ShowData">
-    <a download="BDSdata.xls" href="#" onclick="return ExcellentExport.excel(this, 'graphdata', 'Firms');">Export table to Excel</a>;
-    <a download="BDSdata.csv" href="#" onclick="return ExcellentExport.csv(this, 'graphdata');">CSV</a>
-      <table id="graphdata">
+    <div id="datashowarea" data-bind="visible: ShowData" class="datatable">
+      <a download="BDSdata.xls" href="#" onclick="return ExcellentExport.excel(this, 'graphdata', 'Firms');">Export table to Excel</a>;
+      <a download="BDSdata.csv" href="#" onclick="return ExcellentExport.csv(this, 'graphdata');">CSV</a>
+      <table id="graphdata" >
         <thead data-bind="foreach: data.slice(0,1)">
             <tr data-bind="foreach: $data">
               <th data-bind="text: $data"></th>
             </tr>
         </thead>
         <tbody data-bind="foreach: data.slice(1)">
-            <tr data-bind="foreach: $data">
-                <td data-bind="text: $data"></td>
-            </tr>
+              <tr data-bind="foreach: $data">
+                  <td data-bind="text: $data"></td>
+              </tr>
         </tbody>
       </table>
     </div>

@@ -91,7 +91,7 @@ BDSVis.processAPIdata = function(data,request,vm) {
 	var yvar = request[vm.model.yvars];
 	var YvarsAsLegend = (cvar === vm.model.yvars);
 
-	var data2show = {}; // The nested object, used as an intermediate step to convert data into 2D array
+	
 	
 	for (var key in request) { //Filter the obtained data, so that only what is requested remains (API does not filter all the variables)
     	if ((key!==vm.model.yvars) && //(key!==xvar) && 
@@ -106,6 +106,8 @@ BDSVis.processAPIdata = function(data,request,vm) {
 		vm.PlotView.DisplayNoData();
 		return;	
 	};
+
+	var data2show = {}; // The nested object, used as an intermediate step to convert data into 2D array
 
 	var data1 = []; // The reshuffled (melted) data, with yvars in the same column. Like R function "melt" from the "reshape" package
 
@@ -148,6 +150,10 @@ BDSVis.processAPIdata = function(data,request,vm) {
 			};
 		};
 	};
+
+	//cvarnames1=d3.keys(cvarnames1).sort();
+	//for (var i=0; i<vm.model[cvar].length; i++) if (cvarnames1[vm.model[cvar][i].name]) cvarnames.push(vm.model[cvar][i].name);
+
 
 	vm.data([cvarnames]); //First row of the table will contain names of c-variable
 	for (var xvarkey in data2show) {
