@@ -57,25 +57,28 @@ BDSVis.getAPIdata = function (vm) {
     vm.waiting4api(true); //Show "waiting for data" message
     //vm.PlotView.Init();
     d3.json(geturl,function (data) {
-    	if (!(data===null)) { //Convert data into array of objects with the same keys
-	    	var jsoned = [];
-	    	for (var i in data) {
-	    		var rec = {};
-	    		if (i>0) {
-	    			for (iname in data[0]) { //Find keys, which are contained in the first line of the array returned by API
-	    				var key = (data[0][iname]==="us")?("state"):(data[0][iname]); //Substitute "us" field name to "state"
-	    				key = (key==="time")?vm.model.timevar:key;
-	    				rec[key] = data[i][iname]; //Fill the object
-	    			};
-	    			jsoned.push(rec);
-	    		};
-	    	};
-    		BDSVis.processAPIdata(jsoned,request,vm); //Continue to data processing and plotting
-    	} else {
-    		vm.PlotView.Init();	
-    		vm.PlotView.DisplayNoData();	
-    		console.log("Server sent empty response to " + geturl);	
-    	}
+    	if (data.length<1) console.log("Server sent empty response to " + geturl);
+    	// debugger;
+    	// if (!(data===null)) { //Convert data into array of objects with the same keys
+	    // 	var jsoned = [];
+	    // 	for (var i in data) {
+	    // 		var rec = {};
+	    // 		if (i>0) {
+	    // 			for (iname in data[0]) { //Find keys, which are contained in the first line of the array returned by API
+	    // 				var key = (data[0][iname]==="us")?("state"):(data[0][iname]); //Substitute "us" field name to "state"
+	    // 				key = (key==="time")?vm.model.timevar:key;
+	    // 				rec[key] = data[i][iname]; //Fill the object
+	    // 			};
+	    // 			jsoned.push(rec);
+	    // 		};
+	    // 	};
+    	// 	BDSVis.processAPIdata(jsoned,request,vm); //Continue to data processing and plotting
+    	BDSVis.processAPIdata(data,request,vm);
+    	// } else {
+    	// 	vm.PlotView.Init();	
+    	// 	vm.PlotView.DisplayNoData();	
+    	// 	console.log("Server sent empty response to " + geturl);	
+    	// }
     	vm.waiting4api(false); //Hide "waiting for data" message
     });
 };
@@ -91,9 +94,26 @@ BDSVis.processAPIdata = function(data,request,vm) {
 	var yvar = request[vm.model.yvars];
 	var YvarsAsLegend = (cvar === vm.model.yvars);
 
-	
-	
-	for (var key in request) { //Filter the obtained data, so that only what is requested remains (API does not filter all the variables)
+	if (data.length<1) { //Display No Data message is no data is received
+		vm.PlotView.Init();
+		vm.PlotView.DisplayNoData();
+		return;	
+	};
+
+	//Convert data into array of objects with the keys defined by the first row
+	var keys=data[0];
+	data=data.slice(1).map(function(d) {
+		var rec = {};
+		for (iname in keys) { //Find keys, which are contained in the first line of the array returned by API
+			var key = (keys[iname]==="us")?("state"):(keys[iname]); //Substitute "us" field name to "state"
+			key = (key==="time")?vm.model.timevar:key;
+			rec[key] = d[iname]; //Fill the object
+		};
+		return rec;
+	});
+
+ 	//Filter the obtained data, so that only what is requested remains (API does not filter all the variables)
+	for (var key in request) {
     	if ((key!==vm.model.yvars) && //(key!==xvar) && 
     		(key!=="cvar") &&
     		(key!=="xvar") && (!vm.model.IsGroup(key)) && !(vm.timelapse() && (key===vm.model.timevar))) {
@@ -101,7 +121,7 @@ BDSVis.processAPIdata = function(data,request,vm) {
     	}
 	};
 	
-	if (data.length<1) {
+	if (data.length<1) { //Display No Data message is no data is received
 		vm.PlotView.Init();
 		vm.PlotView.DisplayNoData();
 		return;	
@@ -111,57 +131,54 @@ BDSVis.processAPIdata = function(data,request,vm) {
 
 	var data1 = []; // The reshuffled (melted) data, with yvars in the same column. Like R function "melt" from the "reshape" package
 
-	for (var i in data) {
+	data.forEach(function(d){
 
-		data[i][xvar] = vm.model.NameLookUp(data[i][xvar],xvar); //Replace code strings with actual category names for x-variable
+		d[xvar] = vm.model.NameLookUp(d[xvar],xvar); //Replace code strings with actual category names for x-variable
 		
-		data[i][cvar] = vm.model.NameLookUp(data[i][cvar],cvar); //Replace code strings with actual category names for c-variable
+		d[cvar] = vm.model.NameLookUp(d[cvar],cvar); //Replace code strings with actual category names for c-variable
 
 		if (YvarsAsLegend) 
 			for (var iyvar in yvar) { 
 			//If comparing by yvar, melt the data by yvars: 
 			//combine different yvar in single column and create a column indicating which yvar it is (c-var)
 				var rec = {};
-				for (var key in data[i])
-					if (key!==yvar[iyvar]) rec[key] = data[i][key];
-				rec.value = data[i][yvar[iyvar]]; //Column named "value" will contain values of all the yvars
+				for (var key in d)
+					if (key!==yvar[iyvar]) rec[key] = d[key];
+				rec.value = d[yvar[iyvar]]; //Column named "value" will contain values of all the yvars
 				rec[vm.model.yvars] = vm.model.NameLookUp(yvar[iyvar],vm.model.yvars); //Column for c-variable indicates the yvar
 				data1.push(rec);
 			};
 
 		//Convert data to 2D table, so that it can be displayed
-		if (data2show[data[i][xvar]] === undefined) //Create nested objects
-			data2show[data[i][xvar]] = {};
+		if (data2show[d[xvar]] === undefined) //Create nested objects
+			data2show[d[xvar]] = {};
 		if (!YvarsAsLegend)
-			data2show[data[i][xvar]][data[i][cvar]] = data[i][yvar]; //Fill nested objects
+			data2show[d[xvar]][d[cvar]] = d[yvar]; //Fill nested objects
 		else 
 			for (var iyvar in request[cvar])
-				data2show[data[i][xvar]][vm.model.NameLookUp(request[cvar][iyvar],vm.model.yvars)] = data[i][request[cvar][iyvar]];
-	};
+				data2show[d[xvar]][vm.model.NameLookUp(request[cvar][iyvar],vm.model.yvars)] = d[request[cvar][iyvar]];
+	});
+
+	
+	//console.log(data2show);
 
 	//Convert the nested object with data to display into nested array (including field names)
-	var cvarnames = [vm.model.NameLookUp(xvar,"var")]; //Create row with names of c-variable
-	var cvarnames1={};	
-	for (var xvarkey in data2show) {
-		for (var cvarkey in data2show[xvarkey]) {
-			if (cvarnames1[cvarkey]===undefined) {
-				cvarnames.push(cvarkey);
-				cvarnames1[cvarkey]=true;
-			};
-		};
-	};
 
-	//cvarnames1=d3.keys(cvarnames1).sort();
-	//for (var i=0; i<vm.model[cvar].length; i++) if (cvarnames1[vm.model[cvar][i].name]) cvarnames.push(vm.model[cvar][i].name);
+	var cvarnames = d3.set(data.map(function(d) {return d[cvar]})).values(); //All the names of returned cvars
 
+	cvarnames.unshift(vm.model.NameLookUp(xvar,"var")); //Add xvar name to the table headers
 
-	vm.data([cvarnames]); //First row of the table will contain names of c-variable
+	vm.data([cvarnames]); //Table headers
 	for (var xvarkey in data2show) {
 		var xvararr = [xvarkey]; //Create the column with names of x-variable
 		for (var cvarkey in data2show[xvarkey])
 			xvararr.push(data2show[xvarkey][cvarkey]) //Fill the data into 2D table
 		vm.data.push(xvararr);
 	};
+	// vm.data(d3.nest().key(function(d) {return d[xvar]; }).entries(data)
+	// 	.map(function(d) {
+	// 		return d.values.map(function(d1) {return d1[yvar]});
+	// 	}))
 
 	if (vm.geomap())
 		BDSVis.makeMap(data,request,vm);
