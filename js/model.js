@@ -359,10 +359,12 @@ BDSVis.Model = {
 	},
 
 	PrintTitle : function (value, varname) {
+		debugger;
 		var varr=this.LookUpVar(varname);
 		var pref,postf;
 		if (!this.IsContinuous(varr)) {
 			var ind = this[varname].map(function(d){return d.code}).indexOf(value);
+
 			pref = this[varname][ind].pref;
 			postf = this[varname][ind].postf;
 		}

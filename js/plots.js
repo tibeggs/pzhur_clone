@@ -243,7 +243,7 @@ BDSVis.makePlot = function (data,request,vm) {
 		//X-var should not be in the title, yvar is taken care of. Also check that the name exists in model.variables (e.g. yvar names don't)
 		if ((key!==xvar) && (key!==yvar) && (key!==vm.model.yvars) && !((key===vm.model.timevar) && (vm.timelapse())) && (vm.model.VarExists(key))) {
 			if (key!==cvar) ptitle+=vm.model.PrintTitle(data[0][key],key);
-			else if (cvarlist.length === 1) ptitle+=vm.model.PrintTitle(data[0][key],key) + data[0][key];
+			else if (cvarlist.length === 1) ptitle+=vm.model.PrintTitle(vm.model.CodeLookUp(data[0][key],key),key);
 			else if (key!==vm.model.yvars) ptitle+=" by " + vm.model.NameLookUp(key,"var");
 		} 		
 	};
