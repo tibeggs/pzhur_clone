@@ -355,7 +355,7 @@ BDSVis.Model = {
 	VarExists : function (varname) {
 		if (this.variables.map(function(d) {return d.code}).indexOf(varname)!=-1) return true;
 		else 
-			return ([].concat.apply([],this.variables.filter(function(d) {return d.type==="variablegroup"}).map(function(d) {return d.variables;})).map(function(d) {return d.code}).indexOf(varname)!=-1);
+			return (d3.merge(this.variables.filter(function(d) {return d.type==="variablegroup"}).map(function(d) {return d.variables;})).map(function(d) {return d.code}).indexOf(varname)!=-1);
 	},
 
 	PrintTitle : function (value, varname) {

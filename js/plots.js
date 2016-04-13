@@ -21,9 +21,8 @@ BDSVis.makePlot = function (data,request,vm) {
 	//var request=vm.APIrequest();
 
 	//If yvars is also a c-variable, then we got melted data from updateBDSdata function, with all yvars contained in the "value" column
-	var yvar=YvarsAsLegend?"value":request[vm.model.yvars];
+	var yvar="value";//YvarsAsLegend?"value":request[vm.model.yvars];
 
-	
 
 	//Setting D3 scales
 	var xScale; var yScale; var ymin; var y0;
@@ -124,12 +123,13 @@ BDSVis.makePlot = function (data,request,vm) {
 
     	//console.log();
     	svg.selectAll("path .plotline")
-    		.data(cvarlist.map(function(d) {
-    			return {cvar: d, values: data.filter(function(d1) {return d1[cvar]===d;})}; 
-    		}))
+    		// .data(cvarlist.map(function(d) {
+    		// 	return {cvar: d, values: data.filter(function(d1) {return d1[cvar]===d;})}; 
+    		// }))
+    		.data(d3.nest().key(function(d) {return d[cvar]; }).entries(data))
     		.enter()
     		.append("path").attr("class", "plotline")
-    		.attr("stroke", function(d) {return colors(d.cvar);})
+    		.attr("stroke", function(d) {return colors(d.key);})
     		.attr("d", function(d){return valueline(d.values);});
 
         //Add dots
@@ -243,7 +243,7 @@ BDSVis.makePlot = function (data,request,vm) {
 		//X-var should not be in the title, yvar is taken care of. Also check that the name exists in model.variables (e.g. yvar names don't)
 		if ((key!==xvar) && (key!==yvar) && (key!==vm.model.yvars) && !((key===vm.model.timevar) && (vm.timelapse())) && (vm.model.VarExists(key))) {
 			if (key!==cvar) ptitle+=vm.model.PrintTitle(data[0][key],key);
-			else if (cvarlist.length === 1) ptitle+=" in " + data[0][key];
+			else if (cvarlist.length === 1) ptitle+=vm.model.PrintTitle(data[0][key],key) + data[0][key];
 			else if (key!==vm.model.yvars) ptitle+=" by " + vm.model.NameLookUp(key,"var");
 		} 		
 	};
