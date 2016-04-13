@@ -28,7 +28,7 @@
     <div id="datashowarea" data-bind="visible: ShowData" class="datatable">
       <a download="BDSdata.xls" href="#" onclick="return ExcellentExport.excel(this, 'graphdata', 'Firms');">Export table to Excel</a>;
       <a download="BDSdata.csv" href="#" onclick="return ExcellentExport.csv(this, 'graphdata');">CSV</a>
-      <table id="graphdata" >
+      <table id="graphdata">
         <thead data-bind="foreach: data.slice(0,1)">
             <tr data-bind="foreach: $data">
               <th data-bind="text: $data"></th>

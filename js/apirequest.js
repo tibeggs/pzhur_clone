@@ -129,17 +129,40 @@ BDSVis.processAPIdata = function(data,request,vm) {
 	var cvarvalues = d3.set(data.map(function(d) {return d[cvar]})).values(); //All the values of returned cvars
 	var xvarvalues = d3.set(data.map(function(d) {return d[xvar]})).values(); //All the values of returned xvars
 
-	vm.data( //Set the KnockOut observable array containing the data for displaying as a raw table ("Show Data" button)
-		xvarvalues.map(function(xv){ //Map a row of yvar values to each xvar value
-			return d3.merge([ [xv], //Add the xvar value as a first element of the row
+	//Data as table output via KnockOut
+	vm.data( //Set the KnockOut observable array containing the data for displaying as a table ("Show Data" button)
+		xvarvalues
+			.map(function(xv){ return data.filter(function(d) {return d[xvar]===xv;});}) //Map a row of yvar values to each xvar value
+			.map(function(dxv){
+				return d3.merge([ [dxv[0][xvar]], //Add the xvar value as a first element of the row
 						cvarvalues.map(function(cv){ //Map a yvar value to each cvar/xvar values pair (or, a column of yvar values to each cvar value)
-							return data.filter(function(d) {return (d[xvar]===xv) && (d[cvar]===cv)}).map(function(d) {return d.value});
-						})
-					])
-		})
+							return dxv.filter(function(d) {return d[cvar]===cv}).map(function(d) {return d.value});
+						})])
+			})
 	);
-
 	vm.data.unshift(d3.merge([[vm.model.NameLookUp(xvar,"var")],cvarvalues])); //Header line: the xvar values + all the cvar values
+	
+	// //Data as table output via D3
+	// var datashowtable = d3.select("#graphdata");
+	// datashowtable.selectAll("*").remove()
+	// datashowtable.append("thead")
+	// 	.selectAll("th").data(d3.merge([[vm.model.NameLookUp(xvar,"var")],cvarvalues]))
+	// 	.enter().append("th").text(function(d){return d});
+	// datashowtable.append("tbody")
+	// 	.selectAll("tr").data(xvarvalues.map(function(xv){
+	// 		return data.filter(function(d) {return d[xvar]===xv;} //Map a row of yvar values to each xvar value
+	// 	)}))
+	// 	.enter().append("tr")
+	// 		.selectAll("td")
+	// 		.data(function(dxv) {
+	// 			return d3.merge([ [dxv[0][xvar]], //Add the xvar value as a first element of the row
+	// 							cvarvalues.map(function(cv){ //Map a yvar value to each cvar/xvar values pair (or, a column of yvar values to each cvar value)
+	// 								return dxv.filter(function(d) {return d[cvar]===cv}).map(function(d) {return d.value});
+	// 							})
+	// 		])}).enter().append("td")
+	// 		.text(function(d) {return d});
+
+	
 
 	if (vm.geomap())
 		BDSVis.makeMap(data,request,vm);

@@ -359,7 +359,6 @@ BDSVis.Model = {
 	},
 
 	PrintTitle : function (value, varname) {
-		debugger;
 		var varr=this.LookUpVar(varname);
 		var pref,postf;
 		if (!this.IsContinuous(varr)) {
