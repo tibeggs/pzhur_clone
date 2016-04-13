@@ -175,10 +175,13 @@ BDSVis.processAPIdata = function(data,request,vm) {
 			xvararr.push(data2show[xvarkey][cvarkey]) //Fill the data into 2D table
 		vm.data.push(xvararr);
 	};
-	// vm.data(d3.nest().key(function(d) {return d[xvar]; }).entries(data)
-	// 	.map(function(d) {
-	// 		return d.values.map(function(d1) {return d1[yvar]});
-	// 	}))
+	// vm.data(
+// 		d3.merge([[cvarnames],
+// 		d3.nest().key(function(d) {return d[xvar]; }).entries(data)
+// 		.map(function(d) {
+// 			return d3.merge([[d.key],d.values.map(function(d1) {return d1[yvar]})]);
+// 		})])
+// 	);
 
 	if (vm.geomap())
 		BDSVis.makeMap(data,request,vm);
