@@ -125,8 +125,20 @@ BDSVis.processAPIdata = function(data,request,vm) {
 			}) 
 		})); //d3.merge flattens the array
 
+	BDSVis.makeDataTable(data,cvar,xvar,vm);
+
+	if (vm.geomap())
+		BDSVis.makeMap(data,request,vm);
+	else BDSVis.makePlot(data,request,vm);
+};
+
+BDSVis.makeDataTable = function(data,cvar,xvar,vm) {
 
 	var cvarvalues = d3.set(data.map(function(d) {return d[cvar]})).values(); //All the values of returned cvars
+	cvarvalues.sort(function(a,b) { //Sorted like in model.js
+			var arr=vm.model[cvar].map(function(d) {return d.name})
+			return diff=arr.indexOf(a)-arr.indexOf(b);
+	}) 
 	var xvarvalues = d3.set(data.map(function(d) {return d[xvar]})).values(); //All the values of returned xvars
 
 	//Data as table output via KnockOut
@@ -136,7 +148,8 @@ BDSVis.processAPIdata = function(data,request,vm) {
 			.map(function(dxv){
 				return d3.merge([ [dxv[0][xvar]], //Add the xvar value as a first element of the row
 						cvarvalues.map(function(cv){ //Map a yvar value to each cvar/xvar values pair (or, a column of yvar values to each cvar value)
-							return dxv.filter(function(d) {return d[cvar]===cv}).map(function(d) {return d.value});
+							return dxv.filter(function(d) {return d[cvar]===cv})
+									.map(function(d) {return d.value});
 						})])
 			})
 	);
@@ -145,9 +158,11 @@ BDSVis.processAPIdata = function(data,request,vm) {
 	// //Data as table output via D3
 	// var datashowtable = d3.select("#graphdata");
 	// datashowtable.selectAll("*").remove()
+
 	// datashowtable.append("thead")
 	// 	.selectAll("th").data(d3.merge([[vm.model.NameLookUp(xvar,"var")],cvarvalues]))
 	// 	.enter().append("th").text(function(d){return d});
+
 	// datashowtable.append("tbody")
 	// 	.selectAll("tr").data(xvarvalues.map(function(xv){
 	// 		return data.filter(function(d) {return d[xvar]===xv;} //Map a row of yvar values to each xvar value
@@ -157,14 +172,9 @@ BDSVis.processAPIdata = function(data,request,vm) {
 	// 		.data(function(dxv) {
 	// 			return d3.merge([ [dxv[0][xvar]], //Add the xvar value as a first element of the row
 	// 							cvarvalues.map(function(cv){ //Map a yvar value to each cvar/xvar values pair (or, a column of yvar values to each cvar value)
-	// 								return dxv.filter(function(d) {return d[cvar]===cv}).map(function(d) {return d.value});
-	// 							})
-	// 		])}).enter().append("td")
+	// 								return dxv.filter(function(d) {return d[cvar]===cv})
+	// 										.map(function(d) {return d.value});
+	// 							})])
+	// 			}).enter().append("td")
 	// 		.text(function(d) {return d});
-
-	
-
-	if (vm.geomap())
-		BDSVis.makeMap(data,request,vm);
-	else BDSVis.makePlot(data,request,vm);
 };

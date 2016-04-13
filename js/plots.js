@@ -266,6 +266,8 @@ BDSVis.makePlot = function (data,request,vm) {
 		//pv.maintitle.text("");
 
 		var dataset=data.filter(function(d) {return +d[vm.model.timevar]===yr}); //Select data corresponding to the year
+
+		BDSVis.makeDataTable(dataset,cvar,xvar,vm);
 		
 		//The data4bars is only needed for smooth transition in animations. There have to be rectangles of 0 height for missing data. data4bars is created
 		//empty outside this function. The following loop fills in / updates to actual data values from current year

@@ -149,6 +149,7 @@ BDSVis.makeMap = function (data,request,vm) {
 		curyearmessage.text(yr); //Display year
 		//pv.maintitle.text("");
 		var dataset=datafull.filter(function(d) {return +d[vm.model.timevar]===yr}); //Select data corresponding to the year
+		BDSVis.makeDataTable(dataset,vm.model.yvars,xvar,vm);
 		//Change the data that is displayed raw as a table
 		// var vmdata=vm.data();
 		// for (var i=1; i<dataset.length; i++)

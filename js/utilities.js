@@ -1,6 +1,7 @@
 var BDSVis = BDSVis || {};
 
 BDSVis.util = {
+	
 	//This is a general use function for whenever the number should be printed in format with fixed significant digits and M and k for millions and thousands
 	NumFormat : function(d,sigdig) {
 		//"sigdig" is how many digits to show
