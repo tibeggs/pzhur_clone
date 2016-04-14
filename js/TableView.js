@@ -23,7 +23,7 @@ BDSVis.TableView = {
 							})])
 				})
 		);
-		vm.data.unshift(d3.merge([[vm.model.NameLookUp(xvar,"var")],cvarvalues])); //Header line: the xvar values + all the cvar values
+		vm.data.unshift(d3.merge([[vm.model.NameLookUp(xvar,"var") + " (row) \\ " +  vm.model.NameLookUp(cvar,"var") + " (col)"],cvarvalues])); //Header line: the xvar values + all the cvar values
 		
 		// //Data as table output via D3
 		// var datashowtable = d3.select("#graphdata");
@@ -48,6 +48,7 @@ BDSVis.TableView = {
 		// 			}).enter().append("td")
 		// 		.text(function(d) {return d});
 		
+		d3.select('#graphdata').selectAll('tr').attr("bgcolor",function(d,i) {return (i%2)?"#fff":"#eee";});
 		this.SetLowerHeadersWidth();
 	},
 

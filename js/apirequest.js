@@ -57,41 +57,41 @@ BDSVis.getAPIdata = function (vm) {
     vm.waiting4api(true); //Show "waiting for data" message
     //vm.PlotView.Init();
     d3.json(geturl,function (data) { //Send request to the server and get response
-    	if (data===null) console.log("Server sent empty response to " + geturl);
-    	BDSVis.processAPIdata(data,request,vm); //Continue to data processing and plotting
+    	if (data===null) {
+    		console.log("Server sent empty response to " + geturl);
+    		vm.PlotView.Init();
+			vm.PlotView.DisplayNoData();
+			return;	
+    	} else {
+    		//Convert data into array of objects with the keys defined by the first row
+			var keys=data[0]; //First row contains keys
+			data=data.slice(1).map(function(d) {
+				var rec = {};
+				for (ikey in keys) { //Find keys, which are contained in the first line of the array returned by API
+					var key = (keys[ikey]==="us")?("state"):(keys[ikey]); //Substitute "us" field name to "state"
+					key = (key==="time")?vm.model.timevar:key;
+					rec[key] = d[ikey]; //Fill the object
+				};
+				return rec;
+			});
+    		BDSVis.processAPIdata(data,request,vm); //Continue to data processing and plotting
+    	}
     	vm.waiting4api(false); //Hide "waiting for data" message
     });
 };
 
 
-//Process data obtained from API. Change codes into names, form data2show for displaying as a table and call the function making the plot
+//Process data coming as array of objects. Filter the data according to request (sometimes requests ask server for more than user needs to plot)
+//Change codes into names, melt data if many yvars are chosen (= the yvar is also the cvar), call functions making table, map or plots.
 BDSVis.processAPIdata = function(data,request,vm) {
-	//This function converts the data from API, replacing coded variables with their displayable names, and makes a 2D table for display of the textual data
+	
 	//"vm" is the reference to ViewModel
 
 	//Set shortcuts
-	var cvar = request.cvar;
-	var xvar = request.xvar;
-	var yvar = request[vm.model.yvars];
+	var cvar = request.cvar,
+		xvar = request.xvar,
+		yvar = request[vm.model.yvars];
 	//var YvarsAsLegend = (cvar === vm.model.yvars);
-
-	if (data.length<1) { //Display No Data message is no data is received
-		vm.PlotView.Init();
-		vm.PlotView.DisplayNoData();
-		return;	
-	};
-
-	//Convert data into array of objects with the keys defined by the first row
-	var keys=data[0]; //First row contains keys
-	data=data.slice(1).map(function(d) {
-		var rec = {};
-		for (iname in keys) { //Find keys, which are contained in the first line of the array returned by API
-			var key = (keys[iname]==="us")?("state"):(keys[iname]); //Substitute "us" field name to "state"
-			key = (key==="time")?vm.model.timevar:key;
-			rec[key] = d[iname]; //Fill the object
-		};
-		return rec;
-	});
 
  	//Filter the obtained data, so that only what is requested remains (API does not filter all the variables)
 	for (var key in request) {
@@ -125,7 +125,7 @@ BDSVis.processAPIdata = function(data,request,vm) {
 			}) 
 		})); //d3.merge flattens the array
 
-	vm.TableView.makeDataTable(data,cvar,xvar,vm);
+	vm.TableView.makeDataTable(data,cvar,xvar,vm); //Make the table displaying the data
 
 	if (vm.geomap())
 		BDSVis.makeMap(data,request,vm);
