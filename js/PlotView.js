@@ -7,7 +7,7 @@ BDSVis.PlotView = {
 	height0 : 450,
 	legendwidth: 250,
 	titleheight: 15,
-	xaxislabelheight: 40,
+	xaxislabelheight: 20,
 	Init : function() {
 		//Define margins and dimensions of the SVG element containing the chart
 		var margin = this.margin;
@@ -71,12 +71,15 @@ BDSVis.PlotView = {
 		this.maintitle.selectAll("tspan").attr("x",function(d) { return (pv.legendx-this.getComputedTextLength())/2.; });
 	},
 
-	SetXaxisLabel : function(xlab) {
+	SetXaxisLabel : function(xlab,offset) {
+		var offs = offset || 0;
 		var pv = this;
+		var h = pv.margin.top + pv.margin.bottom + pv.titleheight + pv.svg.node().getBBox().height+offs;
 		this.xaxislabel
 			.text(xlab)
 			.attr("x",function(d) { return (pv.margin.left+pv.margin.right+pv.width-this.getComputedTextLength())/2.; })
-			.attr("y",(pv.height + pv.margin.top + pv.xaxislabelheight + pv.titleheight));
-			//+ d3.select(".x").node().getBBox().height 
+			.attr("y",h);
+		
+		d3.select("#chartsvg").attr("height",h+pv.margin.bottom);
 	}
 };

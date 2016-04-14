@@ -25,9 +25,7 @@ BDSVis.makeMap = function (data,request,vm) {
 			ptitle+=vm.model.PrintTitle(data[0][key],key);
 	};
 
-	pv.SetPlotTitle(ptitle);
-	pv.SetXaxisLabel("Click on states to toggle");
-
+	
 	//Set D3 scales
 	var ymin=d3.min(data, function(d) { return +d[yvar]; });
 	var ymax=d3.max(data, function(d) { return +d[yvar]; });
@@ -103,7 +101,6 @@ BDSVis.makeMap = function (data,request,vm) {
 			})
 			.append("title").text(function(d){return d[vm.model.geomapvar]+": "+d3.format(",")(d[yvar]);});
 
-
 	//Making Legend
 	var legendsvg=vm.PlotView.legendsvg;
 
@@ -142,6 +139,9 @@ BDSVis.makeMap = function (data,request,vm) {
 		.attr("x",colorbar.width+3)
 		.attr("y",function(d) {return .4*colorbar.fontsize+hScale(d);})
 		.text(function(d) {return(BDSVis.util.NumFormat(+d,3));});
+
+	pv.SetPlotTitle(ptitle);
+	pv.SetXaxisLabel("Click on states to toggle",30);
 
 	// Timelapse animation
 	function updateyear(yr) {
