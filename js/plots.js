@@ -21,7 +21,7 @@ BDSVis.makePlot = function (data,request,vm) {
 	//var request=vm.APIrequest();
 
 	//If yvars is also a c-variable, then we got melted data from updateBDSdata function, with all yvars contained in the "value" column
-	var yvar="value";//YvarsAsLegend?"value":request[vm.model.yvars];
+	var yvar=YvarsAsLegend?"value":request[vm.model.yvars];
 
 
 	//Setting D3 scales

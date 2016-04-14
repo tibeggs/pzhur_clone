@@ -76,5 +76,7 @@ BDSVis.PlotView = {
 		this.xaxislabel
 			.text(xlab)
 			.attr("x",function(d) { return (pv.margin.left+pv.margin.right+pv.width-this.getComputedTextLength())/2.; })
+			.attr("y",(pv.height + pv.margin.top + pv.xaxislabelheight + pv.titleheight));
+			//+ d3.select(".x").node().getBBox().height 
 	}
 };

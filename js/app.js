@@ -71,6 +71,10 @@ BDSVis.ViewModel = function() {
 	//Reference to the visual elements of the plot: SVGs for the graph/map and legend
 	this.PlotView = BDSVis.PlotView;
 
+	//Reference to the table showing the data;
+	this.TableView = BDSVis.TableView;
+
+
 	this.ActualVarCode = function(varcode) {
 		//Checks if the varname is group variable, then returns code of the variable selected. 
 		//If not group variable just returns the input (supposedly the variable code)
@@ -91,6 +95,7 @@ BDSVis.ViewModel = function() {
 	this.toggleshowdata = function () {
 		//This function executes in click to 'Show Data' button.
 		vm.ShowData(!vm.ShowData());
+		vm.TableView.SetLowerHeadersWidth();
 	};
 
 	//TIME LAPSE BUTTON

@@ -41,6 +41,15 @@
         </tbody>
       </table>
     </div>
+    <div data-bind="visible: ShowData" class="datatable">
+      <table id="graphdataheaders">
+      <thead data-bind="foreach: data.slice(0,1)">
+            <tr data-bind="foreach: $data">
+              <th data-bind="text: $data"></th>
+            </tr>
+      </thead>
+      </table>
+    </div>
 
    </div>
  
@@ -58,6 +67,7 @@
   <script src="js/utilities.js"></script>
   <script src="js/model.js"></script>
   <!-- <script src="js/statesgeodata.js"></script> -->
+  <script src="js/TableView.js"></script>
   <script src="js/PlotView.js"></script>
   <script src="js/apirequest.js"></script>
   <script src="js/geomap.js"></script>
