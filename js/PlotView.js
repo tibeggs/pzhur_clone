@@ -43,7 +43,8 @@ BDSVis.PlotView = {
 			.attr("class","leglabel legbox");
 		
 		//X-axis label
-		this.xaxislabel=this.svgcont.append("g").append("text")
+		this.xaxislabelg=this.svgcont.append("g")
+		this.xaxislabel=this.xaxislabelg.append("text")
 			.attr("class","xaxislabel")
 			.attr("y",(height + margin.top + this.xaxislabelheight + this.titleheight));
 
@@ -71,6 +72,13 @@ BDSVis.PlotView = {
 					BDSVis.makePlot(data,request,vm);
 				d3.event.stopPropagation();
 			});
+
+		this.xaxisselector = d3.select("#plotarea").append("select")
+		this.xaxisselector.selectAll("option")
+			.data(vm.model.variables.filter(function(d){return d.asaxis})).enter().append("option")
+			.attr("value",function(d) {return d.code})
+			.text(function(d) {return d.name})
+			.property("selected",function(d){return d.code===vm.xvar()});
 	},
 
 	DisplayNoData : function() {
@@ -98,6 +106,6 @@ BDSVis.PlotView = {
 			.attr("x",function(d) { return (pv.margin.left+pv.margin.right+pv.width-this.getComputedTextLength())/2.; })
 			.attr("y",h);
 		
-		d3.select("#chartsvg").attr("height",h+pv.margin.bottom);
+		this.svgcont.attr("height",h+pv.margin.bottom);
 	}
 };
