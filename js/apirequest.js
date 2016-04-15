@@ -55,11 +55,9 @@ BDSVis.getAPIdata = function (vm) {
     console.log(geturl);
     
     vm.waiting4api(true); //Show "waiting for data" message
-    //vm.PlotView.Init();
     d3.json(geturl,function (data) { //Send request to the server and get response
     	if (data===null) {
     		console.log("Server sent empty response to " + geturl);
-    		vm.PlotView.Init();
 			vm.PlotView.DisplayNoData();
 			return;	
     	} else {
@@ -84,7 +82,6 @@ BDSVis.getAPIdata = function (vm) {
 //Process data coming as array of objects. Filter the data according to request (sometimes requests ask server for more than user needs to plot)
 //Change codes into names, melt data if many yvars are chosen (= the yvar is also the cvar), call functions making table, map or plots.
 BDSVis.processAPIdata = function(data,request,vm) {
-	
 	//"vm" is the reference to ViewModel
 
 	//Set shortcuts
@@ -103,7 +100,6 @@ BDSVis.processAPIdata = function(data,request,vm) {
 	};
 	
 	if (data.length<1) { //Display No Data message is all received data is filtered
-		vm.PlotView.Init();
 		vm.PlotView.DisplayNoData();
 		return;	
 	};
@@ -129,6 +125,7 @@ BDSVis.processAPIdata = function(data,request,vm) {
 
 	if (vm.geomap())
 		BDSVis.makeMap(data,request,vm);
-	else BDSVis.makePlot(data,request,vm);
+	else 
+		BDSVis.makePlot(data,request,vm);
 };
 

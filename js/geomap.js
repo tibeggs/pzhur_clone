@@ -6,7 +6,7 @@ BDSVis.makeMap = function (data,request,vm) {
 
 	//Initialize the SVG elements and get width and length for scales
 	var pv=vm.PlotView;
-	pv.Init();
+	pv.Init(data,request,vm);
 	svg=pv.svg;
 	width=pv.width;
 	height=pv.height;
@@ -149,7 +149,7 @@ BDSVis.makeMap = function (data,request,vm) {
 		curyearmessage.text(yr); //Display year
 		//pv.maintitle.text("");
 		var dataset=datafull.filter(function(d) {return +d[vm.model.timevar]===yr}); //Select data corresponding to the year
-		BDSVis.makeDataTable(dataset,vm.model.yvars,xvar,vm);
+		vm.TableView.makeDataTable(dataset,vm.model.yvars,xvar,vm);
 		//Change the data that is displayed raw as a table
 		// var vmdata=vm.data();
 		// for (var i=1; i<dataset.length; i++)

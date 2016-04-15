@@ -39,7 +39,7 @@ BDSVis.Model = {
 			"code" : "measure",
 			"name" : "Measure",
 			"type" : "categorical",
-			"default" : 0,
+			"default" : 7,
 			"aslegend" : true,
 			"asaxis" : false 
 		},

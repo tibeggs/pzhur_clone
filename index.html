@@ -12,9 +12,16 @@
   
   <div id="plotarea">
 
-    <button id="logbutton" data-bind="click: toggleyscale, text: yscalebuttontext, disable: disableAll()" >Log</button>
+    <!-- <button id="logbutton" data-bind="click: toggleyscale, text: yscalebuttontext, disable: disableAll()" >Log</button> -->
 
-    <svg id="chartsvg" data-bind="vis1ible: (!ShowData())"></svg>
+    <svg id="chartsvg" data-bind="vis1ible: (!ShowData())">
+       <defs>
+        <linearGradient id="grad1" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" style="stop-color:#eee;stop-opacity:1" />
+          <stop offset="100%" style="stop-color:#ddd;stop-opacity:1" />
+        </linearGradient>
+      </defs>
+    </svg>
   
     <div id="buttonsundergraph">
       <!-- <a id="savelink">Save SVG</a> -->

@@ -2,13 +2,22 @@
   font: 10px sans-serif;
 }
 
+.svguibox {
+  stroke-width: 1;
+  stroke: #000;
+  /*shape-rendering: crispEdges;*/
+}
+
+.svguitext {
+   font: 14px sans-serif;
+}
+
 .axis path,
 .axis line {
   fill: none;
   stroke: #000;
   shape-rendering: crispEdges;
 }
-
 
 .plotline {
   stroke-width: 2;
@@ -117,8 +126,6 @@
   background-image: linear-gradient(top, #005500, #337733);
   opacity: 1;
 }
-
-
 
 .waiting-caption {
   position:absolute;

@@ -8,7 +8,7 @@ BDSVis.PlotView = {
 	legendwidth: 250,
 	titleheight: 15,
 	xaxislabelheight: 20,
-	Init : function() {
+	Init : function(data,request,vm) {
 		//Define margins and dimensions of the SVG element containing the chart
 		var margin = this.margin;
 
@@ -18,10 +18,10 @@ BDSVis.PlotView = {
 		var height=this.height;
 
 		//Select the SVG element, remove old drawings, add grouping element for the chart
-		var svgcont = d3.select("#chartsvg");
-		svgcont.selectAll("*").remove();
+		this.svgcont = d3.select("#chartsvg");
+		this.svgcont.selectAll("g").remove();
 
-		this.svg=svgcont.attr("width", width + margin.left + margin.right+this.legendwidth)
+		this.svg=this.svgcont.attr("width", width + margin.left + margin.right+this.legendwidth)
 			.attr("height", height + margin.top + margin.bottom + this.titleheight + this.xaxislabelheight)
 			.append('g')
 			.attr("transform", "translate(" + margin.left + "," + (margin.top+this.titleheight)+ ")")
@@ -37,33 +37,51 @@ BDSVis.PlotView = {
 		// this.legendsvg=d3.select("#legend").attr("width",400).attr("height",300);
 		// this.legendsvg.selectAll("*").remove();
 		this.legendx=width+margin.left+ margin.right;
-		this.legendsvg=d3.select("#chartsvg")
+		this.legendsvg=this.svgcont
 			.append("g")
 			.attr("transform","translate("+(width+margin.left+ margin.right)+","+height*.3+")")
 			.attr("class","leglabel legbox");
 		
 		//X-axis label
-		this.xaxislabel=d3.select("#chartsvg").append("text")
+		this.xaxislabel=this.svgcont.append("g").append("text")
 			.attr("class","xaxislabel")
 			.attr("y",(height + margin.top + this.xaxislabelheight + this.titleheight));
 
 		//Y-axis label
-		this.yaxislabel=d3.select("#chartsvg").append("text")
+		this.yaxislabel=this.svgcont.append("g").append("text")
 			.attr("class","yaxislabel")
 			.attr("transform","translate("+16+","+.5*(height + margin.top + this.xaxislabelheight + this.titleheight)+")rotate(-90)");
 
-		this.lowerrightcornertext=d3.select("#chartsvg").append("text").attr("class","leglabel")
+		this.lowerrightcornertext=this.svgcont.append("g").append("text").attr("class","leglabel")
 			.attr("x",width+margin.left+ margin.right)
 			.attr("y",this.height0-margin.bottom);
+
+		//Logscale Checkbox
+		this.logbutton = this.svgcont.append("g").attr("transform","translate(0,"+(height + margin.top + this.titleheight)+")");
+		//this.logbutton.append("rect").attr("class","svguibutton").attr("width",35).attr("height",20).attr("fill","url(#grad1)").attr("stroke-width",.1).attr("stroke","#000");
+		this.logbutton.append("text").attr("class","svguitext").text("Log").attr("y",".75em").attr("x","15");
+		this.logbutton.append("rect").attr("class","svguibox")
+			.attr("width",10).attr("height",10).attr("fill",vm.logscale()?"#090":"#fff");
+		if (!vm.timelapse())
+			this.logbutton.on("click",function() { 
+				vm.logscale(!vm.logscale());
+				if (vm.geomap())
+					BDSVis.makeMap(data,request,vm);
+				else 
+					BDSVis.makePlot(data,request,vm);
+				d3.event.stopPropagation();
+			});
 	},
 
 	DisplayNoData : function() {
-		d3.select("#chartsvg").append("text").attr("class","graphtitle").attr("x",this.width0/2).attr("y",this.height0/2).text("No data");
+		this.svgcont = d3.select("#chartsvg");
+		this.svgcont.selectAll("g").remove();
+		this.svgcont.append("g").append("text").attr("class","graphtitle").attr("x",this.width0/2).attr("y",this.height0/2).style("font-size","32px").text("No data");
 	},
 
 	SetPlotTitle : function(ptitle) {
 		var pv = this;
-		this.maintitle=d3.select("#chartsvg")
+		this.maintitle=this.svgcont.append("g")
 			.append("text").attr("class","graph-title")
 			.text(ptitle)
 			.attr("dy",1+"em").attr("y","0");
