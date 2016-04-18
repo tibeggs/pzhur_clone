@@ -47,7 +47,7 @@ BDSVis.TableView = {
 		// 			}).enter().append("td")
 		// 		.text(function(d) {return d});
 		
-		d3.select('#graphdata').selectAll('tr').attr("bgcolor",function(d,i) {return (i%2)?"#fff":"#eee";});
+		d3.select('#graphdata').selectAll('tr').style("background-color",function(d,i) {return (i%2)?"#fff":"#eee";});
 		this.SetLowerHeadersWidth();
 	},
 

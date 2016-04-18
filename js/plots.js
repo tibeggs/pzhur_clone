@@ -26,7 +26,7 @@ BDSVis.makePlot = function (data,request,vm) {
 
 
 	//Setting D3 scales
-	var xScale; var yScale; var ymin; var y0;
+	var xScale, yScale, yScale1, ymin, y0;
 	if (vm.model.IsContinuous(xvarr))
 		xScale = d3.scale.linear()
 			.domain([vm.model[xvar][0],vm.model[xvar][vm.model[xvar].length-1]])
@@ -40,17 +40,19 @@ BDSVis.makePlot = function (data,request,vm) {
 	if (vm.logscale()) {
 		ymin = d3.min(data.filter(function(d) {return d[yvar]>0}), function(d) { return +d[yvar]; })/2.; // The bottom of the graph, a half of the smallest positive value
 		y0=ymin; //Where the 0 horizontal line is located, for the base of the bar. Since 0 can not be on a log plot, it's ymin
-		yScale = d3.scale.log();
+		yScale1 = d3.scale.log().domain([ymin, d3.max(data, function(d) { return +d[yvar]; })])
+		.range([height,0]);
 		 //0 and negative numbers are -infinity on log scale, replace them with "almost -infinity", so that they can be plotted, but outside of the graph limits.
-		data=data.map(function(d) {if (d[yvar]<=0) d[yvar]=1e-15; return d;});
+		//data=data.map(function(d) {if (d[yvar]<=0) d[yvar]=1e-15; return d;});
+		yScale = function(y) {
+			if (y<=0) return yScale1(1e-15); else return yScale1(y);
+		}
 	} else {
 		y0=0; //Where the 0 horizontal line is located, for the base of the bar
 		ymin = Math.min(0,d3.min(data, function(d) { return +d[yvar]; })); //Bars should be plotted at least from 0.
-		yScale = d3.scale.linear()
-	}
-
-	yScale.domain([ymin, d3.max(data, function(d) { return +d[yvar]; })])
+		yScale = d3.scale.linear().domain([ymin, d3.max(data, function(d) { return +d[yvar]; })])
 		.range([height,0]);
+	}
 
 			
 	//Set up colorscale
@@ -86,13 +88,14 @@ BDSVis.makePlot = function (data,request,vm) {
 
 	var xAxis0 = d3.svg.axis().scale(xScale).tickFormat("").orient("bottom");
 
-	var yAxis = d3.svg.axis().scale(yScale).orient("left");
+	var yAxis = d3.svg.axis().scale(vm.logscale()?yScale1:yScale).orient("left");
+
 	if (vm.logscale()) yAxis.ticks(5,d3.format(",d"));
 
-	// svg.append("g")
-	// 	.attr("class", "x axis")
-	// 	.attr("transform", "translate(0," + yScale(y0) + ")")
-	// 	.call(xAxis0);
+	svg.append("g")
+		.attr("class", "x axis")
+		.attr("transform", "translate(0," + yScale(y0) + ")")
+		.call(xAxis0);
 
 	var xAxisLabels=svg.append("g")
 		.attr("class", "x axis")
@@ -122,7 +125,7 @@ BDSVis.makePlot = function (data,request,vm) {
     	.x(function(d) { return xScale(d[xvar]); })
     	.y(function(d) { return yScale(d[yvar]); });
 
-    	//console.log();
+    	
     	svg.selectAll("path .plotline")
     		// .data(cvarlist.map(function(d) {
     		// 	return {cvar: d, values: data.filter(function(d1) {return d1[cvar]===d;})}; 
@@ -240,6 +243,10 @@ BDSVis.makePlot = function (data,request,vm) {
 
 	//Set the title of the plot
 	var ptitle=(YvarsAsLegend && request[vm.model.yvars].length>1)?("Various "+vm.model.yvars+"s"):(vm.model.NameLookUp(request[vm.model.yvars],vm.model.yvars)); //If many yvars say "various", otherwise the yvar name
+	
+	
+
+	//Continue forming title
 	for (var key in data[0]) {
 		//X-var should not be in the title, yvar is taken care of. Also check that the name exists in model.variables (e.g. yvar names don't)
 		if ((key!==xvar) && (key!==yvar) && (key!==vm.model.yvars) && !((key===vm.model.timevar) && (vm.timelapse())) && (vm.model.VarExists(key))) {
@@ -251,14 +258,15 @@ BDSVis.makePlot = function (data,request,vm) {
 	
 	pv.SetPlotTitle(ptitle);
 
-	//X-axis label
-	pv.SetXaxisLabel(xvarr.name);
-
 	//Y-axis label
 	if ((yvar!=="value") && (vm.model.NameLookUp(yvar,vm.model.yvars).indexOf("rate")!==-1))
-		pv.yaxislabel.text("% change")
-	
+		pv.yaxislabel.text("% change"); else pv.yaxislabel.text(" ");
 
+	//X-axis label
+	pv.SetXaxisLabel(xvarr.name,d3.max(xAxisLabels[0].map(function(d) {return d.getBBox().y+d.getBBox().height;})));
+
+	pv.AdjustUIElements();
+	
 	// Timelapse animation
 	function updateyear(yr) {
 

@@ -245,8 +245,8 @@ BDSVis.ViewModel = function() {
 	}.bind(this.vars);
 
 	//Initial values of X-axis variable and C- variable
-	this.xvar = ko.observable("sic1");
-	this.cvar = ko.observable("fchar");	
+	this.xvar = ko.observable("fchar");
+	this.cvar = ko.observable("sic1");	
 
 	//Subscribe to input changes
 	//Any change in the input select fields triggers request to the server, followed by data processing and making of a new plot

@@ -57,42 +57,71 @@ BDSVis.PlotView = {
 			.attr("x",width+margin.left+ margin.right)
 			.attr("y",this.height0-margin.bottom);
 
-		//Logscale Checkbox
-		this.logbutton = this.svgcont.append("g").attr("transform","translate(0,"+(height + margin.top + this.titleheight)+")");
-		//this.logbutton.append("rect").attr("class","svguibutton").attr("width",35).attr("height",20).attr("fill","url(#grad1)").attr("stroke-width",.1).attr("stroke","#000");
-		this.logbutton.append("text").attr("class","svguitext").text("Log").attr("y",".75em").attr("x","15");
-		this.logbutton.append("rect").attr("class","svguibox")
-			.attr("width",10).attr("height",10).attr("fill",vm.logscale()?"#090":"#fff");
-		if (!vm.timelapse())
+		d3.select("#xvarselector").selectAll("select").remove();
+		d3.select("#cvarselector").selectAll("select").remove();
+		d3.select("#logbutton").selectAll("*").remove();
+		if (!vm.timelapse()) { //Add UI controls is not in Time Lapse regime
+
+			//Logscale Checkbox
+			var boxsize=10;
+			//this.logbutton = this.svgcont.append("g").attr("transform","translate(3,"+(height + margin.top + this.titleheight-boxsize/2.)+")");
+			//this.logbutton.append("rect").attr("class","svguibutton").attr("width",35).attr("height",20).attr("fill","url(#grad1)").attr("stroke-width",.1).attr("stroke","#000");
+			//this.logbutton.append("text").attr("class","svguitext").text("Log").attr("y",".75em").attr("x","15");
+			//this.logbutton.append("rect").attr("class","svguibox")
+			//	.attr("width",boxsize).attr("height",boxsize).attr("fill",vm.logscale()?"#090":"#fff");
+			this.logbutton = d3.select("#logbutton")
+				.append("input").attr("type","Checkbox")
+				.property("checked",function(d) {return vm.logscale();})
+			d3.select("#logbutton").append("span").text("Log")
 			this.logbutton.on("click",function() { 
 				vm.logscale(!vm.logscale());
 				if (vm.geomap())
 					BDSVis.makeMap(data,request,vm);
 				else 
 					BDSVis.makePlot(data,request,vm);
-				d3.event.stopPropagation();
+				//vm.getBDSdata();
+				//d3.event.stopPropagation();
 			});
 
-		d3.select("#xvarselector").selectAll("select").remove();
-		this.xaxisselector = d3.select("#xvarselector").append("select")
-		this.xaxisselector.selectAll("option")
-			.data(vm.model.variables.filter(function(d){return (d.asaxis && d.code!==vm.cvar())})).enter().append("option")
-			.attr("value",function(d) {return d.code})
-			.text(function(d) {return d.name})
-			.property("selected",function(d){return d.code===vm.xvar()});
-		this.xaxisselector.on("change", function() { vm.setxvar(this.value);} );
+			//X-axis variable selector			
+			this.xaxisselector = d3.select("#xvarselector").append("select");
+			this.xaxisselector.selectAll("option")
+				.data(vm.model.variables.filter(function(d){return (d.asaxis && d.code!==vm.cvar())})).enter().append("option")
+				.attr("value",function(d) {return d.code})
+				.text(function(d) {return d.name})
+				.property("selected",function(d){return d.code===vm.xvar()});
+			this.xaxisselector.on("change", function() { vm.setxvar(this.value);} );
+			if (vm.model.IsGroup(vm.xvar())) {
+				this.xgroupselector = d3.select("#xvarselector").append("select");
+				this.xgroupselector.selectAll("option")
+					.data(vm.model[vm.xvar()]).enter().append("option")
+					.attr("value",function(d) {return d.code})
+					.text(function(d) {return d.name})
+					.property("selected",function(d){return d.code===vm.SelectedOpts[vm.xvar()]()[0];});
+				this.xgroupselector.on("change", function() {vm.SelectedOpts[vm.xvar()]([this.value]);});
+			};
 
-		d3.select("#cvarselector").selectAll("select").remove();
-		this.cvarselector = d3.select("#cvarselector").append("select")
-			.style("position","absolute")
-			.style("left",(this.svgcont.node().getBBox().x+this.width+this.margin.left+ this.margin.right)+"px")
-			.style("top",(this.margin.top+this.titleheight)+"px")
-		this.cvarselector.selectAll("option")
-			.data(vm.model.variables.filter(function(d){return (d.aslegend && d.code!==vm.xvar())})).enter().append("option")
-			.attr("value",function(d) {return d.code})
-			.text(function(d) {return d.name})
-			.property("selected",function(d){return d.code===vm.cvar()});
-		this.cvarselector.on("change", function() { vm.setcvar(this.value);} );
+			if (!vm.geomap()) {
+				//Legend variable (cvar) selector
+				this.cvarselector = d3.select("#cvarselector").append("select");
+				this.cvarselector.selectAll("option")
+					.data(vm.model.variables.filter(function(d){return (d.aslegend && d.code!==vm.xvar())})).enter().append("option")
+					.attr("value",function(d) {return d.code})
+					.text(function(d) {return d.name})
+					.property("selected",function(d){return d.code===vm.cvar()});
+				this.cvarselector.on("change", function() { vm.setcvar(this.value);} );
+				if (vm.model.IsGroup(vm.cvar())) {
+					this.xgroupselector = d3.select("#cvarselector").append("select");
+					this.xgroupselector.selectAll("option")
+						.data(vm.model[vm.cvar()]).enter().append("option")
+						.attr("value",function(d) {return d.code})
+						.text(function(d) {return d.name})
+						.property("selected",function(d){return d.code===vm.SelectedOpts[vm.cvar()]()[0];});
+					this.xgroupselector.on("change", function() {vm.SelectedOpts[vm.cvar()]([this.value]);});
+				};
+			};
+		};
+		this.AdjustUIElements();
 	},
 
 	DisplayNoData : function() {
@@ -109,24 +138,40 @@ BDSVis.PlotView = {
 			.attr("dy",1+"em").attr("y","0");
 		this.maintitle.call(BDSVis.util.wrap,pv.width);
 		this.maintitle.selectAll("tspan").attr("x",function(d) { return (pv.legendx-this.getComputedTextLength())/2.; });
+
+		this.AdjustUIElements();
 	},
 
 	SetXaxisLabel : function(xlab,offset) {
 		var offs = offset || 0;
 		var pv = this;
-		var h = pv.margin.top + pv.margin.bottom + pv.titleheight + pv.svg.node().getBBox().height+offs;
+		var h = pv.margin.top + pv.margin.bottom + pv.titleheight + pv.height+offs;
 		this.xaxislabel
 			.text(xlab)
 			.attr("x",function(d) { return (pv.margin.left+pv.margin.right+pv.width-this.getComputedTextLength())/2.; })
 			.attr("y",h)
-			.attr("dy","0.25em");
+			//.attr("dy","1em");
 		this.svgcont.attr("height",h+pv.margin.bottom);
+
+		this.AdjustUIElements();
+	},
+
+	AdjustUIElements : function() {
 
 		d3.select("#xvarselector")
 			.style("position","absolute")
-			.style("left",(this.svgcont.node().getBBox().x+(+this.xaxislabel.attr("x"))+this.xaxislabel.node().getComputedTextLength()*1.5)+"px")
-			.style("top",(-this.svgcont.node().getBBox().y+h)+"px");
+			.style("left",(this.svgcont.node().getBoundingClientRect().left+(+this.xaxislabel.attr("x"))+this.xaxislabel.node().getComputedTextLength()*1.5)+"px")
+			.style("top",(this.xaxislabel.node().getBoundingClientRect().top)+"px");
 
-		
+		d3.select("#cvarselector")
+				.style("position","absolute")
+				.style("left",(this.svgcont.node().getBoundingClientRect().left+this.width+this.margin.left+ this.margin.right)+"px")
+				.style("top",(this.svg.node().getBoundingClientRect().top)+"px");
+
+		d3.select("#logbutton")
+			.style("position","absolute")
+			.style("left",(this.yaxislabel.node().getBoundingClientRect().left)+"px")
+			.style("top",(this.xaxislabel.node().getBoundingClientRect().top)+"px")
+
 	}
 };
