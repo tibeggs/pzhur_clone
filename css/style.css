@@ -39,6 +39,7 @@
   margin-left: 0px;
 }
 
+
 #datashowarea {
   display:block; 
   overflow:auto; 
@@ -69,6 +70,10 @@
 #buttonsundergraph h4{
   display:inline-block;
   font-weight: normal;
+}
+
+#cvarselector {
+  font: 12px sans-serif;
 }
 
 .selectors {

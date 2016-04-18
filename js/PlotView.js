@@ -73,12 +73,26 @@ BDSVis.PlotView = {
 				d3.event.stopPropagation();
 			});
 
-		this.xaxisselector = d3.select("#plotarea").append("select")
+		d3.select("#xvarselector").selectAll("select").remove();
+		this.xaxisselector = d3.select("#xvarselector").append("select")
 		this.xaxisselector.selectAll("option")
-			.data(vm.model.variables.filter(function(d){return d.asaxis})).enter().append("option")
+			.data(vm.model.variables.filter(function(d){return (d.asaxis && d.code!==vm.cvar())})).enter().append("option")
 			.attr("value",function(d) {return d.code})
 			.text(function(d) {return d.name})
 			.property("selected",function(d){return d.code===vm.xvar()});
+		this.xaxisselector.on("change", function() { vm.setxvar(this.value);} );
+
+		d3.select("#cvarselector").selectAll("select").remove();
+		this.cvarselector = d3.select("#cvarselector").append("select")
+			.style("position","absolute")
+			.style("left",(this.svgcont.node().getBBox().x+this.width+this.margin.left+ this.margin.right)+"px")
+			.style("top",(this.margin.top+this.titleheight)+"px")
+		this.cvarselector.selectAll("option")
+			.data(vm.model.variables.filter(function(d){return (d.aslegend && d.code!==vm.xvar())})).enter().append("option")
+			.attr("value",function(d) {return d.code})
+			.text(function(d) {return d.name})
+			.property("selected",function(d){return d.code===vm.cvar()});
+		this.cvarselector.on("change", function() { vm.setcvar(this.value);} );
 	},
 
 	DisplayNoData : function() {
@@ -104,8 +118,15 @@ BDSVis.PlotView = {
 		this.xaxislabel
 			.text(xlab)
 			.attr("x",function(d) { return (pv.margin.left+pv.margin.right+pv.width-this.getComputedTextLength())/2.; })
-			.attr("y",h);
-		
+			.attr("y",h)
+			.attr("dy","0.25em");
 		this.svgcont.attr("height",h+pv.margin.bottom);
+
+		d3.select("#xvarselector")
+			.style("position","absolute")
+			.style("left",(this.svgcont.node().getBBox().x+(+this.xaxislabel.attr("x"))+this.xaxislabel.node().getComputedTextLength()*1.5)+"px")
+			.style("top",(-this.svgcont.node().getBBox().y+h)+"px");
+
+		
 	}
 };

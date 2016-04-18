@@ -89,8 +89,9 @@ BDSVis.processAPIdata = function(data,request,vm) {
 		xvar = request.xvar,
 		yvar = request[vm.model.yvars];
 	//var YvarsAsLegend = (cvar === vm.model.yvars);
-
+	
  	//Filter the obtained data, so that only what is requested remains (API does not filter all the variables)
+ 		
 	for (var key in request) {
     	if ((key!==vm.model.yvars) && //(key!==xvar) && 
     		(key!=="cvar") &&
@@ -98,16 +99,21 @@ BDSVis.processAPIdata = function(data,request,vm) {
     		data = data.filter(function(d) { return request[key].map(function(d) {return d.toString();}).indexOf(d[key])!=-1;});
     	}
 	};
-	
+
+
 	if (data.length<1) { //Display No Data message is all received data is filtered
 		vm.PlotView.DisplayNoData();
 		return;	
 	};
 
+
+
 	data.forEach(function(d){
 		d[xvar] = vm.model.NameLookUp(d[xvar],xvar); //Replace code strings with actual category names for x-variable
 		d[cvar] = vm.model.NameLookUp(d[cvar],cvar); //Replace code strings with actual category names for c-variable
 	});
+
+
 
 	//Melt the data, with yvars in the same column. Like R function "melt" from the "reshape" package. 
 	//(This is needed when several yvars are used, i.e. when yvar is also a cvar)

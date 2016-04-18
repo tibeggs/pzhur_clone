@@ -10,7 +10,6 @@ BDSVis.TableView = {
 				return diff=arr.indexOf(a)-arr.indexOf(b);
 		}) 
 		var xvarvalues = d3.set(data.map(function(d) {return d[xvar]})).values(); //All the values of returned xvars
-
 		//Data as table output via KnockOut
 		vm.data( //Set the KnockOut observable array containing the data for displaying as a table ("Show Data" button)
 			xvarvalues
