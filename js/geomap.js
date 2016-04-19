@@ -1,7 +1,7 @@
 var BDSVis = BDSVis || {};
 
 //This function makes the geographical map
-BDSVis.makeMap = function (data,request,vm) {
+BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	//"vm" is the reference to ViewModel
 
 	//Initialize the SVG elements and get width and length for scales
@@ -89,6 +89,8 @@ BDSVis.makeMap = function (data,request,vm) {
 			.on("click",function(d) {
 				var xvcode = vm.model[vm.model.geomapvar].filter(function(d1) {return d1.name===d.properties.NAME;})[0].code;
 				vm.IncludedXvarValues[xvar].push(xvcode);
+				//request[xvar].push(xvcode);
+				//BDSVis.processAPIdata(data,request,vm,dataunfiltered);
 				vm.getBDSdata();
 			})
 			.data(data)
@@ -98,7 +100,7 @@ BDSVis.makeMap = function (data,request,vm) {
 			.on("click",function(d) {
 				var ind = vm.IncludedXvarValues[xvar].indexOf(vm.model[vm.model.geomapvar].filter(function(d1) {return d1.name===LUName(d);})[0].code);
 				vm.IncludedXvarValues[xvar].splice(ind,1);
-				BDSVis.processAPIdata(data,request,vm);
+				BDSVis.processAPIdata(data,request,vm,dataunfiltered);
 				//vm.getBDSdata();
 			})
 			.append("title").text(function(d){return LUName(d)+": "+d3.format(",")(d[yvar]);});

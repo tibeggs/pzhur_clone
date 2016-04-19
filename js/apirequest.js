@@ -84,7 +84,7 @@ BDSVis.getAPIdata = function (vm) {
 //Change codes into names, melt data if many yvars are chosen (= the yvar is also the cvar), call functions making table, map or plots.
 BDSVis.processAPIdata = function(data,request,vm) {
 	//"vm" is the reference to ViewModel
-	
+	console.log(request[request.xvar]);
  	//Filter the obtained data, so that only what is requested remains (API does not filter all the variables)
  	dataunfiltered = data.slice(0);
 	for (var key in request) {
@@ -115,7 +115,7 @@ BDSVis.processAPIdata = function(data,request,vm) {
 	vm.TableView.makeDataTable(data,request.cvar,request.xvar,vm); //Make the table displaying the data
 
 	if (vm.geomap())
-		BDSVis.makeMap(data,request,vm);
+		BDSVis.makeMap(data,request,vm,dataunfiltered);
 	else 
 		BDSVis.makePlot(data,request,vm,dataunfiltered);
 };
