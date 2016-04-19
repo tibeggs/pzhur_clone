@@ -84,12 +84,6 @@ BDSVis.getAPIdata = function (vm) {
 //Change codes into names, melt data if many yvars are chosen (= the yvar is also the cvar), call functions making table, map or plots.
 BDSVis.processAPIdata = function(data,request,vm) {
 	//"vm" is the reference to ViewModel
-
-	//Set shortcuts
-	var cvar = request.cvar,
-		xvar = request.xvar,
-		yvar = request[vm.model.yvars];
-	//var YvarsAsLegend = (cvar === vm.model.yvars);
 	
  	//Filter the obtained data, so that only what is requested remains (API does not filter all the variables)
  		
@@ -101,34 +95,24 @@ BDSVis.processAPIdata = function(data,request,vm) {
     	}
 	};
 
-
 	if (data.length<1) { //Display No Data message is all received data is filtered
 		vm.PlotView.DisplayNoData();
 		return;	
 	};
 
-
-
-	data.forEach(function(d){
-		d[xvar] = vm.model.NameLookUp(d[xvar],xvar); //Replace code strings with actual category names for x-variable
-		d[cvar] = vm.model.NameLookUp(d[cvar],cvar); //Replace code strings with actual category names for c-variable
-	});
-
-
-
 	//Melt the data, with yvars in the same column. Like R function "melt" from the "reshape" package. 
 	//(This is needed when several yvars are used, i.e. when yvar is also a cvar)
 	data = d3.merge(data.map(function(d) {
 		//Split each record into array of records where value equals to one of yvars, and vm.model.yvars(e.g "measure") is equal to name of that yvar
-			return yvar.map(function(yv){ 
+			return request[vm.model.yvars].map(function(yv){ 
 				var rec=JSON.parse(JSON.stringify(d));
-                rec[vm.model.yvars]=vm.model.NameLookUp(yv,vm.model.yvars); //Set vm.model.yvars (e.g. "measure") field to actual name of yv
+                rec[vm.model.yvars]=yv; //Set vm.model.yvars (e.g. "measure") field to which measure it is
                 rec.value=d[yv]; //Set value field to the value of variable yv
                 return rec;
 			}) 
 		})); //d3.merge flattens the array
 
-	vm.TableView.makeDataTable(data,cvar,xvar,vm); //Make the table displaying the data
+	vm.TableView.makeDataTable(data,request.cvar,request.xvar,vm); //Make the table displaying the data
 
 	if (vm.geomap())
 		BDSVis.makeMap(data,request,vm);

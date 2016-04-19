@@ -82,7 +82,8 @@ BDSVis.makePlot = function (data,request,vm) {
 	};
 
 	//Adding axes
-	var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+
+	var xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickFormat(function(d){ return vm.model.NameLookUp(d,xvar)});
 
 	if (vm.model.IsContinuous(xvarr)) xAxis.tickFormat(d3.format("d"));
 
@@ -110,10 +111,10 @@ BDSVis.makePlot = function (data,request,vm) {
 	.attr("class", "y axis")
 	.call(yAxis); 
 
-	function refresh() {
-	  svg.select(".x .axis").call(xAxis);
-	  svg.select(".y .axis").call(yAxis);
-	};
+	// function refresh() {
+	//   svg.select(".x .axis").call(xAxis);
+	//   svg.select(".y .axis").call(yAxis);
+	// };
 
 	//svg.call(d3.behavior.zoom().x(xScale).y(yScale).on("zoom", refresh))
 
@@ -140,8 +141,8 @@ BDSVis.makePlot = function (data,request,vm) {
         svg.selectAll("circle .plotdot")
 	    	.data(data)
 	  		.enter().append("circle").attr("class","plotdot")
+	  		.attr("r",5)
 	  		.attr("fill", function(d) {return colors(d[cvar]);})
-			.attr("r",5)
 	    	.attr("cx", function(d) { return xScale(d[xvar]); })
 	    	.attr("cy", function(d) { return yScale(d[yvar]); })
 	    	.append("title").text(function(d){return Tooltiptext(d);});
@@ -169,9 +170,9 @@ BDSVis.makePlot = function (data,request,vm) {
 		   	.attr("height", function(d) {return Math.abs(yScale(y0)-yScale(+d[yvar]))})
 		   	.on("click",function(d) {
 		   		//debugger;
-				var ind = vm.IncludedXvarValues[xvar].indexOf(vm.model.CodeLookUp(d[xvar],xvar));
+				var ind = vm.IncludedXvarValues[xvar].indexOf(d[xvar]);
 				vm.IncludedXvarValues[xvar].splice(ind,1);
-				vm.getBDSdata();
+				BDSVis.processAPIdata(data,request,vm);
 			})
 		   	.append("title").text(function(d){return Tooltiptext(d);});
 
@@ -183,7 +184,7 @@ BDSVis.makePlot = function (data,request,vm) {
 	//Making Legend
 	var RemoveItem =  function(d) { //Function to remove an item from the legend
 			var so=vm.SelectedOpts[cvar]();
-			var ind=so.indexOf(vm.model.CodeLookUp(d,cvar));
+			var ind=so.indexOf(vm.model.IsContinuous(cvar)?(+d):d);
 			so.splice(ind,1);
 			vm.SelectedOpts[cvar](so);
 			d3.event.stopPropagation();
@@ -207,7 +208,7 @@ BDSVis.makePlot = function (data,request,vm) {
 		//.attr("y",function(d,i) {return 8+(symbolsize+5)*i;})
 		//.attr("y",function(d,i) {return 1.5*i+"em";})
 		.attr("dy",1+"em")
-		.text(function(d) {return d;});
+		.text(function(d) {return vm.model.NameLookUp(d,cvar);});
 	if ((cvarlist.length>1) && !vm.timelapse())
 		legendlabels.on("click",function(d) { RemoveItem(d); });
 		
@@ -252,7 +253,7 @@ BDSVis.makePlot = function (data,request,vm) {
 		//X-var should not be in the title, yvar is taken care of. Also check that the name exists in model.variables (e.g. yvar names don't)
 		if ((key!==xvar) && (key!==yvar) && (key!==vm.model.yvars) && !((key===vm.model.timevar) && (vm.timelapse())) && (vm.model.VarExists(key))) {
 			if (key!==cvar) ptitle+=vm.model.PrintTitle(data[0][key],key);
-			else if (cvarlist.length === 1) ptitle+=vm.model.PrintTitle(vm.model.CodeLookUp(data[0][key],key),key);
+			else if (cvarlist.length === 1) ptitle+=vm.model.PrintTitle(data[0][key],key);
 			else if (key!==vm.model.yvars) ptitle+=" by " + vm.model.NameLookUp(key,"var");
 		} 		
 	};
@@ -266,7 +267,7 @@ BDSVis.makePlot = function (data,request,vm) {
 	//X-axis label
 	pv.SetXaxisLabel(xvarr.name,d3.max(xAxisLabels[0].map(function(d) {return d.getBBox().y+d.getBBox().height;})));
 
-	pv.AdjustUIElements();
+	//pv.AdjustUIElements();
 	
 	// Timelapse animation
 	function updateyear(yr) {

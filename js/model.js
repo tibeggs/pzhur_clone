@@ -346,11 +346,11 @@ BDSVis.Model = {
 		else return this.dicts[v][d];
 	},
 
-	CodeLookUp : function(d,v) {
-		if (this.IsContinuous(v))
-			return d;
-		else return this.revdicts[v][d];
-	},
+	// CodeLookUp : function(d,v) {
+	// 	if (this.IsContinuous(v))
+	// 		return d;
+	// 	else return this.revdicts[v][d];
+	// },
 
 	VarExists : function (varname) {
 		if (this.variables.map(function(d) {return d.code}).indexOf(varname)!=-1) return true;

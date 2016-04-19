@@ -13,6 +13,7 @@ BDSVis.makeMap = function (data,request,vm) {
 	
 	var yvar=request[vm.model.yvars];
 	var xvar=vm.model.geomapvar;
+	var LUName = function(d) {return vm.model.NameLookUp(d[vm.model.geomapvar],vm.model.geomapvar);}
 
 	//Set graph title
 	//d3.select("#graphtitle").
@@ -66,7 +67,7 @@ BDSVis.makeMap = function (data,request,vm) {
 
 	//Put the states in geo_data in the same order as they are in data
 
-	var xir = data.map(function(d) {return d[vm.model.geomapvar]});
+	var xir = data.map(function(d) {return LUName(d)});
 	for (var i in vm.geo_data.features) {
 		var iir = xir.indexOf(vm.geo_data.features[i].properties.NAME);
 		if (iir === -1) {
@@ -95,11 +96,12 @@ BDSVis.makeMap = function (data,request,vm) {
 			.style('stroke-width', 0.3)
 			.style('stroke', 'white')
 			.on("click",function(d) {
-				var ind = vm.IncludedXvarValues[xvar].indexOf(vm.model[vm.model.geomapvar].filter(function(d1) {return d1.name===d[vm.model.geomapvar];})[0].code);
+				var ind = vm.IncludedXvarValues[xvar].indexOf(vm.model[vm.model.geomapvar].filter(function(d1) {return d1.name===LUName(d);})[0].code);
 				vm.IncludedXvarValues[xvar].splice(ind,1);
-				vm.getBDSdata();
+				BDSVis.processAPIdata(data,request,vm);
+				//vm.getBDSdata();
 			})
-			.append("title").text(function(d){return d[vm.model.geomapvar]+": "+d3.format(",")(d[yvar]);});
+			.append("title").text(function(d){return LUName(d)+": "+d3.format(",")(d[yvar]);});
 
 	//Making Legend
 	var legendsvg=vm.PlotView.legendsvg;
@@ -116,6 +118,8 @@ BDSVis.makeMap = function (data,request,vm) {
 	//legendtitle.selectAll("tspan").attr("x",function(d) { return (pv.legendwidth-this.getComputedTextLength())/2.; })
 	var titleheight = legendtitle.node().getBBox().height;
 	legendsvg=legendsvg.append("g").attr("transform","translate(0,"+titleheight+")");
+
+	var legNumFormat=d3.format(".3s");
 	
 	//Make the colorbar
 	legendsvg.selectAll("rect")
@@ -126,7 +130,7 @@ BDSVis.makeMap = function (data,request,vm) {
 		.attr("width",20)
 		.attr("height",colorbar.height/colorbar.nlevels+1)
 		.attr("y",function(d) {return hScale(d);})
-		.append("title").text(function(d){return BDSVis.util.NumFormat(+d,3);});
+		.append("title").text(function(d){return legNumFormat(d);});
 
 	//Make the labels of the colorbar
 	legendsvg.selectAll("text .leglabel")
@@ -138,10 +142,11 @@ BDSVis.makeMap = function (data,request,vm) {
 		.attr("font-size", colorbar.fontsize+"px")
 		.attr("x",colorbar.width+3)
 		.attr("y",function(d) {return .4*colorbar.fontsize+hScale(d);})
-		.text(function(d) {return(BDSVis.util.NumFormat(+d,3));});
+		.text(function(d) {return legNumFormat(d);});
 
 	pv.SetPlotTitle(ptitle);
-	pv.SetXaxisLabel("Click on states to toggle",30);
+	pv.lowerrightcornertext.text("Click on states to toggle");
+	pv.SetXaxisLabel(".",30);
 
 	// Timelapse animation
 	function updateyear(yr) {
@@ -160,7 +165,7 @@ BDSVis.makeMap = function (data,request,vm) {
 				.transition().duration(vm.timelapsespeed())
 				.style('fill', function(d) { return yScale(d[yvar]);})
 
-		mapg.selectAll('title').data(dataset).text(function(d){return d[vm.model.geomapvar]+": "+d3.format(",")(d[yvar]);});
+		mapg.selectAll('title').data(dataset).text(function(d){return LUName(d)+": "+d3.format(",")(d[yvar]);});
 	};
 
 	//Run timelapse animation

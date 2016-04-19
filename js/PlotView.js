@@ -90,6 +90,7 @@ BDSVis.PlotView = {
 				.attr("value",function(d) {return d.code})
 				.text(function(d) {return d.name})
 				.property("selected",function(d){return d.code===vm.xvar()});
+			//this.xaxisselector.append("option").property("selected",true).property("disabled",true).text("(Change X-axis)")
 			this.xaxisselector.on("change", function() { vm.setxvar(this.value);} );
 			if (vm.model.IsGroup(vm.xvar())) {
 				this.xgroupselector = d3.select("#xvarselector").append("select");
@@ -160,15 +161,18 @@ BDSVis.PlotView = {
 		//console.log(this.xaxislabel.node().getBoundingClientRect().top, this.xaxislabel.attr("y"));
 		//console.log(this.svgcont.node().getBoundingClientRect().top*1.+this.xaxislabel.attr("y")*0.);
 		//console.log(this.xaxislabel.node().getBoundingClientRect().top,window.scrollY)
+		var chartrect=this.svgcont.node().getBoundingClientRect();
+		var sellength=d3.select("#xvarselector").node().getBoundingClientRect().right-d3.select("#xvarselector").node().getBoundingClientRect().left;
 
 		d3.select("#xvarselector")
 			.style("position","absolute")
-			.style("left",(this.svgcont.node().getBoundingClientRect().left+window.scrollX+(+this.xaxislabel.attr("x"))+this.xaxislabel.node().getComputedTextLength()*1.5)+"px")
+			//d3.select("#xvarselector").style("left",(chartrect.left+window.scrollX+(+this.xaxislabel.attr("x"))+this.xaxislabel.node().getComputedTextLength()*1.5)+"px")
+			.style("left",(chartrect.left+window.scrollX+(this.margin.left+this.margin.right+this.width-sellength)/2.)+"px")
 			.style("top",(this.xaxislabel.node().getBoundingClientRect().top+window.scrollY)+"px");
 
 		d3.select("#cvarselector")
 				.style("position","absolute")
-				.style("left",(this.svgcont.node().getBoundingClientRect().left+window.scrollX+this.width+this.margin.left+ this.margin.right)+"px")
+				.style("left",(chartrect.left+window.scrollX+this.width+this.margin.left+ this.margin.right)+"px")
 				.style("top",(this.svg.node().getBoundingClientRect().top+window.scrollY)+"px");
 
 		d3.select("#logbutton")

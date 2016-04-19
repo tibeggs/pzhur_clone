@@ -15,21 +15,23 @@ BDSVis.TableView = {
 			xvarvalues
 				.map(function(xv){ return data.filter(function(d) {return d[xvar]===xv;});}) //Map a row of yvar values to each xvar value
 				.map(function(dxv){
-					return d3.merge([ [dxv[0][xvar]], //Add the xvar value as a first element of the row
+					return d3.merge([ [vm.model.NameLookUp(dxv[0][xvar],xvar)], //Add the xvar value as a first element of the row
 							cvarvalues.map(function(cv){ //Map a yvar value to each cvar/xvar values pair (or, a column of yvar values to each cvar value)
 								return dxv.filter(function(d) {return d[cvar]===cv})
 										.map(function(d) {return d.value});
 							})])
 				})
 		);
-		vm.data.unshift(d3.merge([[vm.model.NameLookUp(xvar,"var") + " (row) \\ " +  vm.model.NameLookUp(cvar,"var") + " (col)"],cvarvalues])); //Header line: the xvar values + all the cvar values
+		vm.data.unshift(d3.merge(
+			[[vm.model.NameLookUp(xvar,"var") + " (row) \\ " +  vm.model.NameLookUp(cvar,"var") + " (col)"],
+				cvarvalues.map(function(d){return vm.model.NameLookUp(d,cvar)})])); //Header line: the xvar values + all the cvar values
 		
 		// //Data as table output via D3
 		// var datashowtable = d3.select("#graphdata");
 		// datashowtable.selectAll("*").remove()
 
 		// datashowtable.append("thead")
-		// 	.selectAll("th").data(d3.merge([[vm.model.NameLookUp(xvar,"var")],cvarvalues]))
+		// 	.selectAll("th").data(d3.merge([[vm.model.NameLookUp(xvar,"var")],cvarvalues.map(function(d){return vm.model.NameLookUp(d,cvar)})]))
 		// 	.enter().append("th").text(function(d){return d});
 
 		// datashowtable.append("tbody")
@@ -39,7 +41,7 @@ BDSVis.TableView = {
 		// 	.enter().append("tr")
 		// 		.selectAll("td")
 		// 		.data(function(dxv) {
-		// 			return d3.merge([ [dxv[0][xvar]], //Add the xvar value as a first element of the row
+		// 			return d3.merge([ [vm.model.NameLookUp(dxv[0][xvar],xvar)], //Add the xvar value as a first element of the row
 		// 							cvarvalues.map(function(cv){ //Map a yvar value to each cvar/xvar values pair (or, a column of yvar values to each cvar value)
 		// 								return dxv.filter(function(d) {return d[cvar]===cv})
 		// 										.map(function(d) {return d.value});
