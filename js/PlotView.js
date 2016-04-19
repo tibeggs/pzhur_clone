@@ -158,22 +158,23 @@ BDSVis.PlotView = {
 
 	AdjustUIElements : function() {
 		//console.log(this.xaxislabel.node().getBoundingClientRect().top, this.xaxislabel.attr("y"));
-		console.log(this.svgcont.node().getBoundingClientRect().top*1.+this.xaxislabel.attr("y")*0.);
+		//console.log(this.svgcont.node().getBoundingClientRect().top*1.+this.xaxislabel.attr("y")*0.);
+		//console.log(this.xaxislabel.node().getBoundingClientRect().top,window.scrollY)
 
 		d3.select("#xvarselector")
 			.style("position","absolute")
-			.style("left",(this.svgcont.node().getBoundingClientRect().left+(+this.xaxislabel.attr("x"))+this.xaxislabel.node().getComputedTextLength()*1.5)+"px")
-			.style("top",(this.svgcont.node().getBoundingClientRect().top*1.+this.xaxislabel.attr("y")*1.)+"px");
+			.style("left",(this.svgcont.node().getBoundingClientRect().left+window.scrollX+(+this.xaxislabel.attr("x"))+this.xaxislabel.node().getComputedTextLength()*1.5)+"px")
+			.style("top",(this.xaxislabel.node().getBoundingClientRect().top+window.scrollY)+"px");
 
 		d3.select("#cvarselector")
 				.style("position","absolute")
-				.style("left",(this.svgcont.node().getBoundingClientRect().left+this.width+this.margin.left+ this.margin.right)+"px")
-				.style("top",(this.svg.node().getBoundingClientRect().top)+"px");
+				.style("left",(this.svgcont.node().getBoundingClientRect().left+window.scrollX+this.width+this.margin.left+ this.margin.right)+"px")
+				.style("top",(this.svg.node().getBoundingClientRect().top+window.scrollY)+"px");
 
 		d3.select("#logbutton")
 			.style("position","absolute")
-			.style("left",(this.yaxislabel.node().getBoundingClientRect().left)+"px")
-			.style("top",(this.xaxislabel.node().getBoundingClientRect().top)+"px")
+			.style("left",(this.yaxislabel.node().getBoundingClientRect().left+window.scrollX)+"px")
+			.style("top",(this.xaxislabel.node().getBoundingClientRect().top+window.scrollY)+"px")
 
 	}
 };
