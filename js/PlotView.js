@@ -157,11 +157,13 @@ BDSVis.PlotView = {
 	},
 
 	AdjustUIElements : function() {
+		//console.log(this.xaxislabel.node().getBoundingClientRect().top, this.xaxislabel.attr("y"));
+		console.log(this.svgcont.node().getBoundingClientRect().top*1.+this.xaxislabel.attr("y")*0.);
 
 		d3.select("#xvarselector")
 			.style("position","absolute")
 			.style("left",(this.svgcont.node().getBoundingClientRect().left+(+this.xaxislabel.attr("x"))+this.xaxislabel.node().getComputedTextLength()*1.5)+"px")
-			.style("top",(this.xaxislabel.node().getBoundingClientRect().top)+"px");
+			.style("top",(this.svgcont.node().getBoundingClientRect().top*1.+this.xaxislabel.attr("y")*1.)+"px");
 
 		d3.select("#cvarselector")
 				.style("position","absolute")
