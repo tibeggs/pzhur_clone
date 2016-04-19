@@ -24,10 +24,6 @@
   fill: none;
 }
 
-.plotdot {
-  r: 5;
-}
-
 .plotbar {
   stroke: white;
   stroke-width: .1;

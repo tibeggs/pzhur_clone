@@ -141,6 +141,7 @@ BDSVis.makePlot = function (data,request,vm) {
 	    	.data(data)
 	  		.enter().append("circle").attr("class","plotdot")
 	  		.attr("fill", function(d) {return colors(d[cvar]);})
+			.attr("r",5)
 	    	.attr("cx", function(d) { return xScale(d[xvar]); })
 	    	.attr("cy", function(d) { return yScale(d[yvar]); })
 	    	.append("title").text(function(d){return Tooltiptext(d);});
