@@ -86,7 +86,7 @@ BDSVis.processAPIdata = function(data,request,vm) {
 	//"vm" is the reference to ViewModel
 	
  	//Filter the obtained data, so that only what is requested remains (API does not filter all the variables)
- 		
+ 	dataunfiltered = data.slice(0);
 	for (var key in request) {
     	if ((key!==vm.model.yvars) && //(key!==xvar) && 
     		(key!=="cvar") &&
@@ -117,6 +117,6 @@ BDSVis.processAPIdata = function(data,request,vm) {
 	if (vm.geomap())
 		BDSVis.makeMap(data,request,vm);
 	else 
-		BDSVis.makePlot(data,request,vm);
+		BDSVis.makePlot(data,request,vm,dataunfiltered);
 };
 

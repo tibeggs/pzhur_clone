@@ -83,7 +83,8 @@ BDSVis.ViewModel = function() {
 
 	// The reference to function that forms and sends API request and gets data (apirequest.js)
 	this.getBDSdata = function () {
-		return BDSVis.getAPIdata(vm);
+		//return 
+		BDSVis.getAPIdata(vm);
 	};
 
 	//SHOW DATA BUTTON

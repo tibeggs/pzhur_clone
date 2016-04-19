@@ -1,7 +1,7 @@
 var BDSVis = BDSVis || {};
 
 //This function makes d3js plot, either a bar chart or scatterplot
-BDSVis.makePlot = function (data,request,vm) {
+BDSVis.makePlot = function (data,request,vm,dataunfiltered) {
 	//"vm" is the reference to ViewModel
 
 	var pv=vm.PlotView;
@@ -18,12 +18,9 @@ BDSVis.makePlot = function (data,request,vm) {
 	var xvarr=vm.model.LookUpVar(xvar);
 
 	var YvarsAsLegend = (cvar === vm.model.yvars);
-	
-	//var request=vm.APIrequest();
 
 	//If yvars is also a c-variable, then we got melted data from updateBDSdata function, with all yvars contained in the "value" column
 	var yvar=YvarsAsLegend?"value":request[vm.model.yvars];
-
 
 	//Setting D3 scales
 	var xScale, yScale, yScale1, ymin, y0;
@@ -75,9 +72,9 @@ BDSVis.makePlot = function (data,request,vm) {
 
 	var Tooltiptext = function(d) {
 		var ttt=YvarsAsLegend?d[vm.model.yvars]:vm.model.NameLookUp(yvar,vm.model.yvars);
-		ttt+=": "+d3.format(",")(d[yvar])+"\n"+xvarr.name+": "+d[xvar];
+		ttt+=": "+d3.format(",")(d[yvar])+"\n"+xvarr.name+": "+vm.model.NameLookUp(d[xvar],xvar);
 		if (!YvarsAsLegend)
-			ttt+="\n"+cvarr.name+": "+d[cvar];
+			ttt+="\n"+cvarr.name+": "+vm.model.NameLookUp(d[cvar],cvar);
 		return ttt;
 	};
 
@@ -114,9 +111,10 @@ BDSVis.makePlot = function (data,request,vm) {
 	// function refresh() {
 	//   svg.select(".x .axis").call(xAxis);
 	//   svg.select(".y .axis").call(yAxis);
+	//   BDSVis.makePlot(data,request,vm);
 	// };
 
-	//svg.call(d3.behavior.zoom().x(xScale).y(yScale).on("zoom", refresh))
+	// svg.call(d3.behavior.zoom().x(xScale).y(yScale).on("zoom", refresh))
 
 	if (vm.model.IsContinuous(xvarr)) {
 		//Make a scatter plot if x-variable is continuous
@@ -169,7 +167,6 @@ BDSVis.makePlot = function (data,request,vm) {
 		   	.attr("y",function(d) {return yScale(Math.max(0,+d[yvar]))})
 		   	.attr("height", function(d) {return Math.abs(yScale(y0)-yScale(+d[yvar]))})
 		   	.on("click",function(d) {
-		   		//debugger;
 				var ind = vm.IncludedXvarValues[xvar].indexOf(d[xvar]);
 				vm.IncludedXvarValues[xvar].splice(ind,1);
 				BDSVis.processAPIdata(data,request,vm);
@@ -179,15 +176,18 @@ BDSVis.makePlot = function (data,request,vm) {
 		pv.lowerrightcornertext.text("Click on bar to remove category");
 	};
 
-	
-
 	//Making Legend
 	var RemoveItem =  function(d) { //Function to remove an item from the legend
-			var so=vm.SelectedOpts[cvar]();
-			var ind=so.indexOf(vm.model.IsContinuous(cvar)?(+d):d);
-			so.splice(ind,1);
-			vm.SelectedOpts[cvar](so);
-			d3.event.stopPropagation();
+			// var so=vm.SelectedOpts[cvar]();
+			// var ind=so.indexOf(vm.model.IsContinuous(cvar)?(+d):d);
+			// so.splice(ind,1);
+			// vm.SelectedOpts[cvar](so);
+			// d3.event.stopPropagation();
+			console.log(vm.SelectedOpts[cvar]());
+			var ind=request[cvar].indexOf(vm.model.IsContinuous(cvar)?(+d):d);
+			request[cvar].splice(ind,1);
+			console.log(vm.SelectedOpts[cvar]());
+			BDSVis.processAPIdata(dataunfiltered,request,vm);
 		};
 
 	var legendsvg=pv.legendsvg;
@@ -246,8 +246,6 @@ BDSVis.makePlot = function (data,request,vm) {
 	//Set the title of the plot
 	var ptitle=(YvarsAsLegend && request[vm.model.yvars].length>1)?("Various "+vm.model.yvars+"s"):(vm.model.NameLookUp(request[vm.model.yvars],vm.model.yvars)); //If many yvars say "various", otherwise the yvar name
 	
-	
-
 	//Continue forming title
 	for (var key in data[0]) {
 		//X-var should not be in the title, yvar is taken care of. Also check that the name exists in model.variables (e.g. yvar names don't)
