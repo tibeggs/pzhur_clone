@@ -15,7 +15,7 @@ BDSVis.getAPIdata = function (vm) {
 
 		if (varr.code===request.xvar) request[varr.code]=vm.IncludedXvarValues[varr.code]; //For x-var take the included values
 		else if (varr.code!==request.cvar) request[varr.code]=[vm.SelectedOpts[varr.code]()[0]]; //If it's not c- or x-var only take first selected option
-		else request[varr.code] = vm.geomap()?[vm.SelectedOpts[varr.code]()[0]]:vm.SelectedOpts[varr.code](); //For the c-var take all selected if not in geo map regime
+		else request[varr.code] = vm.geomap()?[vm.SelectedOpts[varr.code]()[0]]:vm.SelectedOpts[varr.code]().slice(0); //For the c-var take all selected if not in geo map regime
 	
 	});
 		
@@ -84,9 +84,9 @@ BDSVis.getAPIdata = function (vm) {
 //Change codes into names, melt data if many yvars are chosen (= the yvar is also the cvar), call functions making table, map or plots.
 BDSVis.processAPIdata = function(data,request,vm) {
 	//"vm" is the reference to ViewModel
-	console.log(request[request.xvar]);
+	
  	//Filter the obtained data, so that only what is requested remains (API does not filter all the variables)
- 	dataunfiltered = data.slice(0);
+ 	vm.dataunfiltered = data.slice(0);
 	for (var key in request) {
     	if ((key!==vm.model.yvars) && //(key!==xvar) && 
     		(key!=="cvar") &&
@@ -115,8 +115,8 @@ BDSVis.processAPIdata = function(data,request,vm) {
 	vm.TableView.makeDataTable(data,request.cvar,request.xvar,vm); //Make the table displaying the data
 
 	if (vm.geomap())
-		BDSVis.makeMap(data,request,vm,dataunfiltered);
+		BDSVis.makeMap(data,request,vm);
 	else 
-		BDSVis.makePlot(data,request,vm,dataunfiltered);
+		BDSVis.makePlot(data,request,vm);
 };
 

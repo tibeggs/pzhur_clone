@@ -12,8 +12,9 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	height=pv.height;
 	
 	var yvar=request[vm.model.yvars];
-	var xvar=vm.model.geomapvar;
-	var LUName = function(d) {return vm.model.NameLookUp(d[vm.model.geomapvar],vm.model.geomapvar);}
+	var xvar=request.xvar;
+	debugger;
+	var LUName = function(d) {return vm.model.NameLookUp(d[xvar],xvar);}
 
 	//Set graph title
 	//d3.select("#graphtitle").
@@ -22,7 +23,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	var ptitle=vm.model.NameLookUp(yvar,vm.model.yvars); //If many yvars say "various", otherwise the yvar name
 	for (var key in data[0]) {
 		//X-var should not be in the title, yvar is taken care of. Also check that the name exists in model.variables (e.g. yvar names don't)
-		if ((key!==vm.model.geomapvar) && (key!==vm.model.yvars) && !((key===vm.model.timevar) && (vm.timelapse())) && (vm.model.VarExists(key)))
+		if ((key!==xvar) && (key!==vm.model.yvars) && !((key===vm.model.timevar) && (vm.timelapse())) && (vm.model.VarExists(key)))
 			ptitle+=vm.model.PrintTitle(data[0][key],key);
 	};
 
@@ -87,20 +88,20 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 			.style('stroke', 'black')
 			.style('stroke-width', 0.5)
 			.on("click",function(d) {
-				var xvcode = vm.model[vm.model.geomapvar].filter(function(d1) {return d1.name===d.properties.NAME;})[0].code;
+				var xvcode = vm.model[xvar].filter(function(d1) {return d1.name===d.properties.NAME;})[0].code;
 				vm.IncludedXvarValues[xvar].push(xvcode);
 				//request[xvar].push(xvcode);
-				//BDSVis.processAPIdata(data,request,vm,dataunfiltered);
-				vm.getBDSdata();
+				BDSVis.processAPIdata(vm.dataunfiltered,request,vm);
+				//vm.getBDSdata();
 			})
 			.data(data)
 			.style('fill', function(d) {return yScale(d[yvar]);})
 			.style('stroke-width', 0.3)
 			.style('stroke', 'white')
 			.on("click",function(d) {
-				var ind = vm.IncludedXvarValues[xvar].indexOf(vm.model[vm.model.geomapvar].filter(function(d1) {return d1.name===LUName(d);})[0].code);
+				var ind = vm.IncludedXvarValues[xvar].indexOf(vm.model[xvar].filter(function(d1) {return d1.name===LUName(d);})[0].code);
 				vm.IncludedXvarValues[xvar].splice(ind,1);
-				BDSVis.processAPIdata(data,request,vm,dataunfiltered);
+				BDSVis.processAPIdata(vm.dataunfiltered,request,vm);
 				//vm.getBDSdata();
 			})
 			.append("title").text(function(d){return LUName(d)+": "+d3.format(",")(d[yvar]);});
@@ -156,12 +157,8 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 		curyearmessage.text(yr); //Display year
 		//pv.maintitle.text("");
 		var dataset=datafull.filter(function(d) {return +d[vm.model.timevar]===yr}); //Select data corresponding to the year
-		vm.TableView.makeDataTable(dataset,vm.model.yvars,xvar,vm);
-		//Change the data that is displayed raw as a table
-		// var vmdata=vm.data();
-		// for (var i=1; i<dataset.length; i++)
-		// 	vmdata[i][1]=dataset[i][yvar];
-		// vm.data(vmdata);
+		vm.TableView.makeDataTable(dataset,vm.model.yvars,xvar,vm); //Change the data that is displayed raw as a table
+		
 		map = mapg.selectAll('path')
 				.data(dataset)
 				.transition().duration(vm.timelapsespeed())
@@ -174,7 +171,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	if (vm.timelapse()) {
 		var iy=Math.max(timerange[0], vm.timelapsefrom());
 		var step=vm.model.LookUpVar(vm.model.timevar).range[2];
-		var curyearmessage=d3.select("#chartsvg").append("text").attr("x",0).attr("y",height*.5).attr("font-size",100).attr("fill-opacity",.3);
+		var curyearmessage=pv.svg.append("text").attr("x",0).attr("y",height*.5).attr("font-size",100).attr("fill-opacity",.3);
 		var intervalfunction = function() {
   			updateyear(iy);
   			if (iy<Math.min(timerange[1],vm.timelapseto())) iy+=step; else iy=Math.max(timerange[0], vm.timelapsefrom());

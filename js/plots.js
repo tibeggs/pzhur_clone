@@ -1,7 +1,7 @@
 var BDSVis = BDSVis || {};
 
 //This function makes d3js plot, either a bar chart or scatterplot
-BDSVis.makePlot = function (data,request,vm,dataunfiltered) {
+BDSVis.makePlot = function (data,request,vm) {
 	//"vm" is the reference to ViewModel
 
 	var pv=vm.PlotView;
@@ -178,16 +178,9 @@ BDSVis.makePlot = function (data,request,vm,dataunfiltered) {
 
 	//Making Legend
 	var RemoveItem =  function(d) { //Function to remove an item from the legend
-			// var so=vm.SelectedOpts[cvar]();
-			// var ind=so.indexOf(vm.model.IsContinuous(cvar)?(+d):d);
-			// so.splice(ind,1);
-			// vm.SelectedOpts[cvar](so);
-			// d3.event.stopPropagation();
-			console.log(vm.SelectedOpts[cvar]());
 			var ind=request[cvar].indexOf(vm.model.IsContinuous(cvar)?(+d):d);
 			request[cvar].splice(ind,1);
-			console.log(vm.SelectedOpts[cvar]());
-			BDSVis.processAPIdata(dataunfiltered,request,vm);
+			BDSVis.processAPIdata(vm.dataunfiltered,request,vm);
 		};
 
 	var legendsvg=pv.legendsvg;
@@ -280,21 +273,21 @@ BDSVis.makePlot = function (data,request,vm,dataunfiltered) {
 		
 		//The data4bars is only needed for smooth transition in animations. There have to be rectangles of 0 height for missing data. data4bars is created
 		//empty outside this function. The following loop fills in / updates to actual data values from current year
-		for (var i in data4bars) data4bars[i][yvar]=0; //Set every bar to 0 so that missing bars disappear
-			
-		for (var i in dataset) { //Set the values of existing bars
-			data4bars[xScale.domain().indexOf(dataset[i][xvar])*cvarlist.length
-					+cvarlist.indexOf(dataset[i][cvar])][yvar]=+dataset[i][yvar];
-		};
+
+		d3.merge(data4bars).forEach(function(d) {d[yvar]=0;}); //Set every bar to 0 so that missing bars disappear
+
+		dataset.forEach( function(d) { //Set the values of existing bars
+			data4bars [ xScale.domain().indexOf(d[xvar]) ] [ cvarlist.indexOf(d[cvar]) ][yvar]=+d[yvar];
+		});
 		
-  		var bars=svg.selectAll("rect").data(data4bars);
+  		var bars=svg.selectAll("rect").data(d3.merge(data4bars));
 
   		// UPDATE
 		  // Update old elements as needed.
 		  
 		bars
 		   	.attr("fill",  function(d) {return colors(d[cvar])})
-		   	.attr("x",function(d) {return xScale(d[xvar])+barwidth*d.icvar;})
+		   	.attr("x",function(d) {return xScale(d[xvar])+barwidth*cvarlist.indexOf(d[cvar]);})
 		   	.transition().duration(vm.timelapsespeed())
 		   	.attr("y",function(d) { return yScale(Math.max(0,+d[yvar]));})
 		   	.attr("height",function(d) {return Math.abs(yScale(y0)-yScale(+d[yvar]));});
@@ -303,22 +296,14 @@ BDSVis.makePlot = function (data,request,vm,dataunfiltered) {
 
 	//Run timelapse animation
 	if (vm.timelapse()) {
-		//These loops are only needed for smooth transition in animations. There have to be bars of 0 height for missing data.
 		
-		var data4bars=[]
-		for (var i in xScale.domain())
-			for (var j in cvarlist)
-				{
-					var datum4bar={}
-					datum4bar[xvar]=xScale.domain()[i];
-					datum4bar[yvar]=0;
-					datum4bar[cvar]=cvarlist[j];
-					datum4bar.icvar=j;
-					data4bars.push(datum4bar);
-				};
+		//This array is only needed for smooth transition in animations. There have to be bars of 0 height for missing data.
+		//Create array with entry for all values of xvar and all values of cvar.
+		var data4bars = xScale.domain().map(function(xv) {return cvarlist.map(function(cv) {return (obj={}, obj[xvar]=xv, obj[cvar]=cv,obj);});});
 
+		//Create bars for every xvar/cvar combination
 		svg.selectAll("rect").remove();
-		svg.selectAll("rect").data(data4bars).enter().append("rect").attr("class", "plotbar").attr("width", barwidth);
+		svg.selectAll("rect").data(d3.merge(data4bars)).enter().append("rect").attr("class", "plotbar").attr("width", barwidth);
 		
 		var timerange = d3.extent(data, function(d) { return +d[vm.model.timevar] });
 		var step=vm.model.LookUpVar(vm.model.timevar).range[2];
