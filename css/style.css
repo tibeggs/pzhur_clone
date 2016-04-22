@@ -2,6 +2,11 @@
   font: 10px sans-serif;
 }
 
+rect.zoom {
+  stroke: steelblue;
+  fill: none;
+}
+
 .svguibox {
   stroke-width: 1;
   stroke: #000;

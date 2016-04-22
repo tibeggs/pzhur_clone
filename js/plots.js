@@ -1,7 +1,7 @@
 var BDSVis = BDSVis || {};
 
 //This function makes d3js plot, either a bar chart or scatterplot
-BDSVis.makePlot = function (data,request,vm) {
+BDSVis.makePlot = function (data,request,vm,limits) {
 	//"vm" is the reference to ViewModel
 
 	var pv=vm.PlotView;
@@ -49,6 +49,11 @@ BDSVis.makePlot = function (data,request,vm) {
 		ymin = Math.min(0,d3.min(data, function(d) { return +d[yvar]; })); //Bars should be plotted at least from 0.
 		yScale = d3.scale.linear().domain([ymin, d3.max(data, function(d) { return +d[yvar]; })])
 		.range([height,0]);
+	}
+
+	if (limits!==undefined) {
+		yScale.domain([limits[2],limits[3]])
+		xScale.domain([limits[0],limits[1]])
 	}
 
 			
@@ -106,16 +111,60 @@ BDSVis.makePlot = function (data,request,vm) {
 
 	svg.append("g")
 	.attr("class", "y axis")
-	.call(yAxis); 
+	.call(yAxis);
+
+	svg.append("rect")
+    .attr("width", width)
+    .attr("height", height)
+    .attr("opacity", 0); 
 
 	// function refresh() {
-	//   svg.select(".x .axis").call(xAxis);
-	//   svg.select(".y .axis").call(yAxis);
-	//   BDSVis.makePlot(data,request,vm);
-	// };
+	// 	console.log(this)
+	// 	  svg.select(".x .axis").call(xAxis);
+	// 	  svg.select(".y .axis").call(yAxis);
+	// 	  //BDSVis.makePlot(data,request,vm);
+	// 	};
 
-	// svg.call(d3.behavior.zoom().x(xScale).y(yScale).on("zoom", refresh))
+	// var zoom = d3.behavior.zoom().x(xScale).y(yScale).on("zoom", console.log("AAA"));
+	svg.on("mousedown", function() {
 
+      var e = this,
+          origin = d3.mouse(e),
+          rect = svg.append("rect").attr("class", "zoom");
+          console.log(origin)
+
+      d3.select("body").classed("noselect", true);
+      origin[0] = Math.max(0, Math.min(width, origin[0]));
+      origin[1] = Math.max(0, Math.min(height, origin[1]));
+      d3.select(window)
+          .on("mousemove.zoomRect", function() {
+
+            var m = d3.mouse(e);
+            m[0] = Math.max(0, Math.min(width, m[0]));
+            m[1] = Math.max(0, Math.min(height, m[1]));
+            rect.attr("x", Math.min(origin[0], m[0]))
+                .attr("y", Math.min(origin[1], m[1]))
+                .attr("width", Math.abs(m[0] - origin[0]))
+                .attr("height", Math.abs(m[1] - origin[1]));
+          })
+          .on("mouseup.zoomRect", function() {
+            d3.select(window).on("mousemove.zoomRect", null).on("mouseup.zoomRect", null);
+            d3.select("body").classed("noselect", false);
+            var m = d3.mouse(e);
+            m[0] = Math.max(0, Math.min(width, m[0]));
+            m[1] = Math.max(0, Math.min(height, m[1]));
+            rect.remove();
+            if (m[0] !== origin[0] && m[1] !== origin[1]) {
+            	 BDSVis.makePlot(data,request,vm,d3.merge([[origin[0], m[0]].map(xScale.invert).sort(),[origin[1], m[1]].map(yScale.invert).sort()]))
+            }
+          }, true);
+      d3.event.stopPropagation();
+    });
+
+
+
+	
+	
 	if (vm.model.IsContinuous(xvarr)) {
 		//Make a scatter plot if x-variable is continuous
 
@@ -145,12 +194,8 @@ BDSVis.makePlot = function (data,request,vm) {
 	    	.attr("cy", function(d) { return yScale(d[yvar]); })
 	    	.append("title").text(function(d){return Tooltiptext(d);});
 
-    	//d3.select("body").append("text").text(JSON.stringify(data));
-
 	} else {
-		//Make a bar chart if x-variable is categorical
-
-		
+		//Make a bar chart if x-variable is categorical		
 		//Number of bars is number of categories in the legend, and barwidth is determined from that
 		var nbars=cvarlist.length;
 		var barwidth= xScale.rangeBand()/nbars;
