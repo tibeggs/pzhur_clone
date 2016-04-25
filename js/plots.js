@@ -52,7 +52,7 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 	}
 
 	if (limits!==undefined) {
-		yScale.domain([limits[2],limits[3]])
+		(vm.logscale()?yScale1:yScale).domain([limits[2],limits[3]])
 		xScale.domain([limits[0],limits[1]])
 	}
 
@@ -144,7 +144,6 @@ BDSVis.makePlot = function (data,request,vm,limits) {
       var e = this,
           origin = d3.mouse(e),
           rect = svg.append("rect").attr("class", "zoom");
-          console.log(origin)
 
       d3.select("body").classed("noselect", true);
       origin[0] = Math.max(0, Math.min(width, origin[0]));
@@ -168,7 +167,8 @@ BDSVis.makePlot = function (data,request,vm,limits) {
             m[1] = Math.max(0, Math.min(height, m[1]));
             rect.remove();
             if (m[0] !== origin[0] && m[1] !== origin[1]) {
-            	 BDSVis.makePlot(data,request,vm,d3.merge([[origin[0], m[0]].map(xScale.invert).sort(),[origin[1], m[1]].map(yScale.invert).sort()]))
+            	//debugger;
+            	BDSVis.makePlot(data,request,vm,d3.merge([[origin[0], m[0]].map(xScale.invert).sort(),[origin[1], m[1]].map((vm.logscale()?yScale1:yScale).invert).sort()]))
             }
           }, true);
       d3.event.stopPropagation();
