@@ -49,12 +49,18 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 		ymin = Math.min(0,d3.min(data, function(d) { return +d[yvar]; })); //Bars should be plotted at least from 0.
 		yScale = d3.scale.linear().domain([ymin, d3.max(data, function(d) { return +d[yvar]; })])
 		.range([height,0]);
-	}
+	};
 
 	if (limits!==undefined) {
-		(vm.logscale()?yScale1:yScale).domain([limits[2],limits[3]])
-		xScale.domain([limits[0],limits[1]])
-	}
+		if (vm.model.IsContinuous(xvarr)) {
+			(vm.logscale()?yScale1:yScale).domain([limits[2],limits[3]]);
+			xScale.domain([limits[0],limits[1]]);
+		} else {
+			(vm.logscale()?yScale1:yScale).domain([ymin,limits[3]]);
+			xScale.domain(xScale.domain().slice(limits[0],limits[1]));
+		}
+		
+	};
 
 			
 	//Set up colorscale
@@ -167,8 +173,13 @@ BDSVis.makePlot = function (data,request,vm,limits) {
             m[1] = Math.max(0, Math.min(height, m[1]));
             rect.remove();
             if (m[0] !== origin[0] && m[1] !== origin[1]) {
-            	//debugger;
-            	BDSVis.makePlot(data,request,vm,d3.merge([[origin[0], m[0]].map(xScale.invert).sort(),[origin[1], m[1]].map((vm.logscale()?yScale1:yScale).invert).sort()]))
+            	if (vm.model.IsContinuous(xvarr))
+            		BDSVis.makePlot(data,request,vm,d3.merge([[origin[0], m[0]].map(xScale.invert).sort(),[origin[1], m[1]].map((vm.logscale()?yScale1:yScale).invert).sort()]))
+            	else {
+            		var left=xScale.domain().map(function(d) {return xScale(d)<d3.min([origin[0], m[0]]);}).indexOf(false);
+            		var right=xScale.domain().map(function(d) {return xScale(d)>d3.max([origin[0], m[0]]);}).indexOf(true);
+           			BDSVis.makePlot(data,request,vm,d3.merge([[left,right],[origin[1], m[1]].map((vm.logscale()?yScale1:yScale).invert).sort()]));
+            	}
             }
           }, true);
       d3.event.stopPropagation();
@@ -215,7 +226,7 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 
 		var bars=
 		chart.selectAll("rect")
-			.data(data);
+			.data(data.filter(function(d) {return xScale.domain().indexOf(d[xvar])>-1}));
 
 		bars.enter().append("rect")
 		   	.attr("fill",  function(d) {return colors(d[cvar]);})
