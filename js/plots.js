@@ -138,10 +138,10 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 	        .attr("id", "clip")
 	        .append("svg:rect")
 	        .attr("id", "clip-rect")
-	        .attr("x", "0")
-	        .attr("y", "0")
-	        .attr("width", width)
-	        .attr("height", height);
+	        .attr("x", "-5")
+	        .attr("y", "-5")
+	        .attr("width", width+10)
+	        .attr("height", height+10);
 
 	var chart=svg.append("g").attr("clip-path", "url(#clip)");
 

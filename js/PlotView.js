@@ -60,6 +60,7 @@ BDSVis.PlotView = {
 		d3.select("#xvarselector").selectAll("select").remove();
 		d3.select("#cvarselector").selectAll("select").remove();
 		d3.select("#logbutton").selectAll("*").remove();
+		d3.select("#resetzoom").selectAll("*").remove();
 		if (!vm.timelapse()) { //Add UI controls is not in Time Lapse regime
 
 			//Logscale Checkbox
@@ -82,6 +83,15 @@ BDSVis.PlotView = {
 				//vm.getBDSdata();
 				//d3.event.stopPropagation();
 			});
+
+			//Reset Zoom button
+			this.resetzoom = d3.select("#resetzoom")
+				.append("button").text("Reset Zoom").on("click", function() {
+				if (vm.geomap())
+					BDSVis.makeMap(data,request,vm);
+				else 
+					BDSVis.makePlot(data,request,vm);
+			})
 
 			//X-axis variable selector			
 			this.xaxisselector = d3.select("#xvarselector").append("select");
@@ -178,6 +188,11 @@ BDSVis.PlotView = {
 		d3.select("#logbutton")
 			.style("position","absolute")
 			.style("left",(this.yaxislabel.node().getBoundingClientRect().left+window.scrollX)+"px")
+			.style("top",(this.xaxislabel.node().getBoundingClientRect().top+window.scrollY)+"px")
+
+		d3.select("#resetzoom")
+			.style("position","absolute")
+			.style("left",(d3.select("#logbutton").node().getBoundingClientRect().right+window.scrollX+20)+"px")
 			.style("top",(this.xaxislabel.node().getBoundingClientRect().top+window.scrollY)+"px")
 
 	}
