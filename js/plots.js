@@ -102,7 +102,7 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 	if (vm.logscale()) yAxis.ticks(5,d3.format(",d"));
 
 	svg.append("g")
-		.attr("class", "x axis")
+		.attr("class", "x0 axis")
 		.attr("transform", "translate(0," + yScale(y0) + ")")
 		.call(xAxis0);
 
@@ -124,29 +124,33 @@ BDSVis.makePlot = function (data,request,vm,limits) {
     .attr("height", height)
     .attr("opacity", 0); 
 
-	// function refresh() {
-	// 	console.log(this)
-	// 	  svg.select(".x .axis").call(xAxis);
-	// 	  svg.select(".y .axis").call(yAxis);
-	// 	  //BDSVis.makePlot(data,request,vm);
-	// 	};
+	function refresh() {
+		var t="translate(" + d3.event.translate + ")"+" scale(" + d3.event.scale + ")";
+		svg.select(".x.axis").call(xAxis);
+		svg.select(".y").call(yAxis);
+		svg.select(".x0").call(xAxis0);
+		d3.selectAll("path.plotline").attr("transform", t);
+		d3.selectAll("circle.plotdot").attr("transform", t);
+		d3.selectAll("rect.plotbar").attr("transform", t);
+		//BDSVis.makePlot(data,request,vm);
+	};
 
-	// var zoom = d3.behavior.zoom().x(xScale).y(yScale).on("zoom", console.log("AAA"));
-
+	if (!vm.zoombyrect())
+		svg.call(d3.behavior.zoom().x(xScale).y(vm.logscale()?yScale1:yScale).on("zoom",  refresh));
 	
 	svg.append("defs").append("svg:clipPath")
 	        .attr("id", "clip")
 	        .append("svg:rect")
 	        .attr("id", "clip-rect")
-	        .attr("x", "-5")
+	        .attr("x", "0")
 	        .attr("y", "-5")
-	        .attr("width", width+10)
-	        .attr("height", height+10);
+	        .attr("width", width+5)
+	        .attr("height", height+5);
 
 	var chart=svg.append("g").attr("clip-path", "url(#clip)");
 
 	svg.on("mousedown", function() {
-
+		if (!vm.zoombyrect()) return;
       var e = this,
           origin = d3.mouse(e),
           rect = svg.append("rect").attr("class", "zoom");
@@ -198,7 +202,7 @@ BDSVis.makePlot = function (data,request,vm,limits) {
     	.y(function(d) { return yScale(d[yvar]); });
 
     	
-    	chart.selectAll("path .plotline")
+    	chart.selectAll("path.plotline")
     		// .data(cvarlist.map(function(d) {
     		// 	return {cvar: d, values: data.filter(function(d1) {return d1[cvar]===d;})}; 
     		// }))
@@ -209,7 +213,7 @@ BDSVis.makePlot = function (data,request,vm,limits) {
     		.attr("d", function(d){return valueline(d.values);});
 
         //Add dots
-        chart.selectAll("circle .plotdot")
+        chart.selectAll("circle.plotdot")
 	    	.data(data)
 	  		.enter().append("circle").attr("class","plotdot")
 	  		.attr("r",5)
@@ -225,7 +229,7 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 		var barwidth= xScale.rangeBand()/nbars;
 
 		var bars=
-		chart.selectAll("rect")
+		chart.selectAll("rect.plotbar")
 			.data(data.filter(function(d) {return xScale.domain().indexOf(d[xvar])>-1}));
 
 		bars.enter().append("rect")
@@ -260,7 +264,7 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 
 	legendsvg.append("text").attr("class","legtitle").text(cvarr.name+(((cvarlist.length>1) && !vm.timelapse())?"  (click to remove) ":"")+": ");
 
-	var legendlabels=legendsvg.selectAll("text .leglabel")
+	var legendlabels=legendsvg.selectAll("text.leglabel")
 		.data(cvarlist)
 		.enter()
 		.append("text")
@@ -349,7 +353,7 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 			data4bars [ xScale.domain().indexOf(d[xvar]) ] [ cvarlist.indexOf(d[cvar]) ][yvar]=+d[yvar];
 		});
 		
-  		var bars=chart.selectAll("rect").data(d3.merge(data4bars));
+  		var bars=chart.selectAll("rect.plotbar").data(d3.merge(data4bars));
 
   		// UPDATE
 		  // Update old elements as needed.
@@ -371,8 +375,8 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 		var data4bars = xScale.domain().map(function(xv) {return cvarlist.map(function(cv) {return (obj={}, obj[xvar]=xv, obj[cvar]=cv,obj);});});
 
 		//Create bars for every xvar/cvar combination
-		chart.selectAll("rect").remove();
-		chart.selectAll("rect").data(d3.merge(data4bars)).enter().append("rect").attr("class", "plotbar").attr("width", barwidth);
+		chart.selectAll("rect.plotbar").remove();
+		chart.selectAll("rect.plotbar").data(d3.merge(data4bars)).enter().append("rect").attr("class", "plotbar").attr("width", barwidth);
 		
 		var timerange = d3.extent(data, function(d) { return +d[vm.model.timevar] });
 		var step=vm.model.LookUpVar(vm.model.timevar).range[2];

@@ -74,6 +74,7 @@ BDSVis.PlotView = {
 				.append("input").attr("type","Checkbox")
 				.property("checked",function(d) {return vm.logscale();})
 			d3.select("#logbutton").append("span").text("Log")
+			
 			this.logbutton.on("click",function() { 
 				vm.logscale(!vm.logscale());
 				if (vm.geomap())
@@ -84,14 +85,29 @@ BDSVis.PlotView = {
 				//d3.event.stopPropagation();
 			});
 
-			//Reset Zoom button
-			this.resetzoom = d3.select("#resetzoom")
-				.append("button").text("Reset Zoom").on("click", function() {
+			//Rectangular zoom checkbox
+			this.rectzoom = d3.select("#logbutton")//d3.select("#resetzoom")
+				.append("span").text("\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0")
+				.append("input").attr("type","Checkbox")
+				.property("checked",function(d) {return vm.zoombyrect();})
+			d3.select("#logbutton").append("span").text("Zoom by rectangle")
+
+			this.rectzoom.on("click", function() {
+				vm.zoombyrect(!vm.zoombyrect());
 				if (vm.geomap())
 					BDSVis.makeMap(data,request,vm);
 				else 
 					BDSVis.makePlot(data,request,vm);
-			})
+			});
+
+			//Reset Zoom button
+			this.resetzoom = d3.select("#logbutton")//d3.select("#resetzoom")
+				.append("span").text("\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0").append("button").text("Reset Zoom").on("click", function() {
+				if (vm.geomap())
+					BDSVis.makeMap(data,request,vm);
+				else 
+					BDSVis.makePlot(data,request,vm);
+			});
 
 			//X-axis variable selector			
 			this.xaxisselector = d3.select("#xvarselector").append("select");
@@ -190,10 +206,10 @@ BDSVis.PlotView = {
 			.style("left",(this.yaxislabel.node().getBoundingClientRect().left+window.scrollX)+"px")
 			.style("top",(this.xaxislabel.node().getBoundingClientRect().top+window.scrollY)+"px")
 
-		d3.select("#resetzoom")
-			.style("position","absolute")
-			.style("left",(d3.select("#logbutton").node().getBoundingClientRect().right+window.scrollX+20)+"px")
-			.style("top",(this.xaxislabel.node().getBoundingClientRect().top+window.scrollY)+"px")
+		// d3.select("#resetzoom")
+		// 	.style("position","absolute")
+		// 	.style("left",(d3.select("#logbutton").node().getBoundingClientRect().right+window.scrollX+20)+"px")
+		// 	.style("top",(this.xaxislabel.node().getBoundingClientRect().top+window.scrollY)+"px")
 
 	}
 };

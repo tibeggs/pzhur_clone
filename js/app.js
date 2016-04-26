@@ -122,15 +122,9 @@ BDSVis.ViewModel = function() {
 	//LOG SCALE BUTTON
 	//Whether the scale of y-axis is Log or Linear
 	this.logscale = ko.observable(0); //Initial value
-	
-	// The code below is deprecated. Log checkbox with onlick event is generated in PlotView.Init();
 
-	// this.yscalebuttontext = ko.computed (function() {return vm.logscale()?"Linear":"Log"});  //Text on the button
-	// this.toggleyscale = function () { 
-	// 	//Toggle whether to plot the graph in log or linear scale
-	// 	vm.logscale(!vm.logscale());
-	// 	vm.getBDSdata();
-	// };
+	//Zoom by rectangle checkbox
+	this.zoombyrect = ko.observable(true);
 
 	//Geo Map regime
 	this.geomap = function() {
