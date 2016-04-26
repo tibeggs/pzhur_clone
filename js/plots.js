@@ -82,7 +82,7 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 	};
 
 	var Tooltiptext = function(d) {
-		var ttt=YvarsAsLegend?d[vm.model.yvars]:vm.model.NameLookUp(yvar,vm.model.yvars);
+		var ttt=vm.model.NameLookUp(d[vm.model.yvars],vm.model.yvars);
 		ttt+=": "+d3.format(",")(d[yvar])+"\n"+xvarr.name+": "+vm.model.NameLookUp(d[xvar],xvar);
 		if (!YvarsAsLegend)
 			ttt+="\n"+cvarr.name+": "+vm.model.NameLookUp(d[cvar],cvar);
