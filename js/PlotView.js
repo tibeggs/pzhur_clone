@@ -87,7 +87,7 @@ BDSVis.PlotView = {
 
 			//Rectangular zoom checkbox
 			this.rectzoom = d3.select("#logbutton")//d3.select("#resetzoom")
-				.append("span").text("\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0")
+				.append("span").text("\u00A0\u00A0")
 				.append("input").attr("type","Checkbox")
 				.property("checked",function(d) {return vm.zoombyrect();})
 			d3.select("#logbutton").append("span").text("Zoom by rectangle")
@@ -102,7 +102,7 @@ BDSVis.PlotView = {
 
 			//Reset Zoom button
 			this.resetzoom = d3.select("#logbutton")//d3.select("#resetzoom")
-				.append("span").text("\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0").append("button").text("Reset Zoom").on("click", function() {
+				.append("span").text("\u00A0\u00A0").append("button").text("Reset Zoom").on("click", function() {
 				if (vm.geomap())
 					BDSVis.makeMap(data,request,vm);
 				else 

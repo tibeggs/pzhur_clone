@@ -124,6 +124,7 @@ BDSVis.makePlot = function (data,request,vm,limits) {
     .attr("height", height)
     .attr("opacity", 0); 
 
+    //Zooming
 	function refresh() {
 		var t="translate(" + d3.event.translate + ")"+" scale(" + d3.event.scale + ")";
 		svg.select(".x.axis").call(xAxis);
@@ -131,13 +132,32 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 		svg.select(".x0").call(xAxis0);
 		d3.selectAll("path.plotline").attr("transform", t);
 		d3.selectAll("circle.plotdot").attr("transform", t);
+		//BDSVis.makePlot(data,request,vm);
+	};
+
+	function refreshBars() {
+		var t="translate(" + d3.event.translate + ")"+" scale(" + d3.event.scale + ")";
+		
+		svg.select(".y.axis").call(yAxis);
+		xScale.rangeRoundBands([d3.event.translate[0], d3.event.translate[0]+width*d3.event.scale], .1);
+		//debugger;
+		svg.select(".x.axis").call(xAxis);
+		svg.select(".x0.axis").attr("transform", "translate(0," + yScale(y0) + ")").call(xAxis0);
+
 		d3.selectAll("rect.plotbar").attr("transform", t);
 		//BDSVis.makePlot(data,request,vm);
 	};
 
+
 	if (!vm.zoombyrect())
-		svg.call(d3.behavior.zoom().x(xScale).y(vm.logscale()?yScale1:yScale).on("zoom",  refresh));
+	{
+		if(vm.model.IsContinuous(xvarr))
+			svg.call(d3.behavior.zoom().x(xScale).y(vm.logscale()?yScale1:yScale).on("zoom",  refresh));
+		else 
+			svg.call(d3.behavior.zoom().y(vm.logscale()?yScale1:yScale).on("zoom",  refreshBars)); 
+	}
 	
+	//Clipping lines and dots outside the plot area
 	svg.append("defs").append("svg:clipPath")
 	        .attr("id", "clip")
 	        .append("svg:rect")
@@ -182,7 +202,8 @@ BDSVis.makePlot = function (data,request,vm,limits) {
             	else {
             		var left=xScale.domain().map(function(d) {return xScale(d)<d3.min([origin[0], m[0]]);}).indexOf(false);
             		var right=xScale.domain().map(function(d) {return xScale(d)>d3.max([origin[0], m[0]]);}).indexOf(true);
-           			BDSVis.makePlot(data,request,vm,d3.merge([[left,right],[origin[1], m[1]].map((vm.logscale()?yScale1:yScale).invert).sort()]));
+            		if (right===-1) right=xScale.domain().length;
+           			BDSVis.makePlot(data,request,vm,d3.merge([[left,right],[origin[1], m[1]].map((vm.logscale()?yScale1:yScale).invert).sort(function(a,b) {return a>b})]));
             	}
             }
           }, true);

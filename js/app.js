@@ -240,7 +240,7 @@ BDSVis.ViewModel = function() {
 	}.bind(this.vars);
 
 	//Initial values of X-axis variable and C- variable
-	this.xvar = ko.observable("year2");
+	this.xvar = ko.observable("fchar");
 	this.cvar = ko.observable("sic1");	
 
 	//Subscribe to input changes
