@@ -90,7 +90,7 @@ BDSVis.PlotView = {
 				.append("span").text("\u00A0\u00A0")
 				.append("input").attr("type","Checkbox")
 				.property("checked",function(d) {return vm.zoombyrect();})
-			d3.select("#logbutton").append("span").text("Zoom by rectangle")
+			d3.select("#logbutton").append("span").text(vm.geomap()?"Zoom / Scale Colors":"Zoom by rectangle")
 
 			this.rectzoom.on("click", function() {
 				vm.zoombyrect(!vm.zoombyrect());

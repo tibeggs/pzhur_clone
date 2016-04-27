@@ -120,9 +120,9 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 	.call(yAxis);
 
 	svg.append("rect")
-    .attr("width", width)
-    .attr("height", height)
-    .attr("opacity", 0); 
+		.attr("width", width)
+		.attr("height", height)
+		.attr("opacity", 0); 
 
     //Zooming
 	function refresh() {

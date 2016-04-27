@@ -13,7 +13,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	
 	var yvar=request[vm.model.yvars];
 	var xvar=request.xvar;
-	debugger;
+
 	var LUName = function(d) {return vm.model.NameLookUp(d[xvar],xvar);}
 
 	//Set graph title
@@ -51,10 +51,6 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	//Plot the map	
     var mapg = svg.append('g')
     		.attr('class', 'map');
-			
-	var projection = d3.geo.albersUsa()
-			.scale(800)
-			.translate([width / 2, height / 2.]);
 
 	var geo_data1=vm.geo_data.features.slice(0);
 		//geo_data_empty=[];
@@ -77,34 +73,54 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 		} else geo_data1[iir]=vm.geo_data.features[i]
 	};
 
-	var path = d3.geo.path().projection(projection);
+	// svg.append("rect")
+	// 	.attr("width", width)
+	// 	.attr("height", height)
+	// 	.attr("opacity", 0);
 
 	var map = mapg.selectAll('path')
 			.data(geo_data1)
 			.enter()
 			.append('path')
-			.attr('d', path)
+			.attr('d', d3.geo.path().projection(d3.geo.albersUsa().scale(800).translate([width / 2, height / 2.])))
 			.style('fill', "white")
 			.style('stroke', 'black')
-			.style('stroke-width', 0.5)
-			.on("click",function(d) {
+			.style('stroke-width', 0.3)
+			.on("dblclick",function(d) {
 				var xvcode = vm.model[xvar].filter(function(d1) {return d1.name===d.properties.NAME;})[0].code;
 				vm.IncludedXvarValues[xvar].push(xvcode);
 				//request[xvar].push(xvcode);
 				BDSVis.processAPIdata(vm.dataunfiltered,request,vm);
+				//d3.event.stopPropagation()
 				//vm.getBDSdata();
 			})
 			.data(data)
 			.style('fill', function(d) {return yScale(d[yvar]);})
 			.style('stroke-width', 0.3)
 			.style('stroke', 'white')
-			.on("click",function(d) {
+			.on("dblclick",function(d) {
 				var ind = vm.IncludedXvarValues[xvar].indexOf(vm.model[xvar].filter(function(d1) {return d1.name===LUName(d);})[0].code);
 				vm.IncludedXvarValues[xvar].splice(ind,1);
 				BDSVis.processAPIdata(vm.dataunfiltered,request,vm);
+				//d3.event.stopPropagation()	
 				//vm.getBDSdata();
 			})
 			.append("title").text(function(d){return LUName(d)+": "+d3.format(",")(d[yvar]);});
+
+	//Zooming
+	svg.call(d3.behavior.zoom().on("zoom",refresh));
+	function refresh() {
+		var t="translate(" + d3.event.translate + ")"+" scale(" + d3.event.scale + ")";
+		if (vm.zoombyrect())
+			mapg.selectAll('path').attr("transform", t);
+		else {
+			legendsvg.selectAll("rect")
+			.attr("fill",  function(d) {return yScale(d*d3.event.scale);})
+			//.attr("y",function(d) {return hScale(d*d3.event.scale);})
+			mapg.selectAll('path')
+			.style("fill",function(d) {return yScale(d[yvar]*d3.event.scale);})
+		};
+	}; 
 
 	//Making Legend
 	var legendsvg=vm.PlotView.legendsvg;
@@ -148,7 +164,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 		.text(function(d) {return legNumFormat(d);});
 
 	pv.SetPlotTitle(ptitle);
-	pv.lowerrightcornertext.text("Click on states to toggle");
+	pv.lowerrightcornertext.text("Double-click on states to toggle");
 	pv.SetXaxisLabel(".",30);
 
 	// Timelapse animation

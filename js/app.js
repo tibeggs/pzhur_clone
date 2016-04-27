@@ -150,6 +150,10 @@ BDSVis.ViewModel = function() {
 
 		var varname1=vm.ActualVarCode(varname);
 		vm.IncludedXvarValues[varname1]=vm.model.GetCodes(varname1);
+
+		// vm.model.LookUpVar(varname).incompatible.forEach(function(incvar){
+		// 	vm.SelectedOpts[incvar]([vm.model[incvar][vm.model.LookUpVar(incvar).totalindex]]);
+		// })
 		
 		vm.getBDSdata();
 	};
@@ -240,8 +244,8 @@ BDSVis.ViewModel = function() {
 	}.bind(this.vars);
 
 	//Initial values of X-axis variable and C- variable
-	this.xvar = ko.observable("fchar");
-	this.cvar = ko.observable("sic1");	
+	this.xvar = ko.observable("state");
+	this.cvar = ko.observable("measure");	
 
 	//Subscribe to input changes
 	//Any change in the input select fields triggers request to the server, followed by data processing and making of a new plot
