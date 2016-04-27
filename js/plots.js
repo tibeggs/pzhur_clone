@@ -132,20 +132,21 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 		svg.select(".x0").call(xAxis0);
 		d3.selectAll("path.plotline").attr("transform", t);
 		d3.selectAll("circle.plotdot").attr("transform", t);
-		//BDSVis.makePlot(data,request,vm);
 	};
 
 	function refreshBars() {
-		var t="translate(" + d3.event.translate + ")"+" scale(" + d3.event.scale + ")";
+		//var t="translate(" + d3.event.translate + ")"+" scale(" + d3.event.scale + ")";
 		
 		svg.select(".y.axis").call(yAxis);
-		xScale.rangeRoundBands([d3.event.translate[0], d3.event.translate[0]+width*d3.event.scale], .1);
-		//debugger;
-		svg.select(".x.axis").call(xAxis);
+		// xScale.rangeRoundBands([d3.event.translate[0], d3.event.translate[0]+width*d3.event.scale], .1);
+		// //debugger;
+		// svg.select(".x.axis").call(xAxis);
 		svg.select(".x0.axis").attr("transform", "translate(0," + yScale(y0) + ")").call(xAxis0);
 
-		d3.selectAll("rect.plotbar").attr("transform", t);
-		//BDSVis.makePlot(data,request,vm);
+		//d3.selectAll("rect.plotbar").attr("transform", t);
+		d3.selectAll("rect.plotbar")
+			.attr("y",function(d) {return yScale(Math.max(0,+d[yvar]))})
+		   	.attr("height", function(d) {return Math.abs(yScale(y0)-yScale(+d[yvar]))})
 	};
 
 
@@ -169,50 +170,52 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 
 	var chart=svg.append("g").attr("clip-path", "url(#clip)");
 
+	//Zoom-by-rectangle procedure adopted from https://gist.github.com/jasondavies/3689931 and changed to redraw the whole plot and to work with bar charts
 	svg.on("mousedown", function() {
 		if (!vm.zoombyrect()) return;
-      var e = this,
-          origin = d3.mouse(e),
-          rect = svg.append("rect").attr("class", "zoom");
+      	var e = this,
+	        origin = d3.mouse(e),
+	        rect = svg.append("rect").attr("class", "zoom");
 
-      d3.select("body").classed("noselect", true);
-      origin[0] = Math.max(0, Math.min(width, origin[0]));
-      origin[1] = Math.max(0, Math.min(height, origin[1]));
-      d3.select(window)
-          .on("mousemove.zoomRect", function() {
+		d3.select("body").classed("noselect", true);
+		origin[0] = Math.max(0, Math.min(width, origin[0]));
+		origin[1] = Math.max(0, Math.min(height, origin[1]));
+		d3.select(window)
+			.on("mousemove.zoomRect", function() {
+			//Draw rectangle
+			    var m = d3.mouse(e);
+			    m[0] = Math.max(0, Math.min(width, m[0]));
+			    m[1] = Math.max(0, Math.min(height, m[1]));
+			    rect.attr("x", Math.min(origin[0], m[0]))
+			        .attr("y", Math.min(origin[1], m[1]))
+			        .attr("width", Math.abs(m[0] - origin[0]))
+			        .attr("height", Math.abs(m[1] - origin[1]));
+		  	})
+			.on("mouseup.zoomRect", function() {
+				d3.select(window).on("mousemove.zoomRect", null).on("mouseup.zoomRect", null);
+				d3.select("body").classed("noselect", false);
+				var m = d3.mouse(e);
+				m[0] = Math.max(0, Math.min(width, m[0]));
+				m[1] = Math.max(0, Math.min(height, m[1]));
+				rect.remove();
+				if (m[0] !== origin[0] && m[1] !== origin[1]) {
+					//Find new extents/limits of the plot from the rectangle size and call the plot function with them as argument
+					if (vm.model.IsContinuous(xvarr)) {
+						var leftright=[origin[0], m[0]].map(xScale.invert).sort();
+						var topbottom=[origin[1], m[1]].map((vm.logscale()?yScale1:yScale).invert).sort();
+						BDSVis.makePlot(data,request,vm,d3.merge([leftright,topbottom]));
+					} else {
+						var left=xScale.domain().map(function(d) {return xScale(d)<d3.min([origin[0], m[0]]);}).indexOf(false);
+						var right=xScale.domain().map(function(d) {return xScale(d)>d3.max([origin[0], m[0]]);}).indexOf(true);
+						var topbottom=[origin[1], m[1]].map((vm.logscale()?yScale1:yScale).invert).sort(function(a,b) {return a>b});
+						if (right===-1) right=xScale.domain().length;
+						BDSVis.makePlot(data,request,vm,d3.merge([[left,right],topbottom]));
+					}
+				}
+			}, true);
+		d3.event.stopPropagation();
+	});
 
-            var m = d3.mouse(e);
-            m[0] = Math.max(0, Math.min(width, m[0]));
-            m[1] = Math.max(0, Math.min(height, m[1]));
-            rect.attr("x", Math.min(origin[0], m[0]))
-                .attr("y", Math.min(origin[1], m[1]))
-                .attr("width", Math.abs(m[0] - origin[0]))
-                .attr("height", Math.abs(m[1] - origin[1]));
-          })
-          .on("mouseup.zoomRect", function() {
-            d3.select(window).on("mousemove.zoomRect", null).on("mouseup.zoomRect", null);
-            d3.select("body").classed("noselect", false);
-            var m = d3.mouse(e);
-            m[0] = Math.max(0, Math.min(width, m[0]));
-            m[1] = Math.max(0, Math.min(height, m[1]));
-            rect.remove();
-            if (m[0] !== origin[0] && m[1] !== origin[1]) {
-            	if (vm.model.IsContinuous(xvarr))
-            		BDSVis.makePlot(data,request,vm,d3.merge([[origin[0], m[0]].map(xScale.invert).sort(),[origin[1], m[1]].map((vm.logscale()?yScale1:yScale).invert).sort()]))
-            	else {
-            		var left=xScale.domain().map(function(d) {return xScale(d)<d3.min([origin[0], m[0]]);}).indexOf(false);
-            		var right=xScale.domain().map(function(d) {return xScale(d)>d3.max([origin[0], m[0]]);}).indexOf(true);
-            		if (right===-1) right=xScale.domain().length;
-           			BDSVis.makePlot(data,request,vm,d3.merge([[left,right],[origin[1], m[1]].map((vm.logscale()?yScale1:yScale).invert).sort(function(a,b) {return a>b})]));
-            	}
-            }
-          }, true);
-      d3.event.stopPropagation();
-    });
-
-
-
-	
 	
 	if (vm.model.IsContinuous(xvarr)) {
 		//Make a scatter plot if x-variable is continuous
@@ -227,7 +230,7 @@ BDSVis.makePlot = function (data,request,vm,limits) {
     		// .data(cvarlist.map(function(d) {
     		// 	return {cvar: d, values: data.filter(function(d1) {return d1[cvar]===d;})}; 
     		// }))
-    		.data(d3.nest().key(function(d) {return d[cvar]; }).entries(data))
+    		.data(d3.nest().key(function(d) {return d[cvar]; }).entries(data)) //Split data into separate sets for each cvar
     		.enter()
     		.append("path").attr("class", "plotline")
     		.attr("stroke", function(d) {return colors(d.key);})
