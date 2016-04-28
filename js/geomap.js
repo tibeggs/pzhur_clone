@@ -54,9 +54,9 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
     var mapg = svg.append('g')
     		.attr('class', 'map');
 
-	var geo_data1=vm.geo_data.features.slice(0);
-		//geo_data_empty=[];
-		emptystates=0;
+	var geo_data1=topojson.feature(vm.msa_geo_data,vm.msa_geo_data.objects.cbsa_2014_us_ex_hi_ak).features;//vm.geo_data.features.slice(0),
+		//geo_data_empty=[],
+		emptystates=0,
 		timerange = d3.extent(data, function(d) { return +d[vm.model.timevar] });
 
 	if (vm.timelapse()) { //In time lapse regime, select only the data corresponding to the current year
@@ -66,14 +66,16 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 
 	//Put the states in geo_data in the same order as they are in data
 
-	var xir = data.map(function(d) {return LUName(d)});
-	for (var i in vm.geo_data.features) {
-		var iir = xir.indexOf(vm.geo_data.features[i].properties.NAME);
-		if (iir === -1) {
-			geo_data1[data.length+emptystates]=vm.geo_data.features[i];
-			emptystates++;
-		} else geo_data1[iir]=vm.geo_data.features[i]
-	};
+	// var xir = data.map(function(d) {return LUName(d)});
+	// for (var i in vm.geo_data.features) {
+	// 	var iir = xir.indexOf(vm.geo_data.features[i].properties.NAME);
+	// 	if (iir === -1) {
+	// 		geo_data1[data.length+emptystates]=vm.geo_data.features[i];
+	// 		emptystates++;
+	// 	} else geo_data1[iir]=vm.geo_data.features[i]
+	// };
+
+	// debugger;
 
 	// svg.append("rect")
 	// 	.attr("width", width)

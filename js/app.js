@@ -259,10 +259,13 @@ BDSVis.ViewModel = function() {
 
 	//Call initial plot
 	//Get the geographic map from the shape file in JSON format
-	d3.json("../json/gz_2010_us_040_00_20m.json", function(geo_data) {
+	d3.json("../json/gz_2010_us_040_00_20m.json", function(state_data) {
 	//d3.json("../json/msa.json", function(geo_data) {
-		vm.geo_data=geo_data;
+	d3.json("../json/cbsa_us_2014_ex_hi_ak.json", function(msa_data) {
+		vm.geo_data=state_data;
+		vm.msa_geo_data=msa_data;
 		vm.getBDSdata();
+	});
 	});
 	//vm.getBDSdata();
 };
