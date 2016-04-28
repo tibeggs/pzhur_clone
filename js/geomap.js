@@ -54,7 +54,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
     var mapg = svg.append('g')
     		.attr('class', 'map');
 
-	var geo_data1=topojson.feature(vm.msa_geo_data,vm.msa_geo_data.objects.cbsa_2014_us_ex_hi_ak).features;//vm.geo_data.features.slice(0),
+	var geo_data1=topojson.feature(vm.msa_geo_data,vm.msa_geo_data.objects.cb_2014_us_cbsa_500k).features;//vm.geo_data.features.slice(0),
 		//geo_data_empty=[],
 		emptystates=0,
 		timerange = d3.extent(data, function(d) { return +d[vm.model.timevar] });
