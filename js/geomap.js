@@ -31,7 +31,9 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	//Set D3 scales
 	var ymin=d3.min(data, function(d) { return +d[yvar]; });
 	var ymax=d3.max(data, function(d) { return +d[yvar]; });
-	var ymid=(ymax+ymin)*.5;
+	var ymid= function(ymin,ymax) {
+		return (vm.logscale())?Math.sqrt(ymax*ymin):(ymax+ymin)*.5;
+	};
 	var maxabs=d3.max([Math.abs(ymin),Math.abs(ymax)]);
 	
 	//Define which scale to use, for the map and the colorbar. Note that log scale can be replaced by any other here (like sqrt), the colormap will adjust accordingly.
@@ -45,7 +47,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 		yScale.domain([-maxabs,0,maxabs]).range(["#CB2027","#eeeeee","#265DAB"]);
 	else
 		//yScale.domain([ymin,ymax]).range(["#eeeeee","#265DAB"]);
-		yScale.domain([ymin,ymid,ymax]).range([purple,"#bbbbbb",golden]);
+		yScale.domain([ymin,ymid(ymin,ymax),ymax]).range([purple,"#bbbbbb",golden]);
 		//yScale.domain([ymin,ymid,ymax]).range(["red","#ccffcc","blue"]);
 	
 	//Plot the map	
@@ -117,11 +119,11 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 		else {
 			var mn=ymin,//+d3.event.translate[0]*(ymax-ymin)/1e+3,
 				mx=ymax,//+d3.event.translate[1]*(ymax-ymin)/1e+3,
-				md=.5*(mn+mx);
+				md=ymid(ymin,ymax);
 			if ((ymin<0) && !vm.logscale())
 				yScale.domain([-d3.max([Math.abs(mn),Math.abs(mx)])*d3.event.scale,0,d3.max([Math.abs(mn),Math.abs(mx)])*d3.event.scale]);
 			else
-				yScale.domain([mn,.5*(mn+mx)*d3.event.scale,mx]);
+				yScale.domain([mn,md*d3.event.scale,mx]);
 			legendsvg.selectAll("rect")
 				.attr("fill",  function(d) {return yScale(d);})
 			mapg.selectAll('path')
