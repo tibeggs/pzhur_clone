@@ -110,15 +110,22 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	//Zooming
 	svg.call(d3.behavior.zoom().on("zoom",refresh));
 	function refresh() {
+		// /console.log(d3.event)
 		var t="translate(" + d3.event.translate + ")"+" scale(" + d3.event.scale + ")";
 		if (vm.zoombyrect())
 			mapg.selectAll('path').attr("transform", t);
 		else {
+			var mn=ymin,//+d3.event.translate[0]*(ymax-ymin)/1e+3,
+				mx=ymax,//+d3.event.translate[1]*(ymax-ymin)/1e+3,
+				md=.5*(mn+mx);
+			if ((ymin<0) && !vm.logscale())
+				yScale.domain([-d3.max([Math.abs(mn),Math.abs(mx)])*d3.event.scale,0,d3.max([Math.abs(mn),Math.abs(mx)])*d3.event.scale]);
+			else
+				yScale.domain([mn,.5*(mn+mx)*d3.event.scale,mx]);
 			legendsvg.selectAll("rect")
-			.attr("fill",  function(d) {return yScale(d*d3.event.scale);})
-			//.attr("y",function(d) {return hScale(d*d3.event.scale);})
+				.attr("fill",  function(d) {return yScale(d);})
 			mapg.selectAll('path')
-			.style("fill",function(d) {return yScale(d[yvar]*d3.event.scale);})
+				.style("fill",function(d) {return yScale(d[yvar]);})
 		};
 	}; 
 
@@ -138,7 +145,13 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	var titleheight = legendtitle.node().getBBox().height;
 	legendsvg=legendsvg.append("g").attr("transform","translate(0,"+titleheight+")");
 
-	var legNumFormat=d3.format(".3s");
+	var legNumFormat= function(d) {
+		if (Math.abs(d)>1)
+			return d3.format(".3s")(d);
+		else if (Math.abs(d)>5e-2)
+			return d3.format(".2f")(d);
+		else return d3.format(".f")(d);
+	};
 	
 	//Make the colorbar
 	legendsvg.selectAll("rect")
