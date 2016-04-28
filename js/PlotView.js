@@ -94,9 +94,7 @@ BDSVis.PlotView = {
 
 			this.rectzoom.on("click", function() {
 				vm.zoombyrect(!vm.zoombyrect());
-				if (vm.geomap())
-					BDSVis.makeMap(data,request,vm);
-				else 
+				if !(vm.geomap())
 					BDSVis.makePlot(data,request,vm);
 			});
 
