@@ -57,19 +57,16 @@ BDSVis.PlotView = {
 			.attr("x",width+margin.left+ margin.right)
 			.attr("y",this.height0-margin.bottom);
 
+		//UI controls on top of the chart refresh
 		d3.select("#xvarselector").selectAll("select").remove();
 		d3.select("#cvarselector").selectAll("select").remove();
 		d3.select("#logbutton").selectAll("*").remove();
 		d3.select("#resetzoom").selectAll("*").remove();
-		if (!vm.timelapse()) { //Add UI controls is not in Time Lapse regime
+		if (!vm.timelapse()) { //Add UI controls if not in Time Lapse regime
 
 			//Logscale Checkbox
 			var boxsize=10;
-			//this.logbutton = this.svgcont.append("g").attr("transform","translate(3,"+(height + margin.top + this.titleheight-boxsize/2.)+")");
-			//this.logbutton.append("rect").attr("class","svguibutton").attr("width",35).attr("height",20).attr("fill","url(#grad1)").attr("stroke-width",.1).attr("stroke","#000");
-			//this.logbutton.append("text").attr("class","svguitext").text("Log").attr("y",".75em").attr("x","15");
-			//this.logbutton.append("rect").attr("class","svguibox")
-			//	.attr("width",boxsize).attr("height",boxsize).attr("fill",vm.logscale()?"#090":"#fff");
+	
 			this.logbutton = d3.select("#logbutton")
 				.append("input").attr("type","Checkbox")
 				.property("checked",function(d) {return vm.logscale();})
@@ -182,35 +179,35 @@ BDSVis.PlotView = {
 	},
 
 	AdjustUIElements : function() {
-		var wsY=window.scrollY || 0;
-		var wsX=window.scrollX || 0;
-		//console.log(this.xaxislabel.node().getBoundingClientRect().top, this.xaxislabel.attr("y"));
-		//console.log(this.svgcont.node().getBoundingClientRect().top*1.+this.xaxislabel.attr("y")*0.);
-		console.log(this.xaxislabel.node().getBoundingClientRect().top,wsY)
+		// Fully compatible according to https://developer.mozilla.org/en-US/docs/Web/API/Window/scrollY?redirectlocale=en-US&redirectslug=DOM%2Fwindow.scrollY
+		// var supportPageOffset = window.pageXOffset !== undefined;
+		// var isCSS1Compat = ((document.compatMode || "") === "CSS1Compat");
+
+		// var wsX = supportPageOffset ? window.pageXOffset : isCSS1Compat ? document.documentElement.scrollLeft : document.body.scrollLeft;
+		// var wsY = supportPageOffset ? window.pageYOffset : isCSS1Compat ? document.documentElement.scrollTop : document.body.scrollTop;
+
+		var wsY=window.scrollY || window.pageYOffset;
+		var wsX=window.scrollX || window.pageXOffset;
+
 		var chartrect=this.svgcont.node().getBoundingClientRect();
-		var sellength=d3.select("#xvarselector").node().getBoundingClientRect().right-d3.select("#xvarselector").node().getBoundingClientRect().left;
+		var xaxlrect=this.xaxislabel.node().getBoundingClientRect();
+
+		var sellength=d3.select("#xvarselector").node().getBoundingClientRect();
+		sellength = sellength.right-sellength.left;
 
 		d3.select("#xvarselector")
 			.style("position","absolute")
-			//d3.select("#xvarselector").style("left",(chartrect.left+wsX+(+this.xaxislabel.attr("x"))+this.xaxislabel.node().getComputedTextLength()*1.5)+"px")
-			//.style("left","100px")
 			.style("left",(chartrect.left+wsX+(this.margin.left+this.margin.right+this.width-sellength)/2.)+"px")
-			.style("top",(this.xaxislabel.node().getBoundingClientRect().top+wsY)+"px");
+			.style("top",(xaxlrect.top+wsY)+"px");
 
 		d3.select("#cvarselector")
-				.style("position","absolute")
-				.style("left",(chartrect.left+wsX+this.width+this.margin.left+ this.margin.right)+"px")
-				.style("top",(this.svgcont.node().getBoundingClientRect().top+wsY+this.margin.top)+"px");
+			.style("position","absolute")
+			.style("left",(chartrect.left+wsX+this.width+this.margin.left+ this.margin.right)+"px")
+			.style("top",(chartrect.top+wsY+this.margin.top)+"px");
 
 		d3.select("#logbutton")
 			.style("position","absolute")
 			.style("left",(this.yaxislabel.node().getBoundingClientRect().left+wsX)+"px")
-			.style("top",(this.xaxislabel.node().getBoundingClientRect().top+wsY)+"px")
-
-		// d3.select("#resetzoom")
-		// 	.style("position","absolute")
-		// 	.style("left",(d3.select("#logbutton").node().getBoundingClientRect().right+wsX+20)+"px")
-		// 	.style("top",(this.xaxislabel.node().getBoundingClientRect().top+wsY)+"px")
-
+			.style("top",(xaxlrect.top+wsY)+"px");
 	}
 };
