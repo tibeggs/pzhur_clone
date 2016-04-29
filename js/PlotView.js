@@ -94,7 +94,7 @@ BDSVis.PlotView = {
 
 			this.rectzoom.on("click", function() {
 				vm.zoombyrect(!vm.zoombyrect());
-				if !(vm.geomap())
+				if (!vm.geomap())
 					BDSVis.makePlot(data,request,vm);
 			});
 
@@ -182,32 +182,35 @@ BDSVis.PlotView = {
 	},
 
 	AdjustUIElements : function() {
+		var wsY=window.scrollY || 0;
+		var wsX=window.scrollX || 0;
 		//console.log(this.xaxislabel.node().getBoundingClientRect().top, this.xaxislabel.attr("y"));
 		//console.log(this.svgcont.node().getBoundingClientRect().top*1.+this.xaxislabel.attr("y")*0.);
-		//console.log(this.xaxislabel.node().getBoundingClientRect().top,window.scrollY)
+		console.log(this.xaxislabel.node().getBoundingClientRect().top,wsY)
 		var chartrect=this.svgcont.node().getBoundingClientRect();
 		var sellength=d3.select("#xvarselector").node().getBoundingClientRect().right-d3.select("#xvarselector").node().getBoundingClientRect().left;
 
 		d3.select("#xvarselector")
 			.style("position","absolute")
-			//d3.select("#xvarselector").style("left",(chartrect.left+window.scrollX+(+this.xaxislabel.attr("x"))+this.xaxislabel.node().getComputedTextLength()*1.5)+"px")
-			.style("left",(chartrect.left+window.scrollX+(this.margin.left+this.margin.right+this.width-sellength)/2.)+"px")
-			.style("top",(this.xaxislabel.node().getBoundingClientRect().top+window.scrollY)+"px");
+			//d3.select("#xvarselector").style("left",(chartrect.left+wsX+(+this.xaxislabel.attr("x"))+this.xaxislabel.node().getComputedTextLength()*1.5)+"px")
+			//.style("left","100px")
+			.style("left",(chartrect.left+wsX+(this.margin.left+this.margin.right+this.width-sellength)/2.)+"px")
+			.style("top",(this.xaxislabel.node().getBoundingClientRect().top+wsY)+"px");
 
 		d3.select("#cvarselector")
 				.style("position","absolute")
-				.style("left",(chartrect.left+window.scrollX+this.width+this.margin.left+ this.margin.right)+"px")
-				.style("top",(this.svg.node().getBoundingClientRect().top+window.scrollY)+"px");
+				.style("left",(chartrect.left+wsX+this.width+this.margin.left+ this.margin.right)+"px")
+				.style("top",(this.svgcont.node().getBoundingClientRect().top+wsY+this.margin.top)+"px");
 
 		d3.select("#logbutton")
 			.style("position","absolute")
-			.style("left",(this.yaxislabel.node().getBoundingClientRect().left+window.scrollX)+"px")
-			.style("top",(this.xaxislabel.node().getBoundingClientRect().top+window.scrollY)+"px")
+			.style("left",(this.yaxislabel.node().getBoundingClientRect().left+wsX)+"px")
+			.style("top",(this.xaxislabel.node().getBoundingClientRect().top+wsY)+"px")
 
 		// d3.select("#resetzoom")
 		// 	.style("position","absolute")
-		// 	.style("left",(d3.select("#logbutton").node().getBoundingClientRect().right+window.scrollX+20)+"px")
-		// 	.style("top",(this.xaxislabel.node().getBoundingClientRect().top+window.scrollY)+"px")
+		// 	.style("left",(d3.select("#logbutton").node().getBoundingClientRect().right+wsX+20)+"px")
+		// 	.style("top",(this.xaxislabel.node().getBoundingClientRect().top+wsY)+"px")
 
 	}
 };

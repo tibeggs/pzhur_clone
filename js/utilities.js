@@ -90,7 +90,7 @@ BDSVis.util = {
 		        CreateAAndClick("svg",url);
 		    else {
 		        var image = new Image();
-		        image.src = "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(getSVGsource());
+		        image.src = url;
 		        image.onload = function() {
 		            var canvas = document.createElement('canvas');
 		            canvas.width = image.width;
