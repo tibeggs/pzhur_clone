@@ -72,6 +72,7 @@ rect.zoom {
 #buttonsundergraph h4{
   display:inline-block;
   font-weight: normal;
+  padding: 5px;
 }
 
 .selectors {
@@ -124,18 +125,6 @@ rect.zoom {
   background-image: -o-linear-gradient(top, #005500, #337733);
   background-image: linear-gradient(top, #005500, #337733);
   opacity: 1;
-}
-
-.waiting-caption {
-  position:absolute;
-  opacity: 0.5; 
-  width: 1000px;
-  height: 470px;
-  /*margin-top:100px; 
-  margin-left:200px; */
-  font-size:16pt; 
-  background: white;
-  text-align: center;
 }
 
 .graph-title {

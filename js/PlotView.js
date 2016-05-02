@@ -8,21 +8,28 @@ BDSVis.PlotView = {
 	legendwidth: 250,
 	titleheight: 15,
 	xaxislabelheight: 20,
-	Init : function(data,request,vm) {
+	InitSize : function() {
 		//Define margins and dimensions of the SVG element containing the chart
+		
 		var margin = this.margin;
-
 		this.width = this.width0 - margin.left - margin.right;
 		this.height = this.height0 - margin.top - margin.bottom;
+		
+		d3.select("#chartsvg").attr("width", this.width + margin.left + margin.right+this.legendwidth)
+			.attr("height", this.height + margin.top + margin.bottom + this.titleheight + this.xaxislabelheight);
+	},
+
+	Init : function(data,request,vm) {
+
+		var margin = this.margin;
 		var width=this.width;
-		var height=this.height;
+		var height=this.height;	
 
 		//Select the SVG element, remove old drawings, add grouping element for the chart
 		this.svgcont = d3.select("#chartsvg");
 		this.svgcont.selectAll("g").remove();
 
-		this.svg=this.svgcont.attr("width", width + margin.left + margin.right+this.legendwidth)
-			.attr("height", height + margin.top + margin.bottom + this.titleheight + this.xaxislabelheight)
+		this.svg=this.svgcont
 			.append('g')
 			.attr("transform", "translate(" + margin.left + "," + (margin.top+this.titleheight)+ ")")
 			.attr('class', 'chart');
@@ -61,19 +68,18 @@ BDSVis.PlotView = {
 		d3.select("#xvarselector").selectAll("select").remove();
 		d3.select("#cvarselector").selectAll("select").remove();
 		d3.select("#logbutton").selectAll("*").remove();
-		d3.select("#resetzoom").selectAll("*").remove();
-		if (!vm.timelapse()) { //Add UI controls if not in Time Lapse regime
+		if (!vm.timelapse) { //Add UI controls if not in Time Lapse regime
 
 			//Logscale Checkbox
 			var boxsize=10;
 	
 			this.logbutton = d3.select("#logbutton")
 				.append("input").attr("type","Checkbox")
-				.property("checked",function(d) {return vm.logscale();})
+				.property("checked",function(d) {return vm.logscale;})
 			d3.select("#logbutton").append("span").text("Log")
 			
 			this.logbutton.on("click",function() { 
-				vm.logscale(!vm.logscale());
+				vm.logscale=!vm.logscale;
 				if (vm.geomap())
 					BDSVis.makeMap(data,request,vm);
 				else 
@@ -86,11 +92,11 @@ BDSVis.PlotView = {
 			this.rectzoom = d3.select("#logbutton")//d3.select("#resetzoom")
 				.append("span").text("\u00A0\u00A0")
 				.append("input").attr("type","Checkbox")
-				.property("checked",function(d) {return vm.zoombyrect();})
+				.property("checked",function(d) {return vm.zoombyrect;})
 			d3.select("#logbutton").append("span").text(vm.geomap()?"Zoom / Scale Colors":"Zoom by rectangle")
 
 			this.rectzoom.on("click", function() {
-				vm.zoombyrect(!vm.zoombyrect());
+				vm.zoombyrect=!vm.zoombyrect;
 				if (!vm.geomap())
 					BDSVis.makePlot(data,request,vm);
 			});
@@ -104,42 +110,35 @@ BDSVis.PlotView = {
 					BDSVis.makePlot(data,request,vm);
 			});
 
+			function AddOptionsToVarSelector(selector,varvalues,whichvar,group) { //Create a selector option for each variable value, set which are selected
+				selector.selectAll("option")
+					.data(varvalues).enter().append("option")
+					.attr("value",function(d) {return d.code;})
+					.text(function(d) {return d.name;})
+					.property("selected",function(d){
+							return d.code===(group?vm.SelectedOpts[vm[whichvar]][0]:vm[whichvar]);
+					});
+			};
+
 			//X-axis variable selector			
 			this.xaxisselector = d3.select("#xvarselector").append("select");
-			this.xaxisselector.selectAll("option")
-				.data(vm.model.variables.filter(function(d){return (d.asaxis && d.code!==vm.cvar())})).enter().append("option")
-				.attr("value",function(d) {return d.code})
-				.text(function(d) {return d.name})
-				.property("selected",function(d){return d.code===vm.xvar()});
-			//this.xaxisselector.append("option").property("selected",true).property("disabled",true).text("(Change X-axis)")
+			AddOptionsToVarSelector(this.xaxisselector,vm.model.variables.filter(function(d){return (d.asaxis && d.code!==vm.cvar)}),"xvar",false);
 			this.xaxisselector.on("change", function() { vm.setxvar(this.value);} );
-			if (vm.model.IsGroup(vm.xvar())) {
-				this.xgroupselector = d3.select("#xvarselector").append("select");
-				this.xgroupselector.selectAll("option")
-					.data(vm.model[vm.xvar()]).enter().append("option")
-					.attr("value",function(d) {return d.code})
-					.text(function(d) {return d.name})
-					.property("selected",function(d){return d.code===vm.SelectedOpts[vm.xvar()]()[0];});
-				this.xgroupselector.on("change", function() {vm.SelectedOpts[vm.xvar()]([this.value]);});
+			if (vm.model.IsGroup(vm.xvar)) {
+				var groupselector = d3.select("#xvarselector").append("select");
+				AddOptionsToVarSelector(groupselector,vm.model[vm.xvar],"xvar",true);
+				groupselector.on("change", function() {vm.SelectedOpts[vm.xvar]=[this.value]; vm.getBDSdata();});
 			};
 
 			if (!vm.geomap()) {
 				//Legend variable (cvar) selector
 				this.cvarselector = d3.select("#cvarselector").append("select");
-				this.cvarselector.selectAll("option")
-					.data(vm.model.variables.filter(function(d){return (d.aslegend && d.code!==vm.xvar())})).enter().append("option")
-					.attr("value",function(d) {return d.code})
-					.text(function(d) {return d.name})
-					.property("selected",function(d){return d.code===vm.cvar()});
+				AddOptionsToVarSelector(this.cvarselector,vm.model.variables.filter(function(d){return  (d.aslegend && d.code!==vm.xvar)}),"cvar",false);			
 				this.cvarselector.on("change", function() { vm.setcvar(this.value);} );
-				if (vm.model.IsGroup(vm.cvar())) {
-					this.xgroupselector = d3.select("#cvarselector").append("select");
-					this.xgroupselector.selectAll("option")
-						.data(vm.model[vm.cvar()]).enter().append("option")
-						.attr("value",function(d) {return d.code})
-						.text(function(d) {return d.name})
-						.property("selected",function(d){return d.code===vm.SelectedOpts[vm.cvar()]()[0];});
-					this.xgroupselector.on("change", function() {vm.SelectedOpts[vm.cvar()]([this.value]);});
+				if (vm.model.IsGroup(vm.cvar)) {
+					var groupselector = d3.select("#cvarselector").append("select");
+					AddOptionsToVarSelector(groupselector,vm.model[vm.cvar],"cvar",true);
+					groupselector.on("change", function() {vm.SelectedOpts[vm.cvar]=[this.value]; vm.getBDSdata();});
 				};
 			};
 		};
@@ -150,6 +149,12 @@ BDSVis.PlotView = {
 		this.svgcont = d3.select("#chartsvg");
 		this.svgcont.selectAll("g").remove();
 		this.svgcont.append("g").append("text").attr("class","graphtitle").attr("x",this.width0/2).attr("y",this.height0/2).style("font-size","32px").text("No data");
+	},
+
+	DisplayWaitingMessage : function() {
+		this.svgcont = d3.select("#chartsvg");
+		this.svgcont.selectAll("g").attr("opacity",.4)
+		this.svgcont.append("g").append("text").attr("class","graphtitle").attr("x",this.width0/2).attr("y",this.height0/2).style("font-size","32px").text("Waiting for data from the server...");
 	},
 
 	SetPlotTitle : function(ptitle) {

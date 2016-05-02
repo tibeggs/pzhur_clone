@@ -8,67 +8,42 @@
 
 <body>
 
-  <div class="waiting-caption" data-bind="visible: waiting4api"><br><br><br><br><br><br><br><br>Waiting for data from the server...</div>
   <div id="plotarea">
-    <!-- <button id="logbutton" data-bind="click: toggleyscale, text: yscalebuttontext, disable: disableAll()" >Log</button> -->
-    <div id="logbutton"></div><div id="resetzoom"></div>
-
-    <svg id="chartsvg" data-bind="vis1ible: (!ShowData())">
+    <div id="logbutton"></div>
+    <svg id="chartsvg">
     </svg>
     <div id="xvarselector"></div>
     <div id="cvarselector">Legend variable:<br><br></div>
     <div id="buttonsundergraph">
-      <!-- <a id="savelink">Save SVG</a> -->
-      <button onclick="BDSVis.util.savesvg('svg');" data-bind="disable: timelapse">Save SVG</button>
-      <button onclick="BDSVis.util.savesvg('png');" data-bind="disable: timelapse">Save PNG</button>
-      <button data-bind="click: toggleshowdata, disable: timelapse">Show Data</button>
-      <button data-bind="click: toggletimelapse, text: tlbuttontext, disable: vars.isvar(model.timevar,'any') ">Time Lapse</button>
-      <span id="timelapsecontrols" data-bind="visible: timelapse"></span>
     </div>
     
-    <div id="datashowarea" data-bind="visible: ShowData" class="datatable">
+    <span id="showdata" style="display: none">
+    <div id="datashowarea" class="datatable">
       <a download="BDSdata.xls" href="#" onclick="return ExcellentExport.excel(this, 'graphdata', 'Firms');">Export table to Excel</a>;
       <a download="BDSdata.csv" href="#" onclick="return ExcellentExport.csv(this, 'graphdata');">CSV</a>
       <table id="graphdata">
-        <thead data-bind="foreach: data.slice(0,1)">
-            <tr data-bind="foreach: $data">
-              <th data-bind="text: $data"></th>
-            </tr>
-        </thead>
-        <tbody data-bind="foreach: data.slice(1)">
-              <tr data-bind="foreach: $data">
-                  <td data-bind="text: $data"></td>
-              </tr>
-        </tbody>
       </table>
     </div>
-    <div data-bind="visible: ShowData" class="datatable">
+    <div class="datatable">
       <table id="graphdataheaders">
-      <thead data-bind="foreach: data.slice(0,1)">
-            <tr data-bind="foreach: $data">
-              <th data-bind="text: $data"></th>
-            </tr>
-      </thead>
       </table>
     </div>
-
    </div>
+   </span>
  
 
-  <span class="selectors" data-bind="vis1ible: !timelapse()">
-
+  <span class="selectors">
   </span>
 
 <br>
  
 	<script src="js/d3.min.js"></script>
   <script src="js/topojson.v1.min.js"></script>
-  <script src="js/knockout-3.4.0.js"></script>
+  <!-- <script src="js/knockout-3.4.0.js"></script> -->
   <script src="js/colorbrewer.min.js"></script>
   <script src="js/excellentexport.min.js"></script>
   <script src="js/utilities.js"></script>
   <script src="js/model.js"></script>
-  <!-- <script src="js/statesgeodata.js"></script> -->
   <script src="js/TableView.js"></script>
   <script src="js/PlotView.js"></script>
   <script src="js/apirequest.js"></script>

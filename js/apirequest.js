@@ -6,16 +6,15 @@ BDSVis.getAPIdata = function (vm) {
 	
 	var request={}; //The list of variables to request from API. Based on this, the request URL is formed and then this list is used when plotting.
 
-	request.xvar = vm.ActualVarCode(vm.xvar());
-	request.cvar = vm.ActualVarCode(vm.cvar());
+	request.xvar = vm.ActualVarCode(vm.xvar);
+	request.cvar = vm.ActualVarCode(vm.cvar);
 
 	vm.model.variables.forEach(function(varr1) { //Add variables with requested values to the request
 
-		var varr = vm.model.IsGroup(varr1)?vm.model.LookUpVar(vm.SelectedOpts[varr1.code]()[0]):varr1; //If variable is a group variable, put variable that is selected in it instead
-
+		var varr = vm.model.IsGroup(varr1)?vm.model.LookUpVar(vm.SelectedOpts[varr1.code][0]):varr1; //If variable is a group variable, put variable that is selected in it instead
 		if (varr.code===request.xvar) request[varr.code]=vm.IncludedXvarValues[varr.code]; //For x-var take the included values
-		else if (varr.code!==request.cvar) request[varr.code]=[vm.SelectedOpts[varr.code]()[0]]; //If it's not c- or x-var only take first selected option
-		else request[varr.code] = vm.geomap()?[vm.SelectedOpts[varr.code]()[0]]:vm.SelectedOpts[varr.code]().slice(0); //For the c-var take all selected if not in geo map regime
+		else if (varr.code!==request.cvar) request[varr.code]=[vm.SelectedOpts[varr.code][0]]; //If it's not c- or x-var only take first selected option
+		else request[varr.code] = vm.geomap()?[vm.SelectedOpts[varr.code][0]]:vm.SelectedOpts[varr.code].slice(0); //For the c-var take all selected if not in geo map regime
 	
 	});
 		
@@ -28,7 +27,7 @@ BDSVis.getAPIdata = function (vm) {
 	//Whether to request all years or a particular year
 	var reqtime;
 	var tv = vm.model.LookUpVar(vm.model.timevar); //Variable denoting time (e.g. 'year2')
-	if (vm.timelapse() || vm.vars.isvar(tv.code,'x')()) //When time lapse or time variable as axis request data for all times
+	if (vm.timelapse || tv.code===vm.xvar) //When time lapse or time variable as axis request data for all times
 		reqtime = "&time=from+"+tv.range[0]+"+to+"+tv.range[1]+"";
 	else reqtime = "&"+tv.code+"="+(request[tv.code] || tv.default); //Else request for a particular time
 
@@ -54,11 +53,10 @@ BDSVis.getAPIdata = function (vm) {
 
     console.log(geturl);
     
-    vm.waiting4api(true); //Show "waiting for data" message
+    vm.PlotView.DisplayWaitingMessage();
     d3.json(geturl,function (data) { //Send request to the server and get response
     	if (data===null) {
     		console.log("Server sent empty response to " + geturl);
-    		vm.waiting4api(false);
 			vm.PlotView.DisplayNoData();
 			return;	
     	} else {
@@ -75,7 +73,7 @@ BDSVis.getAPIdata = function (vm) {
 			});
     		BDSVis.processAPIdata(data,request,vm); //Continue to data processing and plotting
     	}
-    	vm.waiting4api(false); //Hide "waiting for data" message
+    	vm.DrawUI();
     });
 };
 
@@ -90,7 +88,7 @@ BDSVis.processAPIdata = function(data,request,vm) {
 	for (var key in request) {
     	if ((key!==vm.model.yvars) && //(key!==xvar) && 
     		(key!=="cvar") &&
-    		(key!=="xvar") && (!vm.model.IsGroup(key)) && !(vm.timelapse() && (key===vm.model.timevar))) {
+    		(key!=="xvar") && (!vm.model.IsGroup(key)) && !(vm.timelapse && (key===vm.model.timevar))) {
     		data = data.filter(function(d) { return request[key].map(function(d) {return d.toString();}).indexOf(d[key])!=-1;});
     	}
 	};

@@ -23,7 +23,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	var ptitle=vm.model.NameLookUp(yvar,vm.model.yvars); //If many yvars say "various", otherwise the yvar name
 	for (var key in data[0]) {
 		//X-var should not be in the title, yvar is taken care of. Also check that the name exists in model.variables (e.g. yvar names don't)
-		if ((key!==xvar) && (key!==vm.model.yvars) && !((key===vm.model.timevar) && (vm.timelapse())) && (vm.model.VarExists(key)))
+		if ((key!==xvar) && (key!==vm.model.yvars) && !((key===vm.model.timevar) && (vm.timelapse)) && (vm.model.VarExists(key)))
 			ptitle+=vm.model.PrintTitle(data[0][key],key);
 	};
 
@@ -32,18 +32,18 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	var ymin=d3.min(data, function(d) { return +d[yvar]; });
 	var ymax=d3.max(data, function(d) { return +d[yvar]; });
 	var ymid= function(ymin,ymax) {
-		return (vm.logscale())?Math.sqrt(ymax*ymin):(ymax+ymin)*.5;
+		return (vm.logscale)?Math.sqrt(ymax*ymin):(ymax+ymin)*.5;
 	};
 	var maxabs=d3.max([Math.abs(ymin),Math.abs(ymax)]);
 	
 	//Define which scale to use, for the map and the colorbar. Note that log scale can be replaced by any other here (like sqrt), the colormap will adjust accordingly.
-	var scaletype = (vm.logscale())?d3.scale.log():d3.scale.linear();
+	var scaletype = (vm.logscale)?d3.scale.log():d3.scale.linear();
 
 	var yScale = scaletype.copy();
 	
 	var purple="rgb(112,79,161)"; var golden="rgb(194,85,12)"; var teal="rgb(22,136,51)";
 
-	if ((ymin<0) && !vm.logscale())
+	if ((ymin<0) && !vm.logscale)
 		yScale.domain([-maxabs,0,maxabs]).range(["#CB2027","#eeeeee","#265DAB"]);
 	else
 		//yScale.domain([ymin,ymax]).range(["#eeeeee","#265DAB"]);
@@ -59,7 +59,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 		emptystates=0,
 		timerange = d3.extent(data, function(d) { return +d[vm.model.timevar] });
 
-	if (vm.timelapse()) { //In time lapse regime, select only the data corresponding to the current year
+	if (vm.timelapse) { //In time lapse regime, select only the data corresponding to the current year
 		var datafull=data;
 		data=data.filter(function(d) {return +d[vm.model.timevar]===timerange[0];});
 	};
@@ -116,13 +116,13 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	function refresh() {
 		// /console.log(d3.event)
 		var t="translate(" + d3.event.translate + ")"+" scale(" + d3.event.scale + ")";
-		if (vm.zoombyrect())
+		if (vm.zoombyrect)
 			mapg.selectAll('path').attr("transform", t);
 		else {
 			var mn=ymin,//+d3.event.translate[0]*(ymax-ymin)/1e+3,
 				mx=ymax,//+d3.event.translate[1]*(ymax-ymin)/1e+3,
 				md=ymid(ymin,ymax);
-			if ((ymin<0) && !vm.logscale())
+			if ((ymin<0) && !vm.logscale)
 				yScale.domain([-d3.max([Math.abs(mn),Math.abs(mx)])*d3.event.scale,0,d3.max([Math.abs(mn),Math.abs(mx)])*d3.event.scale]);
 			else
 				yScale.domain([mn,md*d3.event.scale,mx]);
@@ -194,24 +194,24 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 		
 		map = mapg.selectAll('path')
 				.data(dataset)
-				.transition().duration(vm.timelapsespeed())
+				.transition().duration(vm.timelapsespeed)
 				.style('fill', function(d) { return yScale(d[yvar]);})
 
 		mapg.selectAll('title').data(dataset).text(function(d){return LUName(d)+": "+d3.format(",")(d[yvar]);});
 	};
 
 	//Run timelapse animation
-	if (vm.timelapse()) {
-		var iy=Math.max(timerange[0], vm.timelapsefrom());
+	if (vm.timelapse) {
+		var iy=Math.max(timerange[0], vm.timelapsefrom);
 		var step=vm.model.LookUpVar(vm.model.timevar).range[2];
 		var curyearmessage=pv.svg.append("text").attr("x",0).attr("y",height*.5).attr("font-size",100).attr("fill-opacity",.3);
 		var intervalfunction = function() {
   			updateyear(iy);
-  			if (iy<Math.min(timerange[1],vm.timelapseto())) iy+=step; else iy=Math.max(timerange[0], vm.timelapsefrom());
+  			if (iy<Math.min(timerange[1],vm.timelapseto)) iy+=step; else iy=Math.max(timerange[0], vm.timelapsefrom);
   			vm.TimeLapseCurrYear=iy;//vm.model[vm.model.timevar][iy];
 			clearInterval(vm.tlint);
-			vm.tlint=setInterval(intervalfunction, vm.timelapsespeed());
+			vm.tlint=setInterval(intervalfunction, vm.timelapsespeed);
 		}
-		vm.tlint=setInterval(intervalfunction, vm.timelapsespeed());
+		vm.tlint=setInterval(intervalfunction, vm.timelapsespeed);
 	};
 };

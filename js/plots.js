@@ -34,7 +34,7 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 			.domain(data.map(function(d) {return d[xvar]})) //For only showing categories for which data exists
 			.rangeRoundBands([0, width], .1);
 
-	if (vm.logscale()) {
+	if (vm.logscale) {
 		ymin = d3.min(data.filter(function(d) {return d[yvar]>0}), function(d) { return +d[yvar]; })/2.; // The bottom of the graph, a half of the smallest positive value
 		y0=ymin; //Where the 0 horizontal line is located, for the base of the bar. Since 0 can not be on a log plot, it's ymin
 		yScale1 = d3.scale.log().domain([ymin, d3.max(data, function(d) { return +d[yvar]; })])
@@ -53,10 +53,10 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 
 	if (limits!==undefined) {
 		if (vm.model.IsContinuous(xvarr)) {
-			(vm.logscale()?yScale1:yScale).domain([limits[2],limits[3]]);
+			(vm.logscale?yScale1:yScale).domain([limits[2],limits[3]]);
 			xScale.domain([limits[0],limits[1]]);
 		} else {
-			(vm.logscale()?yScale1:yScale).domain([ymin,limits[3]]);
+			(vm.logscale?yScale1:yScale).domain([ymin,limits[3]]);
 			xScale.domain(xScale.domain().slice(limits[0],limits[1]));
 		}
 		
@@ -97,9 +97,9 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 
 	var xAxis0 = d3.svg.axis().scale(xScale).tickFormat("").orient("bottom");
 
-	var yAxis = d3.svg.axis().scale(vm.logscale()?yScale1:yScale).orient("left");
+	var yAxis = d3.svg.axis().scale(vm.logscale?yScale1:yScale).orient("left");
 
-	if (vm.logscale()) yAxis.ticks(5,d3.format(",d"));
+	if (vm.logscale) yAxis.ticks(5,d3.format(",d"));
 
 	svg.append("g")
 		.attr("class", "x0 axis")
@@ -150,12 +150,12 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 	};
 
 
-	if (!vm.zoombyrect())
+	if ((!vm.zoombyrect) && !(vm.timelapse))
 	{
 		if(vm.model.IsContinuous(xvarr))
-			svg.call(d3.behavior.zoom().x(xScale).y(vm.logscale()?yScale1:yScale).on("zoom",  refresh));
+			svg.call(d3.behavior.zoom().x(xScale).y(vm.logscale?yScale1:yScale).on("zoom",  refresh));
 		else 
-			svg.call(d3.behavior.zoom().y(vm.logscale()?yScale1:yScale).on("zoom",  refreshBars)); 
+			svg.call(d3.behavior.zoom().y(vm.logscale?yScale1:yScale).on("zoom",  refreshBars)); 
 	}
 	
 	//Clipping lines and dots outside the plot area
@@ -172,7 +172,7 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 
 	//Zoom-by-rectangle procedure adopted from https://gist.github.com/jasondavies/3689931 and changed to redraw the whole plot and to work with bar charts
 	svg.on("mousedown", function() {
-		if (!vm.zoombyrect()) return;
+		if ((!vm.zoombyrect) || vm.timelapse) return;
       	var e = this,
 	        origin = d3.mouse(e),
 	        rect = svg.append("rect").attr("class", "zoom");
@@ -202,12 +202,12 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 					//Find new extents/limits of the plot from the rectangle size and call the plot function with them as argument
 					if (vm.model.IsContinuous(xvarr)) {
 						var leftright=[origin[0], m[0]].map(xScale.invert).sort();
-						var topbottom=[origin[1], m[1]].map((vm.logscale()?yScale1:yScale).invert).sort();
+						var topbottom=[origin[1], m[1]].map((vm.logscale?yScale1:yScale).invert).sort();
 						BDSVis.makePlot(data,request,vm,d3.merge([leftright,topbottom]));
 					} else {
 						var left=xScale.domain().map(function(d) {return xScale(d)<d3.min([origin[0], m[0]]);}).indexOf(false);
 						var right=xScale.domain().map(function(d) {return xScale(d)>d3.max([origin[0], m[0]]);}).indexOf(true);
-						var topbottom=[origin[1], m[1]].map((vm.logscale()?yScale1:yScale).invert).sort(function(a,b) {return a>b});
+						var topbottom=[origin[1], m[1]].map((vm.logscale?yScale1:yScale).invert).sort(function(a,b) {return a>b});
 						if (right===-1) right=xScale.domain().length;
 						BDSVis.makePlot(data,request,vm,d3.merge([[left,right],topbottom]));
 					}
@@ -286,7 +286,7 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 
 	legendsvg.attr("height",(symbolsize+5)*cvarlist.length);
 
-	legendsvg.append("text").attr("class","legtitle").text(cvarr.name+(((cvarlist.length>1) && !vm.timelapse())?"  (click to remove) ":"")+": ");
+	legendsvg.append("text").attr("class","legtitle").text(cvarr.name+(((cvarlist.length>1) && !vm.timelapse)?"  (click to remove) ":"")+": ");
 
 	var legendlabels=legendsvg.selectAll("text.leglabel")
 		.data(cvarlist)
@@ -299,7 +299,7 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 		//.attr("y",function(d,i) {return 1.5*i+"em";})
 		.attr("dy",1+"em")
 		.text(function(d) {return vm.model.NameLookUp(d,cvar);});
-	if ((cvarlist.length>1) && !vm.timelapse())
+	if ((cvarlist.length>1) && !vm.timelapse)
 		legendlabels.on("click",function(d) { RemoveItem(d); });
 		
 
@@ -327,7 +327,7 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 		.attr("width",symbolsize).attr("height",symbolsize)
 		.attr("y",function(d,i) {return 0.6+((i>0)?(numlines[i-1]+i*.75):0)+"em";});
 
-	if ((cvarlist.length>1) && !vm.timelapse())
+	if ((cvarlist.length>1) && !vm.timelapse)
 		legendrect.on("click",function(d) { RemoveItem(d); });
 
 	var legendheight=d3.select(".legbox").node().getBBox().height
@@ -339,7 +339,7 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 	//Continue forming title
 	for (var key in data[0]) {
 		//X-var should not be in the title, yvar is taken care of. Also check that the name exists in model.variables (e.g. yvar names don't)
-		if ((key!==xvar) && (key!==yvar) && (key!==vm.model.yvars) && !((key===vm.model.timevar) && (vm.timelapse())) && (vm.model.VarExists(key))) {
+		if ((key!==xvar) && (key!==yvar) && (key!==vm.model.yvars) && !((key===vm.model.timevar) && (vm.timelapse)) && (vm.model.VarExists(key))) {
 			if (key!==cvar) ptitle+=vm.model.PrintTitle(data[0][key],key);
 			else if (cvarlist.length === 1) ptitle+=vm.model.PrintTitle(data[0][key],key);
 			else if (key!==vm.model.yvars) ptitle+=" by " + vm.model.NameLookUp(key,"var");
@@ -360,7 +360,7 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 	// Timelapse animation
 	function updateyear(yr) {
 
-		curyearmessage.transition().duration(vm.timelapsespeed()).text(yr); //Display year
+		curyearmessage.transition().duration(vm.timelapsespeed).text(yr); //Display year
 
 		//pv.maintitle.text("");
 
@@ -385,14 +385,14 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 		bars
 		   	.attr("fill",  function(d) {return colors(d[cvar])})
 		   	.attr("x",function(d) {return xScale(d[xvar])+barwidth*cvarlist.indexOf(d[cvar]);})
-		   	.transition().duration(vm.timelapsespeed())
+		   	.transition().duration(vm.timelapsespeed)
 		   	.attr("y",function(d) { return yScale(Math.max(0,+d[yvar]));})
 		   	.attr("height",function(d) {return Math.abs(yScale(y0)-yScale(+d[yvar]));});
 
 	};
 
 	//Run timelapse animation
-	if (vm.timelapse()) {
+	if (vm.timelapse) {
 		
 		//This array is only needed for smooth transition in animations. There have to be bars of 0 height for missing data.
 		//Create array with entry for all values of xvar and all values of cvar.
@@ -404,16 +404,16 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 		
 		var timerange = d3.extent(data, function(d) { return +d[vm.model.timevar] });
 		var step=vm.model.LookUpVar(vm.model.timevar).range[2];
-		var iy=Math.max(timerange[0], vm.timelapsefrom());
+		var iy=Math.max(timerange[0], vm.timelapsefrom);
 		var curyearmessage=svg.append("text").attr("x",width/2).attr("y",height/2).attr("font-size",100).attr("fill-opacity",.3);
 		var intervalfunction = function() {
   			updateyear(iy);
-  			if (iy<Math.min(timerange[1],vm.timelapseto())) iy+=step; else iy=Math.max(timerange[0], vm.timelapsefrom());
+  			if (iy<Math.min(timerange[1],vm.timelapseto)) iy+=step; else iy=Math.max(timerange[0], vm.timelapsefrom);
   			vm.TimeLapseCurrYear=iy;//vm.model[vm.model.timevar][iy];
 			clearInterval(vm.tlint);
-			vm.tlint=setInterval(intervalfunction, vm.timelapsespeed());
+			vm.tlint=setInterval(intervalfunction, vm.timelapsespeed);
 		}
-		vm.tlint=setInterval(intervalfunction, vm.timelapsespeed());
+		vm.tlint=setInterval(intervalfunction, vm.timelapsespeed);
 	};
 
 	//BDSVis.util.preparesavesvg();
