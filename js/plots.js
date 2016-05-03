@@ -6,7 +6,7 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 
 	var pv=vm.PlotView;
 
-	pv.Init(data,request,vm);
+	pv.Refresh(data,request,vm);
 	
 	var svg=pv.svg;
 	var width=pv.width;
@@ -41,9 +41,10 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 		.range([height,0]);
 		 //0 and negative numbers are -infinity on log scale, replace them with "almost -infinity", so that they can be plotted, but outside of the graph limits.
 		//data=data.map(function(d) {if (d[yvar]<=0) d[yvar]=1e-15; return d;});
-		yScale = function(y) {
-			if (y<=0) return yScale1(1e-15); else return yScale1(y);
-		}
+		yScale = yScale1;
+		// yScale = function(y) {
+		// 	if (y<=0) return yScale1(1e-15); else return yScale1(y);
+		// }
 	} else {
 		y0=0; //Where the 0 horizontal line is located, for the base of the bar
 		ymin = Math.min(0,d3.min(data, function(d) { return +d[yvar]; })); //Bars should be plotted at least from 0.
@@ -295,8 +296,6 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 		.attr("class","leglabel")
 		.attr("fill","black")
 		.attr("x",(symbolsize+5))
-		//.attr("y",function(d,i) {return 8+(symbolsize+5)*i;})
-		//.attr("y",function(d,i) {return 1.5*i+"em";})
 		.attr("dy",1+"em")
 		.text(function(d) {return vm.model.NameLookUp(d,cvar);});
 	if ((cvarlist.length>1) && !vm.timelapse)

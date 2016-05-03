@@ -8,45 +8,48 @@ BDSVis.PlotView = {
 	legendwidth: 250,
 	titleheight: 15,
 	xaxislabelheight: 20,
-	InitSize : function() {
+	Init : function() {
 		//Define margins and dimensions of the SVG element containing the chart
 		
 		var margin = this.margin;
 		this.width = this.width0 - margin.left - margin.right;
 		this.height = this.height0 - margin.top - margin.bottom;
+
+		//Select the SVG element,, set sizes
+
+		this.svgcont = d3.select("#chartsvg");
 		
-		d3.select("#chartsvg").attr("width", this.width + margin.left + margin.right+this.legendwidth)
+		this.svgcont.attr("width", this.width + margin.left + margin.right+this.legendwidth)
 			.attr("height", this.height + margin.top + margin.bottom + this.titleheight + this.xaxislabelheight);
+
+		
+		d3.select("#buttonsundergraph").style("width",this.width + margin.left+"px");
+		d3.select("#plotarea").style("width", this.width + margin.left + margin.right+this.legendwidth+"px");
+
+		this.xvarselector = d3.select("#xvarselector");
+		this.cvarselector = d3.select("#cvarselector");
+		this.scaleui = d3.select("#logbutton");
+
 	},
 
-	Init : function(data,request,vm) {
+	Refresh : function(data,request,vm) {
 
 		var margin = this.margin;
 		var width=this.width;
 		var height=this.height;	
-
-		//Select the SVG element, remove old drawings, add grouping element for the chart
-		this.svgcont = d3.select("#chartsvg");
+		
+		//remove old drawings,  add grouping element for the chart, refresh UI elements, 
 		this.svgcont.selectAll("g").remove();
-
 		this.svg=this.svgcont
 			.append('g')
 			.attr("transform", "translate(" + margin.left + "," + (margin.top+this.titleheight)+ ")")
 			.attr('class', 'chart');
 
-		d3.select("#buttonsundergraph").style("width",width + margin.left+"px");
-		d3.select("#plotarea").style("width", width + margin.left + margin.right+this.legendwidth+"px");
-		d3.select(".waiting-caption").style("width", width + margin.left + margin.right+this.legendwidth+"px");
-
-		//d3.select("#graphdata").style("height", height + margin.top + margin.bottom-21+"px");
-
 		//Clear legend, set size
-		// this.legendsvg=d3.select("#legend").attr("width",400).attr("height",300);
-		// this.legendsvg.selectAll("*").remove();
 		this.legendx=width+margin.left+ margin.right;
 		this.legendsvg=this.svgcont
 			.append("g")
-			.attr("transform","translate("+(width+margin.left+ margin.right)+","+height*.3+")")
+			.attr("transform","translate("+this.legendx+","+height*.3+")")
 			.attr("class","leglabel legbox");
 		
 		//X-axis label
@@ -65,18 +68,17 @@ BDSVis.PlotView = {
 			.attr("y",this.height0-margin.bottom);
 
 		//UI controls on top of the chart refresh
-		d3.select("#xvarselector").selectAll("select").remove();
-		d3.select("#cvarselector").selectAll("select").remove();
-		d3.select("#logbutton").selectAll("*").remove();
+		this.xvarselector.selectAll("select").remove();
+		this.cvarselector.selectAll("select").remove();
+		this.scaleui.selectAll("*").remove();
 		if (!vm.timelapse) { //Add UI controls if not in Time Lapse regime
 
 			//Logscale Checkbox
 			var boxsize=10;
 	
-			this.logbutton = d3.select("#logbutton")
-				.append("input").attr("type","Checkbox")
+			this.logbutton=this.scaleui.append("input").attr("type","Checkbox")
 				.property("checked",function(d) {return vm.logscale;})
-			d3.select("#logbutton").append("span").text("Log")
+			this.scaleui.append("span").text("Log")
 			
 			this.logbutton.on("click",function() { 
 				vm.logscale=!vm.logscale;
@@ -84,16 +86,14 @@ BDSVis.PlotView = {
 					BDSVis.makeMap(data,request,vm);
 				else 
 					BDSVis.makePlot(data,request,vm);
-				//vm.getBDSdata();
-				//d3.event.stopPropagation();
 			});
 
 			//Rectangular zoom checkbox
-			this.rectzoom = d3.select("#logbutton")//d3.select("#resetzoom")
+			this.rectzoom = this.scaleui//d3.select("#resetzoom")
 				.append("span").text("\u00A0\u00A0")
 				.append("input").attr("type","Checkbox")
 				.property("checked",function(d) {return vm.zoombyrect;})
-			d3.select("#logbutton").append("span").text(vm.geomap()?"Zoom / Scale Colors":"Zoom by rectangle")
+			this.scaleui.append("span").text(vm.geomap()?"Zoom / Scale Colors":"Zoom by rectangle")
 
 			this.rectzoom.on("click", function() {
 				vm.zoombyrect=!vm.zoombyrect;
@@ -102,7 +102,7 @@ BDSVis.PlotView = {
 			});
 
 			//Reset Zoom button
-			this.resetzoom = d3.select("#logbutton")//d3.select("#resetzoom")
+			this.resetzoom = this.scaleui
 				.append("span").text("\u00A0\u00A0").append("button").text("Reset Zoom").on("click", function() {
 				if (vm.geomap())
 					BDSVis.makeMap(data,request,vm);
@@ -121,22 +121,22 @@ BDSVis.PlotView = {
 			};
 
 			//X-axis variable selector			
-			this.xaxisselector = d3.select("#xvarselector").append("select");
+			this.xaxisselector = this.xvarselector.append("select");
 			AddOptionsToVarSelector(this.xaxisselector,vm.model.variables.filter(function(d){return (d.asaxis && d.code!==vm.cvar)}),"xvar",false);
 			this.xaxisselector.on("change", function() { vm.setxvar(this.value);} );
 			if (vm.model.IsGroup(vm.xvar)) {
-				var groupselector = d3.select("#xvarselector").append("select");
+				var groupselector = this.xvarselector.append("select");
 				AddOptionsToVarSelector(groupselector,vm.model[vm.xvar],"xvar",true);
 				groupselector.on("change", function() {vm.SelectedOpts[vm.xvar]=[this.value]; vm.getBDSdata();});
 			};
 
 			if (!vm.geomap()) {
 				//Legend variable (cvar) selector
-				this.cvarselector = d3.select("#cvarselector").append("select");
+				this.cvarselector = this.cvarselector.append("select");
 				AddOptionsToVarSelector(this.cvarselector,vm.model.variables.filter(function(d){return  (d.aslegend && d.code!==vm.xvar)}),"cvar",false);			
 				this.cvarselector.on("change", function() { vm.setcvar(this.value);} );
 				if (vm.model.IsGroup(vm.cvar)) {
-					var groupselector = d3.select("#cvarselector").append("select");
+					var groupselector = this.cvarselector.append("select");
 					AddOptionsToVarSelector(groupselector,vm.model[vm.cvar],"cvar",true);
 					groupselector.on("change", function() {vm.SelectedOpts[vm.cvar]=[this.value]; vm.getBDSdata();});
 				};
@@ -146,13 +146,11 @@ BDSVis.PlotView = {
 	},
 
 	DisplayNoData : function() {
-		this.svgcont = d3.select("#chartsvg");
 		this.svgcont.selectAll("g").remove();
 		this.svgcont.append("g").append("text").attr("class","graphtitle").attr("x",this.width0/2).attr("y",this.height0/2).style("font-size","32px").text("No data");
 	},
 
 	DisplayWaitingMessage : function() {
-		this.svgcont = d3.select("#chartsvg");
 		this.svgcont.selectAll("g").attr("opacity",.4)
 		this.svgcont.append("g").append("text").attr("class","graphtitle").attr("x",this.width0/2).attr("y",this.height0/2).style("font-size","32px").text("Waiting for data from the server...");
 	},
@@ -197,20 +195,20 @@ BDSVis.PlotView = {
 		var chartrect=this.svgcont.node().getBoundingClientRect();
 		var xaxlrect=this.xaxislabel.node().getBoundingClientRect();
 
-		var sellength=d3.select("#xvarselector").node().getBoundingClientRect();
+		var sellength=this.xvarselector.node().getBoundingClientRect();
 		sellength = sellength.right-sellength.left;
 
-		d3.select("#xvarselector")
+		this.xvarselector
 			.style("position","absolute")
 			.style("left",(chartrect.left+wsX+(this.margin.left+this.margin.right+this.width-sellength)/2.)+"px")
 			.style("top",(xaxlrect.top+wsY)+"px");
 
-		d3.select("#cvarselector")
+		this.cvarselector
 			.style("position","absolute")
 			.style("left",(chartrect.left+wsX+this.width+this.margin.left+ this.margin.right)+"px")
 			.style("top",(chartrect.top+wsY+this.margin.top)+"px");
 
-		d3.select("#logbutton")
+		this.scaleui
 			.style("position","absolute")
 			.style("left",(this.yaxislabel.node().getBoundingClientRect().left+wsX)+"px")
 			.style("top",(xaxlrect.top+wsY)+"px");

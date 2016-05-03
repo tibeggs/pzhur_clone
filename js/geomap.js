@@ -6,7 +6,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 
 	//Initialize the SVG elements and get width and length for scales
 	var pv=vm.PlotView;
-	pv.Init(data,request,vm);
+	pv.Refresh(data,request,vm);
 	svg=pv.svg;
 	width=pv.width;
 	height=pv.height;
@@ -15,9 +15,6 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	var xvar=request.xvar;
 
 	var LUName = function(d) {return vm.model.NameLookUp(d[xvar],xvar);}
-
-	//Set graph title
-	//d3.select("#graphtitle").
 
 	//Set the title of the plot
 	var ptitle=vm.model.NameLookUp(yvar,vm.model.yvars); //If many yvars say "various", otherwise the yvar name
@@ -31,13 +28,14 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	//Set D3 scales
 	var ymin=d3.min(data, function(d) { return +d[yvar]; });
 	var ymax=d3.max(data, function(d) { return +d[yvar]; });
-	var ymid= function(ymin,ymax) {
-		return (vm.logscale)?Math.sqrt(ymax*ymin):(ymax+ymin)*.5;
-	};
 	var maxabs=d3.max([Math.abs(ymin),Math.abs(ymax)]);
 	
 	//Define which scale to use, for the map and the colorbar. Note that log scale can be replaced by any other here (like sqrt), the colormap will adjust accordingly.
 	var scaletype = (vm.logscale)?d3.scale.log():d3.scale.linear();
+	//Midpoint of the colorscale
+	var ymid= function(ymin,ymax) {
+		return scaletype.invert(.5*(scaletype(ymax)+scaletype(ymin)));
+	};
 
 	var yScale = scaletype.copy();
 	
@@ -54,8 +52,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
     var mapg = svg.append('g')
     		.attr('class', 'map');
 
-	var geo_data1=vm.geo_data.features.slice(0),//topojson.feature(vm.msa_geo_data,vm.msa_geo_data.objects.cb_2014_us_cbsa_500k).features,
-		//geo_data_empty=[],
+	var geo_data1=vm.msa_data.slice(0),
 		emptystates=0,
 		timerange = d3.extent(data, function(d) { return +d[vm.model.timevar] });
 
@@ -67,12 +64,12 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	//Put the states in geo_data in the same order as they are in data
 
 	var xir = data.map(function(d) {return LUName(d)});
-	for (var i in vm.geo_data.features) {
-		var iir = xir.indexOf(vm.geo_data.features[i].properties.NAME);
+	for (var i in vm.geo_data) {
+		var iir = xir.indexOf(vm.geo_data[i].properties.NAME);
 		if (iir === -1) {
-			geo_data1[data.length+emptystates]=vm.geo_data.features[i];
+			geo_data1[data.length+emptystates]=vm.geo_data[i];
 			emptystates++;
-		} else geo_data1[iir]=vm.geo_data.features[i]
+		} else geo_data1[iir]=vm.geo_data[i]
 	};
 
 	// debugger;
@@ -114,7 +111,6 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	//Zooming
 	svg.call(d3.behavior.zoom().on("zoom",refresh));
 	function refresh() {
-		// /console.log(d3.event)
 		var t="translate(" + d3.event.translate + ")"+" scale(" + d3.event.scale + ")";
 		if (vm.zoombyrect)
 			mapg.selectAll('path').attr("transform", t);

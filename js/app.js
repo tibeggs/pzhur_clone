@@ -228,17 +228,16 @@ BDSVis.ViewModel = function() {
 	this.xvar = "fchar";
 	this.cvar = "state";
 
-	this.PlotView.InitSize();
+	this.PlotView.Init();
 	this.PlotView.DisplayWaitingMessage();
 	//this.DrawUI();
 
 	//Call initial plot
-	//Get the geographic map from the shape file in JSON format
-	d3.json("../json/gz_2010_us_040_00_20m.json", function(state_data) {
-	//d3.json("../json/msa.json", function(geo_data) {
-		d3.json("../json/cbsa_map1.json", function(msa_data) {
-			vm.geo_data=state_data;
-			vm.msa_geo_data=msa_data;
+	//Get the geographic map from the shape file in TopoJSON format
+	d3.json("../json/tl_2015_us_state.json", function(state_data) {
+		d3.json("../json/tl_2015_us_cbsa.json", function(msa_data) {
+			vm.geo_data=topojson.feature(state_data,state_data.objects.tl_2015_us_state).features;
+			vm.msa_data=topojson.feature(msa_data,msa_data.objects.tl_2015_us_cbsa).features;
 			vm.getBDSdata();
 		});
 	});
