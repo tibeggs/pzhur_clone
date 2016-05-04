@@ -52,7 +52,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
     var mapg = svg.append('g')
     		.attr('class', 'map');
 
-	var geo_data1=vm.msa_data.slice(0),
+	var geo_data1=vm.model.msa_data.slice(0),
 		emptystates=0,
 		timerange = d3.extent(data, function(d) { return +d[vm.model.timevar] });
 
@@ -64,12 +64,12 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	//Put the states in geo_data in the same order as they are in data
 
 	var xir = data.map(function(d) {return LUName(d)});
-	for (var i in vm.geo_data) {
-		var iir = xir.indexOf(vm.geo_data[i].properties.NAME);
+	for (var i in vm.model.geo_data) {
+		var iir = xir.indexOf(vm.model.geo_data[i].properties.NAME);
 		if (iir === -1) {
-			geo_data1[data.length+emptystates]=vm.geo_data[i];
+			geo_data1[data.length+emptystates]=vm.model.geo_data[i];
 			emptystates++;
-		} else geo_data1[iir]=vm.geo_data[i]
+		} else geo_data1[iir]=vm.model.geo_data[i]
 	};
 
 	// debugger;

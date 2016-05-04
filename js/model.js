@@ -236,6 +236,38 @@ BDSVis.Model = {
 
 	InitModel : function() {
 		var tmod=this;
+		//Get the geographic map from the shape file in TopoJSON format
+		// d3_queue.queue()
+		// 	.defer(d3.json, '../json/tl_2015_us_state.json')
+		// 	.defer(d3.json, '../json/tl_2015_us_cbsa.json')
+		// 	.defer(d3.csv, 'cbsacodes.csv',function(d) {
+		// 			return (d["Metropolitan/Micropolitan Statistical Area"]==="Metropolitan Statistical Area")?{code:d["CBSA Code"], name:d["CBSA Title"]}:undefined;
+		// 		})
+		// 	.await(this.Init);
+
+		//Get the geographic map from the shape file in TopoJSON format
+		d3.json("../json/tl_2015_us_state.json", function(state_geodata) {
+			d3.json("../json/tl_2015_us_cbsa.json", function(msa_geodata) {
+				d3.csv("cbsacodes.csv", function(d) {
+					return (d["Metropolitan/Micropolitan Statistical Area"]==="Metropolitan Statistical Area")?{code:d["CBSA Code"], name:d["CBSA Title"]}:undefined;
+				}, function(msa_codes) {
+					tmod.geo_data=topojson.feature(state_geodata,state_geodata.objects.tl_2015_us_state).features;
+					tmod.msa_data=topojson.feature(msa_geodata,msa_geodata.objects.tl_2015_us_cbsa).features.filter(function(d) {return d.properties.MEMI==="1";});
+					var msac={};
+					msa_codes.forEach(function(d) { msac[d.code] = d.name; });
+					tmod.msa=[];
+					for (code in msac)
+						tmod.msa.push({name:msac[code], code:code});
+					tmod.Init()
+				});			
+			});
+		});
+	},
+
+	//Init : function(error, state_geodata, msa_geodata, msa_codes) {
+	Init : function() {
+
+		var tmod=this;
 		
 ////////		//Customization of variables: copying of code/name tables, creating colorscales etc
 		this.ifsize=this.fsize;
@@ -259,15 +291,13 @@ BDSVis.Model = {
 		};
 /////////////////////////
 
-
-		// //Create lookup table for variable by name to get index, by which one can access all the properties in this.variables
-		// for (var i in this.variables)
-		// 	this.VarLookUp[this.variables[i].code]=i;
+		// // //Create lookup table for variable by name to get index, by which one can access all the properties in this.variables
+		// // for (var i in this.variables)
+		// // 	this.VarLookUp[this.variables[i].code]=i;
 
 		//Create dictionaries/hashmaps to lookup names of categorical variable values
 		this.dicts={};this.revdicts={};
 		var CreateDicts = function (varlist) {
-					
 			varlist.forEach(function(varr) {
 				
 				if ((varr.type==='categorical')) {
@@ -295,9 +325,12 @@ BDSVis.Model = {
 
 				if (varr.customcolor) varr.colorscale=CreateCustomColorScale(varr.code);
 			});
-		}
+		};
 
-		CreateDicts(this.variables);
+		CreateDicts(tmod.variables);
+
+		//Initialize ViewModel
+		BDSVis.ViewModel(tmod);
 	},
 
 	GetDomain : function(v) {
@@ -342,6 +375,7 @@ BDSVis.Model = {
 		else if (this.IsContinuous(v))
 			return d; 
 		else return this.dicts[v][d];
+		//else return this[v].map(function(d1) {return d1.name;})[this[v].map(function(d1) {return d1.code;}).indexOf(d)];
 	},
 
 	VarExists : function (varname) {

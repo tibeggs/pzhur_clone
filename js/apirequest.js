@@ -101,7 +101,7 @@ BDSVis.processAPIdata = function(data,request,vm) {
 	//Melt the data, with yvars in the same column. Like R function "melt" from the "reshape" package. 
 	//(This is needed when several yvars are used, i.e. when yvar is also a cvar)
 	data = d3.merge(data.map(function(d) {
-		//Split each record into array of records where value equals to one of yvars, and vm.model.yvars(e.g "measure") is equal to name of that yvar
+		//Split each record into array of records where value equals to one of yvars, and vm.model.yvars(e.g "measure") is equal to the name of that yvar
 			return request[vm.model.yvars].map(function(yv){ 
 				var rec=JSON.parse(JSON.stringify(d));
                 rec[vm.model.yvars]=yv; //Set vm.model.yvars (e.g. "measure") field to which measure it is
