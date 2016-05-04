@@ -52,9 +52,19 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
     var mapg = svg.append('g')
     		.attr('class', 'map');
 
-	var geo_data1=vm.model.msa_data.slice(0),
+
+	var geo_data1=vm.model.geo_data[xvar].slice(0),
 		emptystates=0,
 		timerange = d3.extent(data, function(d) { return +d[vm.model.timevar] });
+
+	mapg.selectAll('path.outlines').data(vm.model.geo_data.state)
+			.enter()
+			.append('path')
+			.attr('class','outlines')
+			.style('fill', "white")
+			.style('stroke', 'black')
+			.style('stroke-width', 0.1)
+			.attr('d', d3.geo.path().projection(d3.geo.albersUsa().scale(800).translate([width / 2, height / 2.])))
 
 	if (vm.timelapse) { //In time lapse regime, select only the data corresponding to the current year
 		var datafull=data;
@@ -64,12 +74,12 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	//Put the states in geo_data in the same order as they are in data
 
 	var xir = data.map(function(d) {return LUName(d)});
-	for (var i in vm.model.geo_data) {
-		var iir = xir.indexOf(vm.model.geo_data[i].properties.NAME);
+	for (var i in vm.model.geo_data[xvar]) {
+		var iir = xir.indexOf(vm.model.geo_data[xvar][i].properties.NAME);
 		if (iir === -1) {
-			geo_data1[data.length+emptystates]=vm.model.geo_data[i];
+			geo_data1[data.length+emptystates]=vm.model.geo_data[xvar][i];
 			emptystates++;
-		} else geo_data1[iir]=vm.model.geo_data[i]
+		} else geo_data1[iir]=vm.model.geo_data[xvar][i]
 	};
 
 	// debugger;
@@ -79,10 +89,11 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	// 	.attr("height", height)
 	// 	.attr("opacity", 0);
 
-	var map = mapg.selectAll('path')
+	var map = mapg.selectAll('path.datacontour')
 			.data(geo_data1)
 			.enter()
 			.append('path')
+			.attr("class","datacontour")
 			.attr('d', d3.geo.path().projection(d3.geo.albersUsa().scale(800).translate([width / 2, height / 2.])))
 			.style('fill', "white")
 			.style('stroke', 'black')
@@ -140,7 +151,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	for (var i=0; i<colorbar.nlevels+1; i++) colorbar.levels.push(y2levelsScale.invert(i));
 
 	var legendtitle = legendsvg.append("text").attr("class","legtitle").text(vm.model.NameLookUp(yvar,vm.model.yvars)).attr("x",-20).attr("y",-20).attr("dy","1em");
-	legendtitle.call(BDSVis.util.wrap,pv.legendwidth);
+	legendtitle.call(pv.wrap,pv.legendwidth);
 	//legendtitle.selectAll("tspan").attr("x",function(d) { return (pv.legendwidth-this.getComputedTextLength())/2.; })
 	var titleheight = legendtitle.node().getBBox().height;
 	legendsvg=legendsvg.append("g").attr("transform","translate(0,"+titleheight+")");

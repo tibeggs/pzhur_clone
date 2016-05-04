@@ -19,10 +19,10 @@ BDSVis.getAPIdata = function (vm) {
 	});
 		
     var url = "http://api.census.gov/data/bds/firms";
-
-	var geography = "state:"+request.state; 
-	if ((request.state.length===1) && (request.state[0]==="00")) geography = "us:*"; //If only "United States" is selected then use us:*
-	if (vm.geomap()) geography = "state:*"; //In map regime use state:*
+    var geovar = vm.SelectedOpts.geo;//d3.keys(request).filter(function(d) {return vm.model.geomapvar.indexOf(d)!==-1;})[0];
+	var geography = geovar+":"+request[geovar]; 
+	if ((request[geovar].length===1) && (request[geovar][0]==="00")) geography = "us:*"; //If only "United States" is selected then use us:*
+	if (vm.geomap()) geography = geovar+":*"; //In map regime use state:*
 
 	//Whether to request all years or a particular year
 	var reqtime;
@@ -39,7 +39,7 @@ BDSVis.getAPIdata = function (vm) {
 
     	if ((key!=="cvar") &&
     		(key!=="xvar") &&
-    		(key!==vm.model.geomapvar) && 
+    		(!vm.model.IsGeomapvar(key)) && 
     		(key!==vm.model.timevar) &&  
     		(key!==vm.model.yvars))
 
@@ -49,7 +49,7 @@ BDSVis.getAPIdata = function (vm) {
     			filterstring+="&"+key+"="+request[key]; //Get records with only those values of variable with name equal to key which are in the request
     };
 
-	var geturl=url+"?get="+getstring+filterstring+"&for="+geography+reqtime+"&key=93beeef146cec68880fccbd72e455fcd7135228f";
+	var geturl=url+"?get="+getstring+filterstring+"&for="+geography.replace(" ","+")+reqtime+"&key=93beeef146cec68880fccbd72e455fcd7135228f";
 
     console.log(geturl);
     
@@ -57,15 +57,15 @@ BDSVis.getAPIdata = function (vm) {
     d3.json(geturl,function (data) { //Send request to the server and get response
     	if (data===null) {
     		console.log("Server sent empty response to " + geturl);
-			vm.PlotView.DisplayNoData();
-			return;	
+			vm.PlotView.DisplayNoData(request,vm);
+			//return;	
     	} else {
     		//Convert data into array of objects with the keys defined by the first row
 			var keys=data[0]; //First row contains keys
 			data=data.slice(1).map(function(d) {
 				var rec = {};
 				for (ikey in keys) { //Find keys, which are contained in the first line of the array returned by API
-					var key = (keys[ikey]==="us")?("state"):(keys[ikey]); //Substitute "us" field name to "state"
+					var key = (keys[ikey]==="us")?geovar:(keys[ikey]); //Substitute "us" field name to "state"
 					key = (key==="time")?vm.model.timevar:key;
 					rec[key] = d[ikey]; //Fill the object
 				};
@@ -82,7 +82,7 @@ BDSVis.getAPIdata = function (vm) {
 //Change codes into names, melt data if many yvars are chosen (= the yvar is also the cvar), call functions making table, map or plots.
 BDSVis.processAPIdata = function(data,request,vm) {
 	//"vm" is the reference to ViewModel
-	
+
  	//Filter the obtained data, so that only what is requested remains (API does not filter all the variables)
  	vm.dataunfiltered = data.slice(0);
 	for (var key in request) {
@@ -94,7 +94,7 @@ BDSVis.processAPIdata = function(data,request,vm) {
 	};
 
 	if (data.length<1) { //Display No Data message is all received data is filtered
-		vm.PlotView.DisplayNoData();
+		vm.PlotView.DisplayNoData(request,vm);
 		return;	
 	};
 

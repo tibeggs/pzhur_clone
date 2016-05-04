@@ -98,8 +98,8 @@ BDSVis.ViewModel = function(model) {
 				selectors.append("button")
 						.on("click", function() {vm.setxvar(varr.code);})
 						.classed("activebutton",vm.xvar===varr.code)
-						.property("disabled", (varr.code !== vm.model.geomapvar) && ((vm.xvar===varr.code) || (vm.cvar===varr.code)))
-						.text((varr.code===vm.model.geomapvar)?"See Map":"Make X-axis");
+						.property("disabled", (!vm.model.IsGeomapvar(varr)) && ((vm.xvar===varr.code) || (vm.cvar===varr.code)))
+						.text(vm.model.IsGeomapvar(varr)?"See Map":"Make X-axis");
 			selectors.append("br");
 		});
 	};
@@ -167,7 +167,7 @@ BDSVis.ViewModel = function(model) {
 
 	//Geo Map regime
 	this.geomap = function() {
-		return vm.model.geomapvar===vm.xvar;
+		return vm.model.IsGeomapvar(vm.xvar);
 	};
 	
 	//The following functions set cvar (Legend/Comparison/Color variable) and xvar (X-axis variable)
@@ -219,8 +219,8 @@ BDSVis.ViewModel = function(model) {
 	});
 
 	//Initial values of X-axis variable and C- variable
-	this.xvar = "fchar";
-	this.cvar = "state";
+	this.xvar = "geo";
+	this.cvar = "measure";
 
 	this.PlotView.Init();
 	this.PlotView.DisplayWaitingMessage();

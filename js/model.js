@@ -2,7 +2,7 @@ var BDSVis = BDSVis || {};
 
 BDSVis.Model = {
 	timevar : "year2", //Variable used in time lapse
-	geomapvar : "state", //Variable used in geo map regime
+	geomapvar : ["state","metropolitan statistical area"], //Variable used in geo map regime
 	yvars : "measure", //Variable plotted in y-axis
 	timelapsespeeds : [
 		{"name":"Slowest","code":"5000"},
@@ -44,16 +44,36 @@ BDSVis.Model = {
 			"asaxis" : false 
 		},
 		{
-			"code" : "state",
-			"name" : "State",
-			"type" : "categorical",
-			"default" : 0,
-			"total" : 0,
-			"APIfiltered" : true,
+			"code" : "geo",
+			"name" : "Geography",
+			"type" : "variablegroup",
+			"default" : 1,
 			"aslegend" : true,
 			"asaxis" : true,
-			"incompatible" : ["sic1"],
-			"printtitle" : {"pref":" in ", "postf":""}
+			"variables" : [
+					{
+						"code" : "state",
+						"name" : "State",
+						"type" : "categorical",
+						"default" : 0,
+						"total" : 0,
+						"APIfiltered" : true,
+						"aslegend" : true,
+						"asaxis" : true,
+						"incompatible" : ["sic1"],
+						"printtitle" : {"pref":" in ", "postf":""}
+					},
+					{
+						"code" : "metropolitan statistical area",
+						"name" : "MSA",
+						"type" : "categorical",
+						"default" : 0,
+						"APIfiltered" : true,
+						"aslegend" : true,
+						"asaxis" : true,
+						"incompatible" : ["sic1"],
+						"printtitle" : {"pref":" in ", "postf":" MSA"}
+					}]
 		},
 		{
 			"code" : "year2",
@@ -78,7 +98,7 @@ BDSVis.Model = {
 					"code" : "fage4",
 					"name" : "Firm Age",
 					"type" : "categorical",
-					"default" : 12,
+					"default" : 6,
 					"total" : 12,
 					"APIfiltered" : false,
 					"aslegend" : true,
@@ -251,13 +271,16 @@ BDSVis.Model = {
 				d3.csv("cbsacodes.csv", function(d) {
 					return (d["Metropolitan/Micropolitan Statistical Area"]==="Metropolitan Statistical Area")?{code:d["CBSA Code"], name:d["CBSA Title"]}:undefined;
 				}, function(msa_codes) {
-					tmod.geo_data=topojson.feature(state_geodata,state_geodata.objects.tl_2015_us_state).features;
-					tmod.msa_data=topojson.feature(msa_geodata,msa_geodata.objects.tl_2015_us_cbsa).features.filter(function(d) {return d.properties.MEMI==="1";});
+					tmod.geo_data={};
+					tmod.geo_data.state=topojson.feature(state_geodata,state_geodata.objects.tl_2015_us_state).features;
+					tmod.geo_data["metropolitan statistical area"]=topojson.feature(msa_geodata,msa_geodata.objects.tl_2015_us_cbsa).features.filter(function(d) {return d.properties.MEMI==="1";});
 					var msac={};
 					msa_codes.forEach(function(d) { msac[d.code] = d.name; });
-					tmod.msa=[];
+					tmod["metropolitan statistical area"]=[{"code" : "00", "name" : "United States"}];
+
 					for (code in msac)
-						tmod.msa.push({name:msac[code], code:code});
+						tmod["metropolitan statistical area"].push({name:msac[code], code:code});
+
 					tmod.Init()
 				});			
 			});
@@ -299,7 +322,7 @@ BDSVis.Model = {
 		this.dicts={};this.revdicts={};
 		var CreateDicts = function (varlist) {
 			varlist.forEach(function(varr) {
-				
+		
 				if ((varr.type==='categorical')) {
 					tmod.dicts[varr.code]={};
 					tmod[varr.code].forEach(function(value){
@@ -366,6 +389,12 @@ BDSVis.Model = {
 	IsCategorical : function (varr) {
 		if (typeof(varr)==="object") return (varr.type==="categorical");
 		else if (typeof(varr)==="string") return (this.LookUpVar(varr).type==="categorical");
+		else console.log("Variable is neither string nor object");
+	},
+
+	IsGeomapvar : function (varr) {
+		if (typeof(varr)==="object") return ((this.geomapvar.indexOf(varr.code)!==-1) || (varr.code==="geo"));
+		else if (typeof(varr)==="string") return ((this.geomapvar.indexOf(varr)!==-1) || (varr==="geo"));
 		else console.log("Variable is neither string nor object");
 	},
 

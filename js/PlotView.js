@@ -145,9 +145,22 @@ BDSVis.PlotView = {
 		this.AdjustUIElements();
 	},
 
-	DisplayNoData : function() {
+	DisplayNoData : function(request,vm) {
 		this.svgcont.selectAll("g").remove();
 		this.svgcont.append("g").append("text").attr("class","graphtitle").attr("x",this.width0/2).attr("y",this.height0/2).style("font-size","32px").text("No data");
+		if (request!==undefined) {
+			ptitle="for "+vm.model.yvars+"s ";
+			//var ptitle=vm.model.NameLookUp(yvar,vm.model.yvars); //If many yvars say "various", otherwise the yvar name
+			for (var key in request) {
+				//X-var should not be in the title, yvar is taken care of. Also check that the name exists in model.variables (e.g. yvar names don't)
+				if ((key!==request.xvar) && (key!==vm.model.yvars) && !((key===vm.model.timevar) && (vm.timelapse)) && (vm.model.VarExists(key))) {
+					console.log(request[key],key)
+					ptitle+=vm.model.PrintTitle(request[key][0],key);
+				}
+			};
+			this.svgcont.append("g").append("text").attr("class","graphtitle").attr("x",.2*this.width0).attr("y",.66*this.height0).style("font-size","18px")
+				.text(ptitle);
+		}
 	},
 
 	DisplayWaitingMessage : function() {
@@ -161,7 +174,7 @@ BDSVis.PlotView = {
 			.append("text").attr("class","graph-title")
 			.text(ptitle)
 			.attr("dy",1+"em").attr("y","0");
-		this.maintitle.call(BDSVis.util.wrap,pv.width);
+		this.maintitle.call(pv.wrap,pv.width);
 		this.maintitle.selectAll("tspan").attr("x",function(d) { return (pv.legendx-this.getComputedTextLength())/2.; });
 
 		this.AdjustUIElements();
@@ -212,5 +225,31 @@ BDSVis.PlotView = {
 			.style("position","absolute")
 			.style("left",(this.yaxislabel.node().getBoundingClientRect().left+wsX)+"px")
 			.style("top",(xaxlrect.top+wsY)+"px");
+	},
+
+	wrap: function(text, width) {
+	  	text.each(function() {
+		    var text = d3.select(this),
+		        words = text.text().split(/[\s]+/).reverse(),
+		        word,
+		        line = [],
+		        lineNumber = 0,
+		        lineHeight = 1.1, // ems
+		        y = text.attr("y"),
+		        dy = parseFloat(text.attr("dy")),
+		        tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em");
+	        while (word = words.pop()) {
+	        	line.push(word);
+	        	tspan.text(line.join(" "));
+	        	if (tspan.node().getComputedTextLength() > width) {
+	        		line.pop();
+	        		tspan.text(line.join(" "));
+	        		line = [word];
+	        		if (tspan.node().getComputedTextLength()>0) //Corrected to not make a new line when even the single word is too long
+	        			lineNumber++;
+		        	tspan = text.append("tspan").attr("x", 0).attr("y", y).attr("dy", lineNumber * lineHeight + dy + "em").text(word);
+	   		 	}
+			}
+	  	});
 	}
 };

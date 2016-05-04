@@ -114,7 +114,7 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 		.selectAll(".tick text");
 
 	if (vm.model.IsCategorical(xvarr))
-      	xAxisLabels.call(BDSVis.util.wrap,xScale.rangeBand());
+      	xAxisLabels.call(pv.wrap,xScale.rangeBand());
 
 	svg.append("g")
 	.attr("class", "y axis")
@@ -303,7 +303,7 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 		
 
 	//Split long labels into multiple lines
-	legendlabels.call(BDSVis.util.wrap,pv.legendwidth - (symbolsize+5));
+	legendlabels.call(pv.wrap,pv.legendwidth - (symbolsize+5));
 	legendlabels.selectAll("tspan").attr("x",(symbolsize+5));
 	var numlines=legendsvg.selectAll(".leglabel").selectAll("tspan").map(function(d) {return d.length;}); //Number of lines in each label
 	tspany=[]; //"y" attributes for tspans
