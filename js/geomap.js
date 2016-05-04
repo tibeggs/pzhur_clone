@@ -199,7 +199,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 		var dataset=datafull.filter(function(d) {return +d[vm.model.timevar]===yr}); //Select data corresponding to the year
 		vm.TableView.makeDataTable(dataset,vm.model.yvars,xvar,vm); //Change the data that is displayed raw as a table
 		
-		map = mapg.selectAll('path')
+		map = mapg.selectAll('path.datacontour')
 				.data(dataset)
 				.transition().duration(vm.timelapsespeed)
 				.style('fill', function(d) { return yScale(d[yvar]);})

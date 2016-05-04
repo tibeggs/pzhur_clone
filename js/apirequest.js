@@ -49,7 +49,7 @@ BDSVis.getAPIdata = function (vm) {
     			filterstring+="&"+key+"="+request[key]; //Get records with only those values of variable with name equal to key which are in the request
     };
 
-	var geturl=url+"?get="+getstring+filterstring+"&for="+geography.replace(" ","+")+reqtime+"&key=93beeef146cec68880fccbd72e455fcd7135228f";
+	var geturl=url+"?get="+getstring+filterstring+"&for="+geography.replace(/ /g,"+")+reqtime+"&key=93beeef146cec68880fccbd72e455fcd7135228f";
 
     console.log(geturl);
     
