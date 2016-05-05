@@ -74,6 +74,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	//Put the states in geo_data in the same order as they are in data
 
 	var xir = data.map(function(d) {return LUName(d)});
+	//var xir = data.map(function(d) {return d[xvar]});
 	for (var i in vm.model.geo_data[xvar]) {
 		var iir = xir.indexOf(vm.model.geo_data[xvar][i].properties.NAME);
 		if (iir === -1) {

@@ -267,16 +267,19 @@ BDSVis.Model = {
 		// 	.await(this.Init);
 
 		//Get the geographic map from the shape file in TopoJSON format
-		d3.json("../json/tl_2015_us_state.json", function(state_geodata) {
-			// d3.json("../json/tl_2015_us_cbsa.json", function(msa_geodata) {
-			d3.json("../json/msatopo.json", function(msa_geodata) {
+		// d3.json("../json/tl_2015_us_state.json", function(state_geodata) {
+		d3.json("../json/states.json", function(state_geodata) {
+			d3.json("../json/tl_2015_us_cbsa.json", function(msa_geodata) {
+			//d3.json("../json/msatopo.json", function(msa_geodata) {
 				d3.csv("cbsacodes.csv", function(d) {
 					return (d["Metropolitan/Micropolitan Statistical Area"]==="Metropolitan Statistical Area")?{code:d["CBSA Code"], name:d["CBSA Title"]}:undefined;
 				}, function(msa_codes) {
 					tmod.geo_data={};
-					tmod.geo_data.state=topojson.feature(state_geodata,state_geodata.objects.tl_2015_us_state).features;
-					// tmod.geo_data["metropolitan statistical area"]=topojson.feature(msa_geodata,msa_geodata.objects.tl_2015_us_cbsa).features.filter(function(d) {return d.properties.MEMI==="1";});
-					tmod.geo_data["metropolitan statistical area"]=topojson.feature(msa_geodata,msa_geodata.objects.msa).features;
+					//tmod.geo_data.state=topojson.feature(state_geodata,state_geodata.objects.tl_2015_us_state).features;
+					tmod.geo_data.state=topojson.feature(state_geodata,state_geodata.objects.gz_2010_us_040_00_5m).features;
+					tmod.geo_data["metropolitan statistical area"]=topojson.feature(msa_geodata,msa_geodata.objects.tl_2015_us_cbsa).features.filter(function(d) {return d.properties.MEMI==="1";});
+					// tmod.geo_data["metropolitan statistical area"]=topojson.feature(msa_geodata,msa_geodata.objects.msa).features;
+					debugger;
 					var msac={};
 					msa_codes.forEach(function(d) { msac[d.code] = d.name; });
 					tmod["metropolitan statistical area"]=[{"code" : "00", "name" : "United States"}];
