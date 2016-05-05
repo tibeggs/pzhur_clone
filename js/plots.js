@@ -203,7 +203,7 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 					//Find new extents/limits of the plot from the rectangle size and call the plot function with them as argument
 					if (vm.model.IsContinuous(xvarr)) {
 						var leftright=[origin[0], m[0]].map(xScale.invert).sort();
-						var topbottom=[origin[1], m[1]].map((vm.logscale?yScale1:yScale).invert).sort();
+						var topbottom=[origin[1], m[1]].map((vm.logscale?yScale1:yScale).invert).sort(function(a,b) {return a>b});
 						BDSVis.makePlot(data,request,vm,d3.merge([leftright,topbottom]));
 					} else {
 						var left=xScale.domain().map(function(d) {return xScale(d)<d3.min([origin[0], m[0]]);}).indexOf(false);

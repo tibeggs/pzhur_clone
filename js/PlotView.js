@@ -154,7 +154,6 @@ BDSVis.PlotView = {
 			for (var key in request) {
 				//X-var should not be in the title, yvar is taken care of. Also check that the name exists in model.variables (e.g. yvar names don't)
 				if ((key!==request.xvar) && (key!==vm.model.yvars) && !((key===vm.model.timevar) && (vm.timelapse)) && (vm.model.VarExists(key))) {
-					console.log(request[key],key)
 					ptitle+=vm.model.PrintTitle(request[key][0],key);
 				}
 			};

@@ -32,7 +32,7 @@ BDSVis.Model = {
 			"APIfiltered" : true,
 			"aslegend" : true,
 			"asaxis" : true,
-			"incompatible" : ["state"],
+			"incompatible" : ["state","metropolitan statistical area"],
 			"printtitle" : {"pref":" in ", "postf":" sector"}
 		},
 		{
@@ -68,6 +68,7 @@ BDSVis.Model = {
 						"name" : "MSA",
 						"type" : "categorical",
 						"default" : 0,
+						"total" : 0,
 						"APIfiltered" : true,
 						"aslegend" : true,
 						"asaxis" : true,

@@ -60,7 +60,7 @@ BDSVis.ViewModel = function(model) {
 				.property("disabled", (vm.xvar===varr.code) && !vm.model.IsGroup(varr))
 				.selectAll("option").data(vm.model[varr.code]).enter()
 				.append("option")
-				.property("selected", function(d){return vm.SelectedOpts[varr.code].indexOf(vm.model.IsContinuous(varr)?d:d.code)!==-1;})
+				.property("selected", function(d){ return vm.SelectedOpts[varr.code].indexOf(vm.model.IsContinuous(varr)?d:d.code)===0;})
 				.text(function(d) {return vm.model.IsContinuous(varr)?d:d.name;})
 				.attr("value",function(d) {return vm.model.IsContinuous(varr)?d:d.code;}); 
 
@@ -78,7 +78,7 @@ BDSVis.ViewModel = function(model) {
 					})
 					.selectAll("option").data(vm.model[varr1code]).enter()
 					.append("option")
-					.property("selected", function(d){return vm.SelectedOpts[varr1code].indexOf(d.code)!==-1;})
+					.property("selected", function(d){return vm.SelectedOpts[varr1code].indexOf(d.code)===0;})
 					.text(function(d) {return vm.model.IsContinuous(varr1code)?d:d.name;})
 					.attr("value",function(d) {return vm.model.IsContinuous(varr1code)?d:d.code;});	
 			};
