@@ -120,7 +120,7 @@ BDSVis.ViewModel = function(model) {
 
 	// The reference to function that forms and sends API request and gets data (apirequest.js)
 	this.getBDSdata = function () {
-		d3.select(".selectors").selectAll('*').property("disabled",true);//remove();//
+		d3.select(".selectors").selectAll('*').property("disabled",true);//remove();// Disable all selectors and buttons while data is loading
 		BDSVis.getAPIdata(vm);
 		//DrawUI();
 	};

@@ -57,14 +57,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 		emptystates=0,
 		timerange = d3.extent(data, function(d) { return +d[vm.model.timevar] });
 
-	mapg.selectAll('path.outlines').data(vm.model.geo_data.state)
-			.enter()
-			.append('path')
-			.attr('class','outlines')
-			.style('fill', "white")
-			.style('stroke', 'black')
-			.style('stroke-width', 0.1)
-			.attr('d', d3.geo.path().projection(d3.geo.albersUsa().scale(800).translate([width / 2, height / 2.])))
+	
 
 	if (vm.timelapse) { //In time lapse regime, select only the data corresponding to the current year
 		var datafull=data;
@@ -87,8 +80,15 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 
 	// svg.append("rect")
 	// 	.attr("width", width)
-	// 	.attr("height", height)
-	// 	.attr("opacity", 0);
+	// 	.attr("height", height);
+	mapg.selectAll('path.outlines').data(vm.model.geo_data.state)
+			.enter()
+			.append('path')
+			.attr('class','outlines')
+			.style('fill', "white")
+			.style('stroke', 'black')
+			.style('stroke-width', 0.1)
+			.attr('d', d3.geo.path().projection(d3.geo.albersUsa().scale(800).translate([width / 2, height / 2.])))
 
 	var map = mapg.selectAll('path.datacontour')
 			.data(geo_data1)
@@ -140,6 +140,15 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 				.style("fill",function(d) {return yScale(d[yvar]);})
 		};
 	}; 
+
+	// mapg.selectAll('path.outlines').data(vm.model.geo_data.state)
+	// 		.enter()
+	// 		.append('path')
+	// 		.attr('class','outlines')
+	// 		.style('fill', "none")
+	// 		.style('stroke', 'black')
+	// 		.style('stroke-width', 0.1)
+	// 		.attr('d', d3.geo.path().projection(d3.geo.albersUsa().scale(800).translate([width / 2, height / 2.])))
 
 	//Making Legend
 	var legendsvg=vm.PlotView.legendsvg;

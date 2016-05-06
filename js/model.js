@@ -257,38 +257,24 @@ BDSVis.Model = {
 
 	InitModel : function() {
 		var tmod=this;
-		//Get the geographic map from the shape file in TopoJSON format
-		// d3_queue.queue()
-		// 	.defer(d3.json, '../json/tl_2015_us_state.json')
-		// 	.defer(d3.json, '../json/tl_2015_us_cbsa.json')
-		// 	.defer(d3.csv, 'cbsacodes.csv',function(d) {
-		// 			return (d["Metropolitan/Micropolitan Statistical Area"]==="Metropolitan Statistical Area")?{code:d["CBSA Code"], name:d["CBSA Title"]}:undefined;
-		// 		})
-		// 	.await(this.Init);
 
 		//Get the geographic map from the shape file in TopoJSON format
-		// d3.json("../json/tl_2015_us_state.json", function(state_geodata) {
-		d3.json("../json/states.json", function(state_geodata) {
-			d3.json("../json/tl_2015_us_cbsa.json", function(msa_geodata) {
-			//d3.json("../json/msatopo.json", function(msa_geodata) {
-				d3.csv("cbsacodes.csv", function(d) {
-					return (d["Metropolitan/Micropolitan Statistical Area"]==="Metropolitan Statistical Area")?{code:d["CBSA Code"], name:d["CBSA Title"]}:undefined;
-				}, function(msa_codes) {
-					tmod.geo_data={};
-					//tmod.geo_data.state=topojson.feature(state_geodata,state_geodata.objects.tl_2015_us_state).features;
-					tmod.geo_data.state=topojson.feature(state_geodata,state_geodata.objects.gz_2010_us_040_00_5m).features;
-					tmod.geo_data["metropolitan statistical area"]=topojson.feature(msa_geodata,msa_geodata.objects.tl_2015_us_cbsa).features.filter(function(d) {return d.properties.MEMI==="1";});
-					// tmod.geo_data["metropolitan statistical area"]=topojson.feature(msa_geodata,msa_geodata.objects.msa).features;
-					debugger;
-					var msac={};
-					msa_codes.forEach(function(d) { msac[d.code] = d.name; });
-					tmod["metropolitan statistical area"]=[{"code" : "00", "name" : "United States"}];
+		d3.json("../json/cb_2015_us_state_20m.json", function(state_geodata) {
+			d3.json("../json/cb_2015_us_cbsa_20m.json", function(msa_geodata) {			
+				tmod.geo_data={};
 
-					for (code in msac)
-						tmod["metropolitan statistical area"].push({name:msac[code], code:code});
-
-					tmod.Init()
-				});			
+				tmod.geo_data.state=topojson.feature(state_geodata,state_geodata.objects.cb_2015_us_state_20m).features;
+				tmod.geo_data["metropolitan statistical area"]=topojson.feature(msa_geodata,msa_geodata.objects.cb_2015_us_cbsa_20m).features.filter(function(d) {return d.properties.LSAD==="M1";});
+				
+				tmod["metropolitan statistical area"] = 
+				tmod.geo_data["metropolitan statistical area"]
+					.map(function(d) {return {name:d.properties.NAME,code:d.properties.GEOID};})
+					.sort(function(a,b) {return a.name.localeCompare(b.name);});;
+				
+				tmod["metropolitan statistical area"].unshift({"code" : "00", "name" : "United States"});
+			
+				tmod.Init();
+			
 			});
 		});
 	},
