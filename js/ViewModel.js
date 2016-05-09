@@ -46,48 +46,38 @@ BDSVis.ViewModel = function(model) {
 		//UI elements for variable selection
 		var selectors = d3.select('.selectors');
 		selectors.selectAll('*').remove();
+
+		function AddSelectorWOptions(varr, isundergroupvar) {
+			var varr1code = isundergroupvar ? vm.SelectedOpts[varr.code][0] : varr.code;
+			var multiple = vm.multiple(varr.code) && (!vm.model.IsGroup(varr) || isundergroupvar);
+			selectors.append("select")//Add the selector
+				.on("change", function() {
+					vm.SelectedOpts[varr1code]=d3.selectAll(this.childNodes)[0].filter(function(d) {return d.selected}).map(function(d) {return d.value});
+					vm.getBDSdata();
+				})
+				.property("multiple", multiple)
+				.classed("tallselector", multiple)
+				.property("disabled", (vm.xvar===varr.code) && (!vm.model.IsGroup(varr) || isundergroupvar))
+				.selectAll("option").data(vm.model[varr1code]).enter()
+				.append("option")
+				.property("selected", function(d){
+					var selind = vm.SelectedOpts[varr1code].indexOf(vm.model.IsContinuous(varr)?d:d.code); 
+					return vm.multiple(varr.code)?(selind!==-1):(selind===0);
+				})
+				.text(function(d) {return vm.model.IsContinuous(varr1code)?d:d.name;})
+				.attr("value",function(d) {return vm.model.IsContinuous(varr1code)?d:d.code;}); 
+		};
+
 		vm.model.variables.forEach(function(varr) { //For each variable create selector and buttons
 		
 			selectors.append("h4").text(varr.name+":"); //Add the title for selector
-
-			selectors.append("select")//.attr("data-bind", databind) //Add the selector
-				.on("change", function() {
-					vm.SelectedOpts[varr.code]=d3.selectAll(this.childNodes)[0].filter(function(d) {return d.selected}).map(function(d) {return d.value});
-					vm.getBDSdata();
-				})
-				.property("multiple", vm.multiple(varr.code) && !vm.model.IsGroup(varr))
-				.classed("tallselector", vm.multiple(varr.code) && !vm.model.IsGroup(varr))
-				.property("disabled", (vm.xvar===varr.code) && !vm.model.IsGroup(varr))
-				.selectAll("option").data(vm.model[varr.code]).enter()
-				.append("option")
-				.property("selected", function(d){
-					var selind = vm.SelectedOpts[varr.code].indexOf(vm.model.IsContinuous(varr)?d:d.code); 
-					return vm.multiple(varr.code)?(selind!==-1):(selind===0);
-				})
-				.text(function(d) {return vm.model.IsContinuous(varr)?d:d.name;})
-				.attr("value",function(d) {return vm.model.IsContinuous(varr)?d:d.code;}); 
+			
+			AddSelectorWOptions(varr, false); //Add the selector for the variable
 
 			if (vm.model.IsGroup(varr)) { //Add selector for the choice selected in the group variable selector
-				var varr1code=vm.SelectedOpts[varr.code][0];
 				selectors.append("br");
 				selectors.append("h4");
-				selectors.append("select")
-					.property("multiple", vm.multiple(varr.code))
-					.classed("tallselector", vm.multiple(varr.code))
-					.property("disabled", vm.xvar===varr.code)
-					.on("change", function() {
-						vm.SelectedOpts[varr1code]=d3.selectAll(this.childNodes)[0].filter(function(d) {return d.selected}).map(function(d) {return d.value});
-						vm.getBDSdata();
-					})
-					.selectAll("option").data(vm.model[varr1code]).enter()
-					.append("option")
-					.property("selected", function(d){
-						debugger;
-						var selind = vm.SelectedOpts[varr1code].indexOf(vm.model.IsContinuous(varr)?d:d.code); 
-						return vm.multiple(varr.code)?(selind!==-1):(selind===0);
-					})
-					.text(function(d) {return vm.model.IsContinuous(varr1code)?d:d.name;})
-					.attr("value",function(d) {return vm.model.IsContinuous(varr1code)?d:d.code;});	
+				AddSelectorWOptions(varr, true);
 			};
 		
 			if (varr.aslegend) { //Add the 'Compare' button
@@ -180,7 +170,6 @@ BDSVis.ViewModel = function(model) {
 	//The following functions set cvar (Legend/Comparison/Color variable) and xvar (X-axis variable)
 	this.setcvar = function (varname) {
 		vm.cvar=varname;
-
 		if (vm.model.LookUpVar(varname).incompatible !== undefined)
 			vm.model.LookUpVar(varname).incompatible.forEach(function(incvar){
 				vm.SelectedOpts[incvar]=[vm.model[incvar][vm.model.LookUpVar(incvar).total].code];

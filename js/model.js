@@ -32,7 +32,7 @@ BDSVis.Model = {
 			"APIfiltered" : true,
 			"aslegend" : true,
 			"asaxis" : true,
-			"incompatible" : ["state","metropolitan statistical area"],
+			"incompatible" : ["state","metropolitan statistical area","metro"],
 			"printtitle" : {"pref":" in ", "postf":" sector"}
 		},
 		{
@@ -60,7 +60,7 @@ BDSVis.Model = {
 						"APIfiltered" : true,
 						"aslegend" : true,
 						"asaxis" : true,
-						"incompatible" : ["sic1"],
+						"incompatible" : ["sic1","metro"],
 						"printtitle" : {"pref":" in ", "postf":""}
 					},
 					{
@@ -72,10 +72,23 @@ BDSVis.Model = {
 						"APIfiltered" : true,
 						"aslegend" : true,
 						"asaxis" : true,
-						"incompatible" : ["sic1"],
+						"incompatible" : ["sic1","metro"],
 						"printtitle" : {"pref":" in ", "postf":" MSA"}
-					}]
+					},
+					]
 		},
+		{
+				"code" : "metro",
+				"name" : "Metro/Non-Metro",
+				"type" : "categorical",
+				"default" : 2,
+				"total" : 2,
+				"APIfiltered" : false,
+				"aslegend" : true,
+				"asaxis" : true,
+				"incompatible" : ["sic1","state","metropolitan statistical area"],
+				"printtitle" : {"pref":" in ", "postf":" areas"}
+			},
 		{
 			"code" : "year2",
 			"name" : "Year",
@@ -254,6 +267,11 @@ BDSVis.Model = {
 		{"code" : "firmdeath_firms", "name" : "Number of firm exits" },
 		{"code" : "firmdeath_estabs", "name" : "Establishment exit due to firm death" },
 		{"code" : "firmdeath_emp", "name" : "Job destruction from firm exit" }],
+
+	metro: [
+		{"code" : "M", "name" : "Metropolitan Statistical Area"},
+		{"code" : "N", "name" : "Non-metropolitan Statistical Area"},
+		{"code" : "o", "name" : "All Areas"}],
 
 	InitModel : function() {
 		var tmod=this;
