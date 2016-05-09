@@ -121,9 +121,9 @@ BDSVis.PlotView = {
 			};
 
 			//X-axis variable selector			
-			this.xaxisselector = this.xvarselector.append("select");
-			AddOptionsToVarSelector(this.xaxisselector,vm.model.variables.filter(function(d){return (d.asaxis && d.code!==vm.cvar)}),"xvar",false);
-			this.xaxisselector.on("change", function() { vm.setxvar(this.value);} );
+			var selector = this.xvarselector.append("select");
+			AddOptionsToVarSelector(selector,vm.model.variables.filter(function(d){return (d.asaxis && d.code!==vm.cvar)}),"xvar",false);
+			selector.on("change", function() { vm.setxvar(this.value);} );
 			if (vm.model.IsGroup(vm.xvar)) {
 				var groupselector = this.xvarselector.append("select");
 				AddOptionsToVarSelector(groupselector,vm.model[vm.xvar],"xvar",true);
@@ -132,9 +132,9 @@ BDSVis.PlotView = {
 
 			if (!vm.geomap()) {
 				//Legend variable (cvar) selector
-				this.cvarselector = this.cvarselector.append("select");
-				AddOptionsToVarSelector(this.cvarselector,vm.model.variables.filter(function(d){return  (d.aslegend && d.code!==vm.xvar)}),"cvar",false);			
-				this.cvarselector.on("change", function() { vm.setcvar(this.value);} );
+				selector = this.cvarselector.append("select");
+				AddOptionsToVarSelector(selector,vm.model.variables.filter(function(d){return  (d.aslegend && d.code!==vm.xvar)}),"cvar",false);			
+				selector.on("change", function() { vm.setcvar(this.value);} );
 				if (vm.model.IsGroup(vm.cvar)) {
 					var groupselector = this.cvarselector.append("select");
 					AddOptionsToVarSelector(groupselector,vm.model[vm.cvar],"cvar",true);
