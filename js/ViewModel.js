@@ -82,8 +82,9 @@ BDSVis.ViewModel = function(model) {
 					.selectAll("option").data(vm.model[varr1code]).enter()
 					.append("option")
 					.property("selected", function(d){
+						debugger;
 						var selind = vm.SelectedOpts[varr1code].indexOf(vm.model.IsContinuous(varr)?d:d.code); 
-						return vm.multiple(varr1code)?(selind!==-1):(selind===0);
+						return vm.multiple(varr.code)?(selind!==-1):(selind===0);
 					})
 					.text(function(d) {return vm.model.IsContinuous(varr1code)?d:d.name;})
 					.attr("value",function(d) {return vm.model.IsContinuous(varr1code)?d:d.code;});	
