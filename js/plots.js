@@ -41,23 +41,24 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 		.range([height,0]);
 		 //0 and negative numbers are -infinity on log scale, replace them with "almost -infinity", so that they can be plotted, but outside of the graph limits.
 		//data=data.map(function(d) {if (d[yvar]<=0) d[yvar]=1e-15; return d;});
-		yScale = yScale1;
-		// yScale = function(y) {
-		// 	if (y<=0) return yScale1(1e-15); else return yScale1(y);
-		// }
+		
+		yScale = function(y) {
+			if (y<=0) return yScale1(1e-15); else return yScale1(y);
+		}
 	} else {
 		y0=0; //Where the 0 horizontal line is located, for the base of the bar
 		ymin = Math.min(0,d3.min(data, function(d) { return +d[yvar]; })); //Bars should be plotted at least from 0.
 		yScale = d3.scale.linear().domain([ymin, d3.max(data, function(d) { return +d[yvar]; })])
-		.range([height,0]);
+			.range([height,0]);
+		yScale1 = yScale;
 	};
 
 	if (limits!==undefined) {
 		if (vm.model.IsContinuous(xvarr)) {
-			(vm.logscale?yScale1:yScale).domain([limits[2],limits[3]]);
+			yScale1.domain([limits[2],limits[3]]);
 			xScale.domain([limits[0],limits[1]]);
 		} else {
-			(vm.logscale?yScale1:yScale).domain([ymin,limits[3]]);
+			yScale1.domain([ymin,limits[3]]);
 			xScale.domain(xScale.domain().slice(limits[0],limits[1]));
 		}
 		
@@ -98,7 +99,7 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 
 	var xAxis0 = d3.svg.axis().scale(xScale).tickFormat("").orient("bottom");
 
-	var yAxis = d3.svg.axis().scale(vm.logscale?yScale1:yScale).orient("left");
+	var yAxis = d3.svg.axis().scale(yScale1).orient("left");
 
 	if (vm.logscale) yAxis.ticks(5,d3.format(",d"));
 
@@ -150,13 +151,15 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 		   	.attr("height", function(d) {return Math.abs(yScale(y0)-yScale(+d[yvar]))})
 	};
 
+	if(vm.model.IsContinuous(xvarr))
+		pv.zoom = d3.behavior.zoom().x(xScale).y(yScale1).on("zoom",  refresh);
+	else 
+		pv.zoom = d3.behavior.zoom().y(yScale1).on("zoom",  refreshBars); 
+
 
 	if ((!vm.zoombyrect) && !(vm.timelapse))
 	{
-		if(vm.model.IsContinuous(xvarr))
-			svg.call(d3.behavior.zoom().x(xScale).y(vm.logscale?yScale1:yScale).on("zoom",  refresh));
-		else 
-			svg.call(d3.behavior.zoom().y(vm.logscale?yScale1:yScale).on("zoom",  refreshBars)); 
+		svg.call(pv.zoom);
 	}
 	
 	//Clipping lines and dots outside the plot area
@@ -203,12 +206,12 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 					//Find new extents/limits of the plot from the rectangle size and call the plot function with them as argument
 					if (vm.model.IsContinuous(xvarr)) {
 						var leftright=[origin[0], m[0]].map(xScale.invert).sort();
-						var topbottom=[origin[1], m[1]].map((vm.logscale?yScale1:yScale).invert).sort(function(a,b) {return a>b});
+						var topbottom=[origin[1], m[1]].map((yScale1).invert).sort(function(a,b) {return a>b});
 						BDSVis.makePlot(data,request,vm,d3.merge([leftright,topbottom]));
 					} else {
 						var left=xScale.domain().map(function(d) {return xScale(d)<d3.min([origin[0], m[0]]);}).indexOf(false);
 						var right=xScale.domain().map(function(d) {return xScale(d)>d3.max([origin[0], m[0]]);}).indexOf(true);
-						var topbottom=[origin[1], m[1]].map((vm.logscale?yScale1:yScale).invert).sort(function(a,b) {return a>b});
+						var topbottom=[origin[1], m[1]].map((yScale1).invert).sort(function(a,b) {return a>b});
 						if (right===-1) right=xScale.domain().length;
 						BDSVis.makePlot(data,request,vm,d3.merge([[left,right],topbottom]));
 					}
@@ -217,14 +220,22 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 		d3.event.stopPropagation();
 	});
 
+	// var tip = d3.tip()
+	// 	.attr('class', 'd3-tip')
+	// 	.offset(function(d) {return [-10, yScale(d[yvar]/2.)];})
+	// 	.html(function(d) {
+	// 	return Tooltiptext(d);
+	// });
+	// svg.call(tip);
+
 	
 	if (vm.model.IsContinuous(xvarr)) {
 		//Make a scatter plot if x-variable is continuous
 
 		// Define the line
 		var valueline = d3.svg.line().interpolate("monotone")
-    	.x(function(d) { return xScale(d[xvar]); })
-    	.y(function(d) { return yScale(d[yvar]); });
+	    	.x(function(d) { return xScale(d[xvar]); })
+	    	.y(function(d) { return yScale(d[yvar]); });
 
     	
     	chart.selectAll("path.plotline")
@@ -264,14 +275,16 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 		   	.attr("x",function(d) {return xScale(d[xvar])+barwidth*cvarlist.indexOf(d[cvar])})
 		   	.attr("y",function(d) {return yScale(Math.max(0,+d[yvar]))})
 		   	.attr("height", function(d) {return Math.abs(yScale(y0)-yScale(+d[yvar]))})
-		   	.on("click",function(d) {
+		   	.on("dblclick",function(d) {
 				var ind = vm.IncludedXvarValues[xvar].indexOf(d[xvar]);
 				vm.IncludedXvarValues[xvar].splice(ind,1);
 				BDSVis.processAPIdata(data,request,vm);
 			})
+			// .on('mouseover', tip.show)
+   //    		.on('mouseout', tip.hide)
 		   	.append("title").text(function(d){return Tooltiptext(d);});
 
-		pv.lowerrightcornertext.text("Click on bar to remove category");
+		pv.lowerrightcornertext.text("Double-click on bar to remove category");
 	};
 
 	//Making Legend

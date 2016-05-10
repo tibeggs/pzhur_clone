@@ -11,10 +11,10 @@ BDSVis.getAPIdata = function (vm) {
 
 	vm.model.variables.forEach(function(varr1) { //Add variables with requested values to the request
 
-		var varr = vm.model.IsGroup(varr1)?vm.model.LookUpVar(vm.SelectedOpts[varr1.code][0]):varr1; //If variable is a group variable, put variable that is selected in it instead
-		if (varr.code===request.xvar) request[varr.code]=vm.IncludedXvarValues[varr.code]; //For x-var take the included values
-		else if (varr.code!==request.cvar) request[varr.code]=[vm.SelectedOpts[varr.code][0]]; //If it's not c- or x-var only take first selected option
-		else request[varr.code] = vm.geomap()?[vm.SelectedOpts[varr.code][0]]:vm.SelectedOpts[varr.code].slice(0); //For the c-var take all selected if not in geo map regime
+		var varr = vm.model.IsGroup(varr1) ? vm.model.LookUpVar(vm.SelectedOpts[varr1.code][0]) : varr1; //If variable is a group variable, put variable that is selected in it instead
+		if (varr.code === request.xvar) request[varr.code] = vm.IncludedXvarValues[varr.code]; //For x-var take the included values
+		else if (varr.code !== request.cvar) request[varr.code] = [vm.SelectedOpts[varr.code][0]]; //If it's not c- or x-var only take first selected option
+		else request[varr.code] = vm.geomap() ? [vm.SelectedOpts[varr.code][0]] : vm.SelectedOpts[varr.code].slice(0); //For the c-var take all selected if not in geo map regime
 	
 	});
 		
@@ -83,13 +83,15 @@ BDSVis.getAPIdata = function (vm) {
 BDSVis.processAPIdata = function(data,request,vm) {
 	//"vm" is the reference to ViewModel
 
+
+
  	//Filter the obtained data, so that only what is requested remains (API does not filter all the variables)
  	vm.dataunfiltered = data.slice(0);
 	for (var key in request) {
     	if ((key!==vm.model.yvars) && //(key!==xvar) && 
     		(key!=="cvar") &&
     		(key!=="xvar") && (!vm.model.IsGroup(key)) && !(vm.timelapse && (key===vm.model.timevar))) {
-    		data = data.filter(function(d) { return request[key].map(function(d) {return d.toString();}).indexOf(d[key])!=-1;});
+    		data = data.filter(function(d) { return request[key].map(function(d) {return d.toString();}).indexOf(d[key])!==-1;});
     	}
 	};
 

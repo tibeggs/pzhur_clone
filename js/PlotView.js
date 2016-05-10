@@ -33,6 +33,7 @@ BDSVis.PlotView = {
 	},
 
 	Refresh : function(data,request,vm) {
+		var pv = this;
 
 		var margin = this.margin;
 		var width=this.width;
@@ -96,18 +97,34 @@ BDSVis.PlotView = {
 			this.scaleui.append("span").text(vm.geomap()?"Zoom / Scale Colors":"Zoom by rectangle")
 
 			this.rectzoom.on("click", function() {
+
+				if (vm.geomap()) {
+					if (vm.zoombyrect) pv.zoom.scale(pv.colorscale || 1) //If zooming/panning, reset zoom (for colorscale) to what it was before zooming/panning
+					
+					else 
+						pv.zoom.scale(pv.scale || 1).translate(pv.translate || [0,0]); //If scaling colors, reset zoom to what it was before scaling colors
+					
+				} else { 
+					if (vm.zoombyrect) pv.svg.call(pv.zoom); else pv.zoom.on("zoom", null);
+				};
+				
 				vm.zoombyrect=!vm.zoombyrect;
-				if (!vm.geomap())
-					BDSVis.makePlot(data,request,vm);
+				// if (!vm.geomap())
+				// 	BDSVis.makePlot(data,request,vm);
 			});
 
 			//Reset Zoom button
 			this.resetzoom = this.scaleui
 				.append("span").text("\u00A0\u00A0").append("button").text("Reset Zoom").on("click", function() {
-				if (vm.geomap())
-					BDSVis.makeMap(data,request,vm);
-				else 
-					BDSVis.makePlot(data,request,vm);
+				if (vm.geomap()) {
+					pv.zoom.scale(1).translate([0,0]).event(pv.svg);
+					//BDSVis.makeMap(data,request,vm);
+				}
+				else {
+					if (vm.zoombyrect)
+						BDSVis.makePlot(data,request,vm);
+					else pv.zoom.scale(1).translate([0,0]).event(pv.svg);
+				}
 			});
 
 			function AddOptionsToVarSelector(selector,varvalues,whichvar,group) { //Create a selector option for each variable value, set which are selected

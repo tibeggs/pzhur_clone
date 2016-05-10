@@ -121,12 +121,16 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 			.append("title").text(function(d){return LUName(d)+": "+d3.format(",")(d[yvar]);});
 
 	//Zooming
-	svg.call(d3.behavior.zoom().on("zoom",refresh));
+
 	function refresh() {
-		var t="translate(" + d3.event.translate + ")"+" scale(" + d3.event.scale + ")";
-		if (vm.zoombyrect)
+		
+		if (vm.zoombyrect) {
+			pv.translate = d3.event.translate.slice(0); pv.scale = d3.event.scale+0.;
+			var t="translate(" + pv.translate + ")"+" scale(" + pv.scale + ")";
 			mapg.selectAll('path').attr("transform", t);
+		}
 		else {
+			pv.colorscale = d3.event.scale;
 			var mn=ymin,//+d3.event.translate[0]*(ymax-ymin)/1e+3,
 				mx=ymax,//+d3.event.translate[1]*(ymax-ymin)/1e+3,
 				md=ymid(ymin,ymax);
@@ -140,6 +144,9 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 				.style("fill",function(d) {return yScale(d[yvar]);})
 		};
 	}; 
+
+	pv.zoom = d3.behavior.zoom().on("zoom",refresh);
+	svg.call(pv.zoom);
 
 	// mapg.selectAll('path.outlines').data(vm.model.geo_data.state)
 	// 		.enter()

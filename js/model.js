@@ -47,7 +47,7 @@ BDSVis.Model = {
 			"code" : "geo",
 			"name" : "Geography",
 			"type" : "variablegroup",
-			"default" : 1,
+			"default" : 0,
 			"aslegend" : true,
 			"asaxis" : true,
 			"variables" : [

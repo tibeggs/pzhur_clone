@@ -6,6 +6,12 @@ BDSVis.ViewModel = function(model) {
 	//Reference to the model, which contains variable names and name look up tables/functions (in model.js file)
 	this.model = model;
 
+	//Reference to the visual elements of the plot: SVGs for the graph/map and legend
+	this.PlotView = BDSVis.PlotView;
+
+	//Reference to the table showing the data;
+	this.TableView = BDSVis.TableView;
+
 	this.DrawUI = function(){
 
 		//UI elements for Save and Show Data
@@ -100,19 +106,12 @@ BDSVis.ViewModel = function(model) {
 			selectors.append("br");
 		});
 	};
-	
-	
-	//Reference to the visual elements of the plot: SVGs for the graph/map and legend
-	this.PlotView = BDSVis.PlotView;
-
-	//Reference to the table showing the data;
-	this.TableView = BDSVis.TableView;
 
 
 	this.ActualVarCode = function(varcode) {
 		//Checks if the varname is group variable, then returns code of the variable selected. 
 		//If not group variable just returns the input (supposedly the variable code)
-		return vm.model.IsGroup(vm.model.LookUpVar(varcode))?vm.SelectedOpts[varcode][0]:varcode;
+		return vm.model.IsGroup(varcode)?vm.SelectedOpts[varcode][0]:varcode;
 	};
 
 	// The reference to function that forms and sends API request and gets data (apirequest.js)
@@ -166,14 +165,20 @@ BDSVis.ViewModel = function(model) {
 	this.geomap = function() {
 		return vm.model.IsGeomapvar(vm.xvar);
 	};
+
+	//Set the incompatible variables to values corresponding totals
+	function SetToTotals(varname) {
+		if (vm.model.LookUpVar(varname).incompatible !== undefined)
+			vm.model.LookUpVar(varname).incompatible.forEach(function(incvar){
+				vm.SelectedOpts[incvar]=[vm.model[incvar][vm.model.LookUpVar(incvar).total].code];
+			});
+	};
 	
 	//The following functions set cvar (Legend/Comparison/Color variable) and xvar (X-axis variable)
 	this.setcvar = function (varname) {
 		vm.cvar=varname;
-		if (vm.model.LookUpVar(varname).incompatible !== undefined)
-			vm.model.LookUpVar(varname).incompatible.forEach(function(incvar){
-				vm.SelectedOpts[incvar]=[vm.model[incvar][vm.model.LookUpVar(incvar).total].code];
-			})
+		
+		SetToTotals(varname)
 
 		vm.getBDSdata();
 	};
@@ -185,10 +190,7 @@ BDSVis.ViewModel = function(model) {
 		var varname1=vm.ActualVarCode(varname);
 		vm.IncludedXvarValues[varname1]=vm.model.GetCodes(varname1);
 		
-		if (vm.model.LookUpVar(varname).incompatible !== undefined)
-			vm.model.LookUpVar(varname).incompatible.forEach(function(incvar){
-				vm.SelectedOpts[incvar]=[vm.model[incvar][vm.model.LookUpVar(incvar).total].code];
-			})
+		SetToTotals(varname);
 		
 		vm.getBDSdata();
 	};
@@ -215,8 +217,8 @@ BDSVis.ViewModel = function(model) {
 	});
 
 	//Initial values of X-axis variable and C- variable
-	this.xvar = "geo";
-	this.cvar = "measure";
+	this.xvar = "fchar";
+	this.cvar = "metro";
 
 	this.PlotView.Init();
 	this.PlotView.DisplayWaitingMessage();
