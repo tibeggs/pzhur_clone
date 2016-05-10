@@ -41,7 +41,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	
 	var purple="rgb(112,79,161)"; var golden="rgb(194,85,12)"; var teal="rgb(22,136,51)";
 
-	if ((ymin<0) && !vm.logscale)
+	if ((ymin<0) && !vm.logscale) //If there are negative values use blue to red scale with white(ish) for 0 and strength of color corresponding to absolute value
 		yScale.domain([-maxabs,0,maxabs]).range(["#CB2027","#eeeeee","#265DAB"]);
 	else
 		//yScale.domain([ymin,ymax]).range(["#eeeeee","#265DAB"]);
