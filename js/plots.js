@@ -64,9 +64,7 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 			yScale1.domain([ymin,limits[3]]);
 			xScale.domain(xScale.domain().slice(limits[0],limits[1]));
 		}
-		
 	};
-
 			
 	//Set up colorscale
 	var cScale=d3.scale.ordinal().domain(data.map(function(d) {return d[cvar]}));
@@ -151,8 +149,7 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 		//d3.selectAll("rect.plotbar").attr("transform", t);
 		d3.selectAll("rect.plotbar")
 			.attr("y",function(d) {return yScale(Math.max(0,+d[yvar]))})
-		   	.attr("height", function(d) {return Math.abs(yScale(y0)-yScale(+d[yvar]))})
-
+		   	.attr("height", function(d) {return Math.abs(yScale(y0)-yScale(+d[yvar]))});
 		var uptri = chart.selectAll(".offlimitis").data(data.filter(function(d) {return (xScale.domain().indexOf(d[xvar])>-1) && (yScale(d[yvar])<0)}));
 		uptri.exit().remove()
 		uptri.enter().append("path")
@@ -297,6 +294,7 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 		   	.attr("y",function(d) {return yScale(Math.max(0,+d[yvar]))})
 		   	.attr("height", function(d) {return Math.abs(yScale(y0)-yScale(+d[yvar]))})
 		   	.on("dblclick",function(d) {
+		   		if(!vm.zoombyrect) return;
 				var ind = vm.IncludedXvarValues[xvar].indexOf(d[xvar]);
 				vm.IncludedXvarValues[xvar].splice(ind,1);
 				BDSVis.processAPIdata(data,request,vm);
@@ -312,7 +310,7 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 			.attr("fill","red")
 			.attr("transform", function(d) { return "translate(" + (xScale(d[xvar])+xScale.rangeBand()/2.) + "," + 0 + ")"; });
 
-		pv.lowerrightcornertext.text("Double-click on bar to remove category");
+		if(vm.zoombyrect) pv.lowerrightcornertext.text("Double-click on bar to remove category");
 	};
 
 	//Making Legend
