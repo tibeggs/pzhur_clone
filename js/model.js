@@ -271,7 +271,7 @@ BDSVis.Model = {
 	metro: [
 		{"code" : "M", "name" : "Metropolitan Statistical Area"},
 		{"code" : "N", "name" : "Non-metropolitan Statistical Area"},
-		{"code" : "o", "name" : "All Areas"}],
+		{"code" : "o", "name" : "All Areas", "postf" : ""}],
 
 	InitModel : function() {
 		var tmod=this;

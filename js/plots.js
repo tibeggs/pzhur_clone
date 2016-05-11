@@ -45,6 +45,7 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 		yScale = function(y) {
 			if (y<=0) return yScale1(1e-15); else return yScale1(y);
 		}
+
 	} else {
 		y0=0; //Where the 0 horizontal line is located, for the base of the bar
 		ymin = Math.min(0,d3.min(data, function(d) { return +d[yvar]; })); //Bars should be plotted at least from 0.
@@ -52,6 +53,8 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 			.range([height,0]);
 		yScale1 = yScale;
 	};
+
+	yScale1.domain([yScale1.domain()[0],yScale1.domain()[1]*1.1]); //Add 10% space above the highest data point
 
 	if (limits!==undefined) {
 		if (vm.model.IsContinuous(xvarr)) {
@@ -149,6 +152,24 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 		d3.selectAll("rect.plotbar")
 			.attr("y",function(d) {return yScale(Math.max(0,+d[yvar]))})
 		   	.attr("height", function(d) {return Math.abs(yScale(y0)-yScale(+d[yvar]))})
+
+		var uptri = chart.selectAll(".offlimitis").data(data.filter(function(d) {return (xScale.domain().indexOf(d[xvar])>-1) && (yScale(d[yvar])<0)}));
+		uptri.exit().remove()
+		uptri.enter().append("path")
+			.attr("class", "offlimitis")
+			.attr("d", d3.svg.symbol().type("triangle-up"))
+			.attr("fill","red")
+		uptri
+			.attr("transform", function(d) { return "translate(" + (xScale(d[xvar])+xScale.rangeBand()/2.) + "," + 0 + ")"; });
+
+		var downtri = chart.selectAll(".downofflimitis").data(data.filter(function(d) {return (xScale.domain().indexOf(d[xvar])>-1) && (yScale(0)>height)}));
+		downtri.exit().remove()
+		downtri.enter().append("path")
+			.attr("class", "downofflimitis")
+			.attr("d", d3.svg.symbol().type("triangle-down"))
+			.attr("fill","red")
+		downtri
+			.attr("transform", function(d) { return "translate(" + (xScale(d[xvar])+xScale.rangeBand()/2.) + "," + height*.98 + ")"; });	
 	};
 
 	if(vm.model.IsContinuous(xvarr))
@@ -283,6 +304,13 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 			// .on('mouseover', tip.show)
    //    		.on('mouseout', tip.hide)
 		   	.append("title").text(function(d){return Tooltiptext(d);});
+
+		chart.selectAll(".offlimitis").data(data.filter(function(d) {return (xScale.domain().indexOf(d[xvar])>-1) && (yScale(d[yvar])<0)}))
+			.enter().append("path")
+			.attr("class", "offlimitis")
+			.attr("d", d3.svg.symbol().type("triangle-up"))
+			.attr("fill","red")
+			.attr("transform", function(d) { return "translate(" + (xScale(d[xvar])+xScale.rangeBand()/2.) + "," + 0 + ")"; });
 
 		pv.lowerrightcornertext.text("Double-click on bar to remove category");
 	};

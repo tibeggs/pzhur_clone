@@ -217,8 +217,8 @@ BDSVis.ViewModel = function(model) {
 	});
 
 	//Initial values of X-axis variable and C- variable
-	this.xvar = "fchar";
-	this.cvar = "metro";
+	this.xvar = "year2";
+	this.cvar = "geo";
 
 	this.PlotView.Init();
 	this.PlotView.DisplayWaitingMessage();

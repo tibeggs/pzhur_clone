@@ -43,10 +43,10 @@ BDSVis.getAPIdata = function (vm) {
     		(key!==vm.model.timevar) &&  
     		(key!==vm.model.yvars))
 
-    		if (!(vm.model.LookUpVar(key).APIfiltered) || (key===request.xvar))
-    			getstring+=","+key; //Get records with all values of variable with name equal to key
-    		else
-    			filterstring+="&"+key+"="+request[key]; //Get records with only those values of variable with name equal to key which are in the request
+	    		if ((!(vm.model.LookUpVar(key).APIfiltered) || (key===request.xvar)) && (request[key].length > 1))
+	    			getstring+=","+key; //Get records with all values of variable with name equal to key
+	    		else //if ((request[key].length > 1) || (request[key][0]!==vm.model[key][vm.model.LookUpVar(key).total].code))
+	    			filterstring+="&"+key+"="+request[key]; //Get records with only those values of variable with name equal to key which are in the request
     };
 
 	var geturl=url+"?get="+getstring+filterstring+"&for="+geography.replace(/ /g,"+")+reqtime+"&key=93beeef146cec68880fccbd72e455fcd7135228f";
