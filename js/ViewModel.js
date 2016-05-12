@@ -168,8 +168,8 @@ BDSVis.ViewModel = function(model) {
 
 	//Set the incompatible variables to values corresponding totals
 	function SetToTotals(varname) {
-		if (vm.model.LookUpVar(varname).incompatible !== undefined)
-			vm.model.LookUpVar(varname).incompatible.forEach(function(incvar){
+		if (vm.model.LookUpVar(vm.ActualVarCode(varname)).incompatible !== undefined)
+			vm.model.LookUpVar(vm.ActualVarCode(varname)).incompatible.forEach(function(incvar){
 				vm.SelectedOpts[incvar]=[vm.model[incvar][vm.model.LookUpVar(incvar).total].code];
 			});
 	};

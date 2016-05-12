@@ -5,10 +5,12 @@ BDSVis.TableView = {
 	makeDataTable : function(data,cvar,xvar,vm) {
 
 		var cvarvalues = d3.set(data.map(function(d) {return d[cvar]})).values(); //All the values of returned cvars
+		
 		cvarvalues.sort(function(a,b) { //Sorted like in model.js
-				var arr=vm.model[cvar].map(function(d) {return d.name})
-				return diff=arr.indexOf(a)-arr.indexOf(b);
-		}) 
+				var arr=vm.model[cvar].map(function(d) {return d.code});
+				return arr.indexOf(a)-arr.indexOf(b);
+		});
+		
 		var xvarvalues = d3.set(data.map(function(d) {return d[xvar]})).values(); //All the values of returned xvars
 		
 		//Data as table output via D3
