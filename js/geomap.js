@@ -69,7 +69,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	var xir = data.map(function(d) {return LUName(d)});
 	//var xir = data.map(function(d) {return d[xvar]});
 	for (var i in vm.model.geo_data[xvar]) {
-		var iir = xir.indexOf(vm.model.geo_data[xvar][i].properties.NAME);
+		var iir = xir.indexOf(vm.model.geo_data[xvar][i].properties.name);
 		if (iir === -1) {
 			geo_data1[data.length+emptystates]=vm.model.geo_data[xvar][i];
 			emptystates++;
@@ -100,7 +100,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 			.style('stroke', 'black')
 			.style('stroke-width', 0.3)
 			.on("dblclick",function(d) {
-				var xvcode = vm.model[xvar].filter(function(d1) {return d1.name===d.properties.NAME;})[0].code;
+				var xvcode = vm.model[xvar].filter(function(d1) {return d1.name===d.properties.name;})[0].code;
 				vm.IncludedXvarValues[xvar].push(xvcode);
 				//request[xvar].push(xvcode);
 				BDSVis.processAPIdata(vm.dataunfiltered,request,vm);

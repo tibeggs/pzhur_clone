@@ -277,23 +277,21 @@ BDSVis.Model = {
 		var tmod=this;
 
 		//Get the geographic map from the shape file in TopoJSON format
-		d3.json("../json/cb_2015_us_state_20m.json", function(state_geodata) {
-			d3.json("../json/cb_2015_us_cbsa_20m.json", function(msa_geodata) {			
-				tmod.geo_data={};
-
-				tmod.geo_data.state=topojson.feature(state_geodata,state_geodata.objects.cb_2015_us_state_20m).features;
-				tmod.geo_data["metropolitan statistical area"]=topojson.feature(msa_geodata,msa_geodata.objects.cb_2015_us_cbsa_20m).features.filter(function(d) {return d.properties.LSAD==="M1";});
-				
-				tmod["metropolitan statistical area"] = 
-				tmod.geo_data["metropolitan statistical area"]
-					.map(function(d) {return {name:d.properties.NAME,code:d.properties.GEOID};})
-					.sort(function(a,b) {return a.name.localeCompare(b.name);});;
-				
-				tmod["metropolitan statistical area"].unshift({"code" : "00", "name" : "United States"});
+		
+		d3.json("../json/statesmsa.json", function(geodata) {			
+			tmod.geo_data={};
+			tmod.geo_data.state=topojson.feature(geodata,geodata.objects.states).features;
+			tmod.geo_data["metropolitan statistical area"]=topojson.feature(geodata,geodata.objects.msa).features;
 			
-				tmod.Init();
+			tmod["metropolitan statistical area"] = 
+			tmod.geo_data["metropolitan statistical area"]
+				.map(function(d) {return {name:d.properties.name,code:d.properties.geoid};})
+				.sort(function(a,b) {return a.name.localeCompare(b.name);});;
 			
-			});
+			tmod["metropolitan statistical area"].unshift({"code" : "00", "name" : "United States"});
+		
+			tmod.Init();
+			
 		});
 	},
 
