@@ -276,6 +276,23 @@ BDSVis.Model = {
 	InitModel : function() {
 		var tmod=this;
 
+/////////////////// THIS ARE THE SHELL COMMANDS THAT DOWNLOAD SHAPE FILES FROM CENSUS WEBSITE AND GENERATE THE TOPOJSON FILE
+////////////////// YOU'LL NEED topojson AND ogr2ogr WHICH CAN BE INSTALLED AS PART OF Node.js 
+//		
+//		curl https://www2.census.gov/geo/tiger/GENZ2015/shp/cb_2015_us_cbsa_20m.zip -o msa.zip
+// 		unzip msa.zip
+// 		ogr2ogr -f GeoJSON -where "LSAD = 'M1'" msa.json cb_2015_us_cbsa_20m.shp
+//
+//
+// 		curl https://www2.census.gov/geo/tiger/GENZ2015/shp/cb_2015_us_state_20m.zip -o states.zip
+// 		unzip states.zip
+// 		ogr2ogr -f GeoJSON states.json cb_2015_us_state_20m.shp
+//
+//		topojson -o statesmsa.json --properties name=NAME,geoid=GEOID --simplify=1e-6 -- states.json msa.json
+//
+///////////////////////////////////////////////////////////////////////////////
+
+
 		//Get the geographic map from the shape file in TopoJSON format
 		
 		d3.json("../json/statesmsa.json", function(geodata) {			
