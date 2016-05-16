@@ -122,6 +122,20 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 
 	//Zooming
 
+	function zoomscale(scale) {
+		var mn=ymin,//+d3.event.translate[0]*(ymax-ymin)/1e+3,
+			mx=ymax,//+d3.event.translate[1]*(ymax-ymin)/1e+3,
+			md=ymid(ymin,ymax);
+		if ((ymin<0) && !vm.logscale)
+			yScale.domain([-d3.max([Math.abs(mn),Math.abs(mx)])*scale,0,d3.max([Math.abs(mn),Math.abs(mx)])*scale]);
+		else
+			yScale.domain([mn,md*scale,mx]);
+		legendsvg.selectAll("rect")
+			.attr("fill",  function(d) {return yScale(d);})
+		mapg.selectAll('path')
+			.style("fill",function(d) {return yScale(d[yvar]);})
+	};
+
 	function refresh() {
 		
 		if (vm.zoombyrect) {
@@ -131,19 +145,15 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 		}
 		else {
 			pv.colorscale = d3.event.scale;
-			var mn=ymin,//+d3.event.translate[0]*(ymax-ymin)/1e+3,
-				mx=ymax,//+d3.event.translate[1]*(ymax-ymin)/1e+3,
-				md=ymid(ymin,ymax);
-			if ((ymin<0) && !vm.logscale)
-				yScale.domain([-d3.max([Math.abs(mn),Math.abs(mx)])*d3.event.scale,0,d3.max([Math.abs(mn),Math.abs(mx)])*d3.event.scale]);
-			else
-				yScale.domain([mn,md*d3.event.scale,mx]);
-			legendsvg.selectAll("rect")
-				.attr("fill",  function(d) {return yScale(d);})
-			mapg.selectAll('path')
-				.style("fill",function(d) {return yScale(d[yvar]);})
+			zoomscale(d3.event.scale);
 		};
-	}; 
+	};
+
+	function colorscalerefresh() {
+		zoomscale(d3.event.scale);
+	};
+
+	
 
 	pv.zoom = d3.behavior.zoom().on("zoom",refresh);
 	svg.call(pv.zoom);
@@ -159,6 +169,8 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 
 	//Making Legend
 	var legendsvg=vm.PlotView.legendsvg;
+
+	legendsvg.call(d3.behavior.zoom().on("zoom",colorscalerefresh));
 
 	var colorbar={height:200, width:20, nlevels:50, nlabels:5, fontsize:15, levels:[]};
 
