@@ -66,7 +66,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 
 	//Put the states in geo_data in the same order as they are in data
 
-	var xir = data.map(function(d) {return LUName(d)});
+	var xir = data.map(LUName);
 	//var xir = data.map(function(d) {return d[xvar]});
 	for (var i in vm.model.geo_data[xvar]) {
 		var iir = xir.indexOf(vm.model.geo_data[xvar][i].properties.name);
@@ -131,7 +131,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 		else
 			yScale.domain([mn,md*scale,mx]);
 		legendsvg.selectAll("rect")
-			.attr("fill",  function(d) {return yScale(d);})
+			.attr("fill", yScale)
 		mapg.selectAll('path')
 			.style("fill",function(d) {return yScale(d[yvar]);})
 	};
@@ -198,11 +198,11 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 		.data(colorbar.levels)
 		.enter()
 		.append("rect")
-		.attr("fill",  function(d) {return yScale(d);})
+		.attr("fill",  yScale)
 		.attr("width",20)
 		.attr("height",colorbar.height/colorbar.nlevels+1)
-		.attr("y",function(d) {return hScale(d);})
-		.append("title").text(function(d){return legNumFormat(d);});
+		.attr("y", hScale)
+		.append("title").text(legNumFormat);
 
 	//Make the labels of the colorbar
 	legendsvg.selectAll("text .leglabel")
@@ -214,7 +214,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 		.attr("font-size", colorbar.fontsize+"px")
 		.attr("x",colorbar.width+3)
 		.attr("y",function(d) {return .4*colorbar.fontsize+hScale(d);})
-		.text(function(d) {return legNumFormat(d);});
+		.text(legNumFormat);
 
 	pv.SetPlotTitle(ptitle);
 	pv.lowerrightcornertext.text("Double-click on states to toggle");
