@@ -241,9 +241,7 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 	// var tip = d3.tip()
 	// 	.attr('class', 'd3-tip')
 	// 	.offset(function(d) {return [-10, yScale(d[yvar]/2.)];})
-	// 	.html(function(d) {
-	// 	return Tooltiptext(d);
-	// });
+	// 	.html(Tooltiptext);
 	// svg.call(tip);
 
 	
@@ -274,7 +272,7 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 	  		.attr("fill", function(d) {return colors(d[cvar]);})
 	    	.attr("cx", function(d) { return xScale(d[xvar]); })
 	    	.attr("cy", function(d) { return yScale(d[yvar]); })
-	    	.append("title").text(function(d){return Tooltiptext(d);});
+	    	.append("title").text(Tooltiptext);
 
 	} else {
 		//Make a bar chart if x-variable is categorical		
@@ -301,7 +299,7 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 			})
 			// .on('mouseover', tip.show)
    //    		.on('mouseout', tip.hide)
-		   	.append("title").text(function(d){return Tooltiptext(d);});
+		   	.append("title").text(Tooltiptext);
 
 		chart.selectAll(".offlimitis").data(data.filter(function(d) {return (xScale.domain().indexOf(d[xvar])>-1) && (yScale(d[yvar])<0)}))
 			.enter().append("path")
@@ -338,7 +336,7 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 		.attr("dy",1+"em")
 		.text(function(d) {return vm.model.NameLookUp(d,cvar);});
 	if ((cvarlist.length>1) && !vm.timelapse)
-		legendlabels.on("click",function(d) { RemoveItem(d); });
+		legendlabels.on("click",RemoveItem);
 		
 
 	//Split long labels into multiple lines
@@ -361,12 +359,12 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 		.data(cvarlist)
 		.enter()
 		.append("rect")
-		.attr("fill",  function(d) {return colors(d);})
+		.attr("fill", colors)
 		.attr("width",symbolsize).attr("height",symbolsize)
 		.attr("y",function(d,i) {return 0.6+((i>0)?(numlines[i-1]+i*.75):0)+"em";});
 
 	if ((cvarlist.length>1) && !vm.timelapse)
-		legendrect.on("click",function(d) { RemoveItem(d); });
+		legendrect.on("click",RemoveItem);
 
 	var legendheight=d3.select(".legbox").node().getBBox().height
 	d3.select(".legbox").attr("transform","translate("+pv.legendx+","+Math.max(20,.5*(height+pv.margin.top+pv.margin.bottom+pv.titleheight-legendheight))+")")
