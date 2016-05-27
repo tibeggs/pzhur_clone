@@ -64,6 +64,7 @@ BDSVis.PlotView = {
 			.attr("class","yaxislabel")
 			.attr("transform","translate("+16+","+.5*(height + margin.top + this.xaxislabelheight + this.titleheight)+")rotate(-90)");
 
+		//Text in the lower right corner of the plot (Like "double-click to remove")
 		this.lowerrightcornertext=this.svgcont.append("g").append("text").attr("class","leglabel")
 			.attr("x",width+margin.left+ margin.right)
 			.attr("y",this.height0-margin.bottom);

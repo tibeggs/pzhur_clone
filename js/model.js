@@ -101,14 +101,6 @@ BDSVis.Model = {
 			"printtitle" : {"pref":" in ", "postf":""}
 		},
 		{
-			"code" : "fchar",
-			"name" : "Firm Characteristic",
-			"type" : "variablegroup",
-			"default" : 0,
-			"aslegend" : true,
-			"asaxis" : true,
-			"variables" : [
-				 {
 					"code" : "fage4",
 					"name" : "Firm Age",
 					"type" : "categorical",
@@ -120,6 +112,15 @@ BDSVis.Model = {
 					"customcolor" : true,
 					"printtitle" : {"pref":" for firms of age ", "postf":" yr"}
 				 },
+		{
+			"code" : "fchar",
+			"name" : "Firm Characteristic",
+			"type" : "variablegroup",
+			"default" : 0,
+			"aslegend" : true,
+			"asaxis" : true,
+			"variables" : [
+				 
 				 {
 					"code" : "fsize",
 					"name" : "Firm Size",

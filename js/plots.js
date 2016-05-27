@@ -119,8 +119,8 @@ BDSVis.makePlot = function (data,request,vm,limits) {
       	xAxisLabels.call(pv.wrap,xScale.rangeBand());
 
 	svg.append("g")
-	.attr("class", "y axis")
-	.call(yAxis);
+		.attr("class", "y axis")
+		.call(yAxis);
 
 	svg.append("rect")
 		.attr("width", width)
