@@ -98,7 +98,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 			.append('path')
 			.attr("class","datacontour")
 			//.attr('d', d3.geo.path().projection(d3.geo.albersUsa().scale(800).translate([width / 2, height / 2.])))
-			.attr('d', path)
+			.attr('d',d3.geo.path().projection(d3.geo.albersUsa().scale(800).translate([width / 2, height / 2.])))
 			.style('fill', "white")
 			.style('stroke', 'black')
 			.style('stroke-width', 0.3)
@@ -117,8 +117,9 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 		            x = centroid[0],
 		            y = centroid[1];
 		        return "translate(" + x + "," + y + ")"
-		            + "scale(" + Math.sqrt(data[i][yvar]/ymax || 0) + ")"
-		            + "translate(" + -x + "," + -y + ")";
+		            //+ "scale(" + Math.sqrt(data[i][yvar]/ymax || 0) + ")"
+		           + "scale(" +.5 + ")"
+		              + "translate(" + -x + "," + -y + ")";
 
 				}
 		        
