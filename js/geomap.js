@@ -64,13 +64,13 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 		data=data.filter(function(d) {return +d[vm.model.timevar]===timerange[0];});
 	};
 
-	//Put the states in geo_data in the same order as they are in data
+	//Put the states/MSAs in geo_data in the same order as they are in data
 
 	var xir = data.map(LUName);
 	//var xir = data.map(function(d) {return d[xvar]});
 	for (var i in vm.model.geo_data[xvar]) {
 		var iir = xir.indexOf(vm.model.geo_data[xvar][i].properties.name);
-		if (iir === -1) {
+		if (iir === -1) { //If the state/MSA is not in data (e.g. Puerto Rico is never there), put it to the end of the array
 			geo_data1[data.length+emptystates]=vm.model.geo_data[xvar][i];
 			emptystates++;
 		} else geo_data1[iir]=vm.model.geo_data[xvar][i]
@@ -137,6 +137,9 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 				//vm.getBDSdata();
 			})
 			.append("title").text(function(d){return LUName(d)+": "+d3.format(",")(d[yvar]);});
+
+
+	d3.select("body").append("div").text(JSON.stringify(data))
 
 	//Zooming
 
