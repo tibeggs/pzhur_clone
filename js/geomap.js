@@ -94,24 +94,6 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 			.style('stroke-width', 0.1)
 			.attr('d', d3.geo.path().projection(d3.geo.albersUsa().scale(800).translate([width / 2, height / 2.])))
 
-
-
-  // svg.selectAll(".state")
-  //     .data(geo_data1)
-  //   .enter().append("path")
-  //     .attr("class", "state")
-  //     .attr("d",projection)
-  //     .attr("transform", function(d,i) {
-  //       var centroid = path.centroid(d),
-  //           x = centroid[0],
-  //           y = centroid[1];
-  //           console.log("scale(" + Math.sqrt(data[i][yvar]/ymax || 0) + ")","scale(" + Math.sqrt(valueById[i]/d3.max(valueById) || 0) + ")")
-  //       return "translate(" + x + "," + y + ")"
-  //          // + "scale(" + Math.sqrt(valueById[i]/d3.max(valueById) || 0) + ")"
-  //           + "scale(" + Math.sqrt(data[i][yvar]/ymax || 0) + ")"
-  //           + "translate(" + -x + "," + -y + ")";
-  //     })
-
 	var map = mapg.selectAll('path.datacontour')
 			.data(geo_data1)
 			.enter()
@@ -252,8 +234,10 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 		.attr("y",function(d) {return .4*colorbar.fontsize+hScale(d);})
 		.text(legNumFormat);
 
+	legendsvg.append("text").attr("y",1.2*colorbar.fontsize+colorbar.height).style("font-size","10px").text("Zoom over the colorbar to change color scale");
+
 	pv.SetPlotTitle(ptitle);
-	pv.lowerrightcornertext.text("Double-click on states to toggle");
+	pv.lowerrightcornertext.style("font-size","10px").text("Double-click on states to toggle");
 	pv.SetXaxisLabel(".",30);
 
 	// Timelapse animation
