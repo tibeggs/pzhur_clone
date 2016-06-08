@@ -289,7 +289,7 @@ BDSVis.Model = {
 // 		unzip states.zip
 // 		ogr2ogr -f GeoJSON states.json cb_2015_us_state_20m.shp
 //
-//		topojson -o statesmsa.json --properties name=NAME,geoid=GEOID --simplify=1e-6 -- states.json msa.json
+//		topojson -o statesmsa.json --properties name=NAME,geoid=GEOID,landarea=ALAND --simplify=1e-6 -- states.json msa.json
 //
 ///////////////////////////////////////////////////////////////////////////////
 
