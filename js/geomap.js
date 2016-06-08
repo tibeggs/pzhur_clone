@@ -73,18 +73,20 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 		if (iir === -1) { //If the state/MSA is not in data (e.g. Puerto Rico is never there), put it to the end of the array
 			geo_data1[data.length+emptystates]=vm.model.geo_data[xvar][i];
 			emptystates++;
-		} else geo_data1[iir]=vm.model.geo_data[xvar][i]
+		} else geo_data1[iir]=vm.model.geo_data[xvar][i];
 	};
 
 	var path = d3.geo.path(),
 	projection = path.projection(d3.geo.albersUsa().scale(800).translate([width / 2, height / 2.]));
 
+	var meanla = d3.mean(geo_data1.filter(function(d) {return (xir.indexOf(d.properties.name)!==-1) && (d.properties.name!=="Alaska");}).map(function(d) {return d.properties.landarea;}));
 
-	// svg.append("rect")
-	// 	.attr("width", width)
-	// 	.attr("height", height);
-
-
+	var scalingmax = d3.max(geo_data1.map(function(d,i){
+		if (data[i]===undefined) return 0;
+		else return data[i][yvar]/d.properties.landarea;
+	}));
+		
+	//.filter(function(d) {return d[xvar]!=="11";})
 	mapg.selectAll('path.outlines').data(vm.model.geo_data.state)
 			.enter()
 			.append('path')
@@ -92,7 +94,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 			.style('fill', "white")
 			.style('stroke', 'black')
 			.style('stroke-width', 0.1)
-			.attr('d', d3.geo.path().projection(d3.geo.albersUsa().scale(800).translate([width / 2, height / 2.])))
+			.attr('d', projection);
 
 	var map = mapg.selectAll('path.datacontour')
 			.data(geo_data1)
@@ -111,17 +113,21 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 				//d3.event.stopPropagation()
 				//vm.getBDSdata();
 			})
-			// .attr("transform", function(d,i) {
-			// 	if (data[i]===undefined) return;
-			// 	else {
-			// 		var centroid = path.centroid(d),
-		 //            x = centroid[0],
-		 //            y = centroid[1];
-		 //        return "translate(" + x + "," + y + ")"
-		 //            + "scale(" + Math.sqrt(data[i][yvar]/ymax || 0) + ")"
-		 //              + "translate(" + -x + "," + -y + ")";
-			// 	}
-		 //    })
+			.attr("transform", function(d,i) {
+				var noscale = ["Alaska","Hawaii"].indexOf(d.properties.name)!==-1;
+				if (data[i]===undefined) return;
+				else {
+					console.log(d.properties.name,(Math.sqrt((!noscale)*data[i][yvar]/d.properties.landarea/scalingmax)+noscale))
+					var centroid = path.centroid(d),
+					x = centroid[0],
+					y = centroid[1];
+					return "translate(" + x + "," + y + ")"
+					// + "scale(" + Math.sqrt(data[i][yvar]/ymax || 0) + ")"
+					+ "scale(" + (Math.sqrt((!noscale)*data[i][yvar]/d.properties.landarea/scalingmax)+noscale) + ")"
+					+ "translate(" + -x + "," + -y + ")";
+				}
+			})
+			.attr("fill-opacity",.5)
 			.data(data)
 			.style('fill', function(d) {return yScale(d[yvar]);})
 			.style('stroke-width', 0.3)
