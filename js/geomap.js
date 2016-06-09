@@ -80,12 +80,13 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	projection = path.projection(d3.geo.albersUsa().scale(800).translate([width / 2, height / 2.]));
 
 	var meanla = d3.mean(geo_data1.filter(function(d) {return (xir.indexOf(d.properties.name)!==-1) && (d.properties.name!=="Alaska");}).map(function(d) {return d.properties.landarea;}));
+	console.log(meanla)
 
 	var scalingmax = d3.max(geo_data1.map(function(d,i){
 		if (data[i]===undefined) return 0;
 		else return data[i][yvar]/d.properties.landarea;
 	}));
-		
+
 	//.filter(function(d) {return d[xvar]!=="11";})
 	mapg.selectAll('path.outlines').data(vm.model.geo_data.state)
 			.enter()
@@ -127,7 +128,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 					+ "translate(" + -x + "," + -y + ")";
 				}
 			})
-			.attr("fill-opacity",.5)
+			.attr("fill-opacity",.9)
 			.data(data)
 			.style('fill', function(d) {return yScale(d[yvar]);})
 			.style('stroke-width', 0.3)
