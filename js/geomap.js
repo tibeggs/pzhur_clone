@@ -73,19 +73,32 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 		if (iir === -1) { //If the state/MSA is not in data (e.g. Puerto Rico is never there), put it to the end of the array
 			geo_data1[data.length+emptystates]=vm.model.geo_data[xvar][i];
 			emptystates++;
-		} else geo_data1[iir]=vm.model.geo_data[xvar][i];
+		} else {
+			geo_data1[iir]=vm.model.geo_data[xvar][i];
+			// geo_data1[iir][xvar]=data[iir][xvar];
+			// geo_data1[iir][yvar]=data[iir][yvar];
+		}
 	};
 
 	var path = d3.geo.path(),
 	projection = path.projection(d3.geo.albersUsa().scale(800).translate([width / 2, height / 2.]));
 
-	var meanla = d3.mean(geo_data1.filter(function(d) {return (xir.indexOf(d.properties.name)!==-1) && (d.properties.name!=="Alaska");}).map(function(d) {return d.properties.landarea;}));
-	console.log(meanla)
+	var meanla = d3.mean(geo_data1.filter(function(d) {return (xir.indexOf(d.properties.name)!==-1);}).map(function(d) {return d.properties.landarea;}));
+
+	geo_data1.forEach(function(d) {d.properties.reducedla = d.properties.landarea/meanla});
+
 
 	var scalingmax = d3.max(geo_data1.map(function(d,i){
-		if (data[i]===undefined) return 0;
-		else return data[i][yvar]/d.properties.landarea;
+		if ((data[i]===undefined) || (["Alaska","Hawaii"].indexOf(d.properties.name)!==-1)) return 0;
+		else return data[i][yvar]/d.properties.reducedla;
 	}));
+
+	
+
+
+	var minareascaled = d3.min(data.map(function(d) {return d[yvar]/scalingmax}));
+	
+	scalingmax = scalingmax/(.02/minareascaled);
 
 	//.filter(function(d) {return d[xvar]!=="11";})
 	mapg.selectAll('path.outlines').data(vm.model.geo_data.state)
@@ -116,15 +129,15 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 			})
 			.attr("transform", function(d,i) {
 				var noscale = ["Alaska","Hawaii"].indexOf(d.properties.name)!==-1;
+				console.log(d.properties.reducedla)
 				if (data[i]===undefined) return;
 				else {
-					console.log(d.properties.name,(Math.sqrt((!noscale)*data[i][yvar]/d.properties.landarea/scalingmax)+noscale))
 					var centroid = path.centroid(d),
 					x = centroid[0],
 					y = centroid[1];
 					return "translate(" + x + "," + y + ")"
 					// + "scale(" + Math.sqrt(data[i][yvar]/ymax || 0) + ")"
-					+ "scale(" + (Math.sqrt((!noscale)*data[i][yvar]/d.properties.landarea/scalingmax)+noscale) + ")"
+					+ "scale(" + (Math.sqrt((!noscale)*data[i][yvar]/d.properties.reducedla/scalingmax)+noscale) + ")"
 					+ "translate(" + -x + "," + -y + ")";
 				}
 			})
