@@ -274,6 +274,12 @@ BDSVis.Model = {
 		{"code" : "N", "name" : "Non-metropolitan Statistical Area"},
 		{"code" : "o", "name" : "All Areas", "postf" : ""}],
 
+	Regions: [
+		{"name" : "New England", "states" : ["09","23","25","33","44","50"]}
+		{"name" : "Middle Atlantic", "states" : ["34","36","42"]}
+
+	]
+
 	InitModel : function() {
 		var tmod=this;
 
