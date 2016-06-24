@@ -24,7 +24,47 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 			ptitle+=vm.model.PrintTitle(data[0][key],key);
 	};
 
+
+	//Filter by region
+	data = data.filter(function(d1){
+		return vm.model[xvar][vm.model[xvar].map(function(d) {return d.code}).indexOf(d1[xvar])].regions.indexOf("New England")>-1;
+	})
+	vm.TableView.makeDataTable(data,request.cvar,request.xvar,vm); 
 	
+	
+	//Plot the map	
+    var mapg = svg.append('g')
+    		.attr('class', 'map');
+
+
+	var geo_data1=vm.model.geo_data[xvar].slice(0),
+		emptystates=0,
+		timerange = d3.extent(data, function(d) { return +d[vm.model.timevar] });
+
+	
+
+	if (vm.timelapse) { //In time lapse regime, select only the data corresponding to the current year
+		var datafull=data;
+		data=data.filter(function(d) {return +d[vm.model.timevar]===timerange[0];});
+	};
+
+
+	//Put the states/MSAs in geo_data in the same order as they are in data
+
+	var xir = data.map(LUName);
+	//var xir = data.map(function(d) {return d[xvar]});
+	for (var i in vm.model.geo_data[xvar]) {
+		var iir = xir.indexOf(vm.model.geo_data[xvar][i].properties.name);
+		if (iir === -1) { //If the state/MSA is not in data (e.g. Puerto Rico is never there), put it to the end of the array
+			geo_data1[data.length+emptystates]=vm.model.geo_data[xvar][i];
+			emptystates++;
+		} else {
+			geo_data1[iir]=vm.model.geo_data[xvar][i];
+			// geo_data1[iir][xvar]=data[iir][xvar];
+			// geo_data1[iir][yvar]=data[iir][yvar];
+		}
+	};
+
 	//Set D3 scales
 	var ymin=d3.min(data, function(d) { return +d[yvar]; });
 	var ymax=d3.max(data, function(d) { return +d[yvar]; });
@@ -47,38 +87,6 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 		//yScale.domain([ymin,ymax]).range(["#eeeeee","#265DAB"]);
 		yScale.domain([ymin,ymid(ymin,ymax),ymax]).range([purple,"#bbbbbb",golden]);
 		//yScale.domain([ymin,ymid,ymax]).range(["red","#ccffcc","blue"]);
-	
-	//Plot the map	
-    var mapg = svg.append('g')
-    		.attr('class', 'map');
-
-
-	var geo_data1=vm.model.geo_data[xvar].slice(0),
-		emptystates=0,
-		timerange = d3.extent(data, function(d) { return +d[vm.model.timevar] });
-
-	
-
-	if (vm.timelapse) { //In time lapse regime, select only the data corresponding to the current year
-		var datafull=data;
-		data=data.filter(function(d) {return +d[vm.model.timevar]===timerange[0];});
-	};
-
-	//Put the states/MSAs in geo_data in the same order as they are in data
-
-	var xir = data.map(LUName);
-	//var xir = data.map(function(d) {return d[xvar]});
-	for (var i in vm.model.geo_data[xvar]) {
-		var iir = xir.indexOf(vm.model.geo_data[xvar][i].properties.name);
-		if (iir === -1) { //If the state/MSA is not in data (e.g. Puerto Rico is never there), put it to the end of the array
-			geo_data1[data.length+emptystates]=vm.model.geo_data[xvar][i];
-			emptystates++;
-		} else {
-			geo_data1[iir]=vm.model.geo_data[xvar][i];
-			// geo_data1[iir][xvar]=data[iir][xvar];
-			// geo_data1[iir][yvar]=data[iir][yvar];
-		}
-	};
 
 	var path = d3.geo.path(),
 	projection = path.projection(d3.geo.albersUsa().scale(800).translate([width / 2, height / 2.]));
@@ -98,7 +106,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 
 	var minareascaled = d3.min(data.map(function(d) {return d[yvar]/scalingmax}));
 	
-	scalingmax = scalingmax/(.02/minareascaled);
+	//scalingmax = scalingmax/(.02/minareascaled);
 
 	//.filter(function(d) {return d[xvar]!=="11";})
 	mapg.selectAll('path.outlines').data(vm.model.geo_data.state)

@@ -274,11 +274,9 @@ BDSVis.Model = {
 		{"code" : "N", "name" : "Non-metropolitan Statistical Area"},
 		{"code" : "o", "name" : "All Areas", "postf" : ""}],
 
-	Regions: [
-		{"name" : "New England", "states" : ["09","23","25","33","44","50"]}
-		{"name" : "Middle Atlantic", "states" : ["34","36","42"]}
-
-	]
+	regions: [
+		{"name" : "New England", "states" : ["09","23","25","33","44","50"]},
+		{"name" : "Middle Atlantic", "states" : ["34","36","42"]}],
 
 	InitModel : function() {
 		var tmod=this;
@@ -310,10 +308,33 @@ BDSVis.Model = {
 			tmod["metropolitan statistical area"] = 
 			tmod.geo_data["metropolitan statistical area"]
 				.map(function(d) {return {name:d.properties.name,code:d.properties.geoid};})
-				.sort(function(a,b) {return a.name.localeCompare(b.name);});;
+				.sort(function(a,b) {return a.name.localeCompare(b.name);});
+
+
+			//Set regions to which the MSA belongs
+			tmod["metropolitan statistical area"].forEach(function(msa) {
 			
-			tmod["metropolitan statistical area"].unshift({"code" : "00", "name" : "United States"});
-		
+				msa.regions = [];
+
+				tmod.regions.forEach(function(region) {
+					
+					tmod.state.forEach(function(st) {
+						if ((msa.name.indexOf(st.st)>-1) && (region.states.indexOf(st.code)>-1)) msa.regions.push(region.name);
+					})
+				})
+
+				msa.regions = d3.set(msa.regions).values();	
+			})
+
+			tmod.state.forEach(function(st) {
+				st.regions = [];
+				tmod.regions.forEach(function(region) {
+					if (region.states.indexOf(st.code)>-1) st.regions.push(region.name);
+				})
+			})
+			
+			tmod["metropolitan statistical area"].unshift({"code" : "00", "name" : "United States", "regions" : []});
+			
 			tmod.Init();
 			
 		});
