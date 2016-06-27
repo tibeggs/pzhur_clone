@@ -150,6 +150,7 @@ BDSVis.PlotView = {
 
 			if (!vm.geomap()) {
 				//Legend variable (cvar) selector
+				this.cvarselector.html('Legend variable:<br><br>')
 				selector = this.cvarselector.append("select");
 				AddOptionsToVarSelector(selector,vm.model.variables.filter(function(d){return  (d.aslegend && d.code!==vm.xvar)}),"cvar",false);			
 				selector.on("change", function() { vm.setcvar(this.value);} );
@@ -158,6 +159,17 @@ BDSVis.PlotView = {
 					AddOptionsToVarSelector(groupselector,vm.model[vm.cvar],"cvar",true);
 					groupselector.on("change", function() {vm.SelectedOpts[vm.cvar]=[this.value]; vm.getBDSdata();});
 				};
+			} else {
+				this.cvarselector.html('Region:<br><br>')
+				selector = this.cvarselector.append("select");
+				selector.selectAll("option")
+					.data(vm.model.regions).enter().append("option")
+					.attr("value",function(d) {return d.name;})
+					.text(function(d) {return d.name;})
+					.property("selected",function(d){
+							return d.name===vm.region;
+					});		
+				selector.on("change", function() { vm.region = this.value;  vm.getBDSdata();} );
 			};
 		};
 		this.AdjustUIElements();

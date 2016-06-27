@@ -27,7 +27,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 
 	//Filter by region
 	data = data.filter(function(d1){
-		return vm.model[xvar][vm.model[xvar].map(function(d) {return d.code}).indexOf(d1[xvar])].regions.indexOf("New England")>-1;
+		return vm.model[xvar][vm.model[xvar].map(function(d) {return d.code}).indexOf(d1[xvar])].regions.indexOf(vm.region)>-1;
 	})
 	vm.TableView.makeDataTable(data,request.cvar,request.xvar,vm); 
 	
@@ -88,9 +88,26 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 		yScale.domain([ymin,ymid(ymin,ymax),ymax]).range([purple,"#bbbbbb",golden]);
 		//yScale.domain([ymin,ymid,ymax]).range(["red","#ccffcc","blue"]);
 
-	var path = d3.geo.path(),
-	projection = path.projection(d3.geo.albersUsa().scale(800).translate([width / 2, height / 2.]));
+	// Create a unit projection.
+	var projection = d3.geo.albersUsa().scale(1).translate([0, 0]);
 
+	// Create a path generator.
+	var path = d3.geo.path().projection(projection);
+
+	// Compute the bounds of a feature of interest, then derive scale & translate.
+	var b = geo_data1.slice(0,data.length).map(path.bounds),
+		leftbound = d3.min(b.map(function(d) {return d[0][0]}).filter(function(d) {return Math.abs(d)!==Infinity}));
+		rightbound = d3.max(b.map(function(d) {return d[1][0]}).filter(function(d) {return Math.abs(d)!==Infinity}));
+		topbound = d3.min(b.map(function(d) {return d[0][1]}).filter(function(d) {return Math.abs(d)!==Infinity}));
+		bottombound = d3.max(b.map(function(d) {return d[1][1]}).filter(function(d) {return Math.abs(d)!==Infinity}));
+
+	s = .95 / Math.max((rightbound - leftbound) / width, (bottombound - topbound) / height),
+	t = [(width - s * (rightbound + leftbound)) / 2, (height - s * (topbound + bottombound)) / 2];
+
+	// Update the projection to use computed scale & translate.
+	projection.scale(s).translate(t);
+
+	
 	var meanla = d3.mean(geo_data1.filter(function(d) {return (xir.indexOf(d.properties.name)!==-1);}).map(function(d) {return d.properties.landarea;}));
 
 	geo_data1.forEach(function(d) {d.properties.reducedla = d.properties.landarea/meanla});
@@ -100,9 +117,6 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 		if ((data[i]===undefined) || (["Alaska","Hawaii"].indexOf(d.properties.name)!==-1)) return 0;
 		else return data[i][yvar]/d.properties.reducedla;
 	}));
-
-	
-
 
 	var minareascaled = d3.min(data.map(function(d) {return d[yvar]/scalingmax}));
 	
@@ -116,14 +130,14 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 			.style('fill', "white")
 			.style('stroke', 'black')
 			.style('stroke-width', 0.1)
-			.attr('d', projection);
+			.attr('d', path);
 
 	var map = mapg.selectAll('path.datacontour')
 			.data(geo_data1)
 			.enter()
 			.append('path')
 			.attr("class","datacontour")
-			.attr('d',projection)
+			.attr('d',path)
 			.style('fill', "white")
 			.style('stroke', 'black')
 			.style('stroke-width', 0.3)
@@ -135,9 +149,10 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 				//d3.event.stopPropagation()
 				//vm.getBDSdata();
 			})
+
 			.attr("transform", function(d,i) {
 				var noscale = ["Alaska","Hawaii"].indexOf(d.properties.name)!==-1;
-				console.log(d.properties.reducedla)
+				//console.log(d.properties.reducedla)
 				if (data[i]===undefined) return;
 				else {
 					var centroid = path.centroid(d),

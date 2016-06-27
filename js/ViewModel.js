@@ -166,6 +166,8 @@ BDSVis.ViewModel = function(model) {
 		return vm.model.IsGeomapvar(vm.xvar);
 	};
 
+	this.region = "US";
+
 	//Set the incompatible variables to values corresponding totals
 	function SetToTotals(varname) {
 		if (vm.model.LookUpVar(vm.ActualVarCode(varname)).incompatible !== undefined)
@@ -217,8 +219,8 @@ BDSVis.ViewModel = function(model) {
 	});
 
 	//Initial values of X-axis variable and C- variable
-	this.xvar = "year2";
-	this.cvar = "geo";
+	this.xvar = "geo";
+	this.cvar = "measure";
 
 	this.PlotView.Init();
 	this.PlotView.DisplayWaitingMessage();
