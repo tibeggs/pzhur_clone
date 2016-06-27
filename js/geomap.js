@@ -36,6 +36,29 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
     var mapg = svg.append('g')
     		.attr('class', 'map');
 
+    //Set D3 scales
+	var ymin=d3.min(data, function(d) { return +d[yvar]; });
+	var ymax=d3.max(data, function(d) { return +d[yvar]; });
+	var maxabs=d3.max([Math.abs(ymin),Math.abs(ymax)]);
+	
+	//Define which scale to use, for the map and the colorbar. Note that log scale can be replaced by any other here (like sqrt), the colormap will adjust accordingly.
+	var scaletype = (vm.logscale)?d3.scale.log():d3.scale.linear();
+	//Midpoint of the colorscale
+	var ymid= function(ymin,ymax) {
+		return scaletype.invert(.5*(scaletype(ymax)+scaletype(ymin)));
+	};
+
+	var yScale = scaletype.copy();
+	
+	var purple="rgb(112,79,161)"; var golden="rgb(194,85,12)"; var teal="rgb(22,136,51)";
+
+	if ((ymin<0) && !vm.logscale) //If there are negative values use blue to red scale with white(ish) for 0 and strength of color corresponding to absolute value
+		yScale.domain([-maxabs,0,maxabs]).range(["#CB2027","#eeeeee","#265DAB"]);
+	else
+		//yScale.domain([ymin,ymax]).range(["#eeeeee","#265DAB"]);
+		yScale.domain([ymin,ymid(ymin,ymax),ymax]).range([purple,"#bbbbbb",golden]);
+		//yScale.domain([ymin,ymid,ymax]).range(["red","#ccffcc","blue"]);
+
 
 	var geo_data1=vm.model.geo_data[xvar].slice(0),
 		emptystates=0,
@@ -65,28 +88,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 		}
 	};
 
-	//Set D3 scales
-	var ymin=d3.min(data, function(d) { return +d[yvar]; });
-	var ymax=d3.max(data, function(d) { return +d[yvar]; });
-	var maxabs=d3.max([Math.abs(ymin),Math.abs(ymax)]);
 	
-	//Define which scale to use, for the map and the colorbar. Note that log scale can be replaced by any other here (like sqrt), the colormap will adjust accordingly.
-	var scaletype = (vm.logscale)?d3.scale.log():d3.scale.linear();
-	//Midpoint of the colorscale
-	var ymid= function(ymin,ymax) {
-		return scaletype.invert(.5*(scaletype(ymax)+scaletype(ymin)));
-	};
-
-	var yScale = scaletype.copy();
-	
-	var purple="rgb(112,79,161)"; var golden="rgb(194,85,12)"; var teal="rgb(22,136,51)";
-
-	if ((ymin<0) && !vm.logscale) //If there are negative values use blue to red scale with white(ish) for 0 and strength of color corresponding to absolute value
-		yScale.domain([-maxabs,0,maxabs]).range(["#CB2027","#eeeeee","#265DAB"]);
-	else
-		//yScale.domain([ymin,ymax]).range(["#eeeeee","#265DAB"]);
-		yScale.domain([ymin,ymid(ymin,ymax),ymax]).range([purple,"#bbbbbb",golden]);
-		//yScale.domain([ymin,ymid,ymax]).range(["red","#ccffcc","blue"]);
 
 	// Create a unit projection.
 	var projection = d3.geo.albersUsa().scale(1).translate([0, 0]);
@@ -150,20 +152,20 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 				//vm.getBDSdata();
 			})
 
-			.attr("transform", function(d,i) {
-				var noscale = ["Alaska","Hawaii"].indexOf(d.properties.name)!==-1;
-				//console.log(d.properties.reducedla)
-				if (data[i]===undefined) return;
-				else {
-					var centroid = path.centroid(d),
-					x = centroid[0],
-					y = centroid[1];
-					return "translate(" + x + "," + y + ")"
-					// + "scale(" + Math.sqrt(data[i][yvar]/ymax || 0) + ")"
-					+ "scale(" + (Math.sqrt((!noscale)*data[i][yvar]/d.properties.reducedla/scalingmax)+noscale) + ")"
-					+ "translate(" + -x + "," + -y + ")";
-				}
-			})
+			// .attr("transform", function(d,i) {
+			// 	var noscale = ["Alaska","Hawaii"].indexOf(d.properties.name)!==-1;
+			// 	//console.log(d.properties.reducedla)
+			// 	if (data[i]===undefined) return;
+			// 	else {
+			// 		var centroid = path.centroid(d),
+			// 		x = centroid[0],
+			// 		y = centroid[1];
+			// 		return "translate(" + x + "," + y + ")"
+			// 		// + "scale(" + Math.sqrt(data[i][yvar]/ymax || 0) + ")"
+			// 		+ "scale(" + (Math.sqrt((!noscale)*data[i][yvar]/d.properties.reducedla/scalingmax)+noscale) + ")"
+			// 		+ "translate(" + -x + "," + -y + ")";
+			// 	}
+			// })
 			.attr("fill-opacity",.9)
 			.data(data)
 			.style('fill', function(d) {return yScale(d[yvar]);})
