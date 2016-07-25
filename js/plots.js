@@ -180,15 +180,15 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 		svg.call(pv.zoom);
 	}
 	
-	//Clipping lines and dots outside the plot area
-	svg.append("defs").append("svg:clipPath")
-	        .attr("id", "clip")
-	        .append("svg:rect")
-	        .attr("id", "clip-rect")
-	        .attr("x", "0")
-	        .attr("y", "-5")
-	        .attr("width", width+5)
-	        .attr("height", height+5);
+	// //Clipping lines and dots outside the plot area
+	// svg.append("defs").append("svg:clipPath")
+	//         .attr("id", "clip")
+	//         .append("svg:rect")
+	//         .attr("id", "clip-rect")
+	//         .attr("x", "0")
+	//         .attr("y", "-5")
+	//         .attr("width", width+5)
+	//         .attr("height", height+5);
 
 	var chart=svg.append("g").attr("clip-path", "url(#clip)");
 

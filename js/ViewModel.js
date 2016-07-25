@@ -167,6 +167,7 @@ BDSVis.ViewModel = function(model) {
 	};
 
 	this.region = "US";
+	this.cartogram = 1;
 
 	//Set the incompatible variables to values corresponding totals
 	function SetToTotals(varname) {

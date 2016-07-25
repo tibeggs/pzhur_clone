@@ -30,6 +30,9 @@ BDSVis.PlotView = {
 		this.cvarselector = d3.select("#cvarselector");
 		this.scaleui = d3.select("#logbutton");
 
+		this.scale = 1;
+		this.translate = [0,0];
+
 	},
 
 	Refresh : function(data,request,vm) {
@@ -45,6 +48,16 @@ BDSVis.PlotView = {
 			.append('g')
 			.attr("transform", "translate(" + margin.left + "," + (margin.top+this.titleheight)+ ")")
 			.attr('class', 'chart');
+
+		//Clipping lines and dots outside the plot area
+		this.svg.append("defs").append("svg:clipPath")
+	        .attr("id", "clip")
+	        .append("svg:rect")
+	        .attr("id", "clip-rect")
+	        .attr("x", "0")
+	        .attr("y", "-5")
+	        .attr("width", width+5)
+	        .attr("height", height+5);
 
 		//Clear legend, set size
 		this.legendx=width+margin.left+ margin.right;
@@ -118,6 +131,7 @@ BDSVis.PlotView = {
 			this.resetzoom = this.scaleui
 				.append("span").text("\u00A0\u00A0").append("button").text("Reset Zoom").on("click", function() {
 				if (vm.geomap()) {
+					//pv.scale=1; pv.translate=[0,0];
 					pv.zoom.scale(1).translate([0,0]).event(pv.svg);
 					//BDSVis.makeMap(data,request,vm);
 				}
