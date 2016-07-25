@@ -110,19 +110,19 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	projection.scale(s).translate(t);
 
 	
+	//Calculate relative land areas and how to scale selected states
+
+	//Mean Land Area
 	var meanla = d3.mean(geo_data1.filter(function(d) {return (xir.indexOf(d.properties.name)!==-1);}).map(function(d) {return d.properties.landarea;}));
 
+	//Reduced land areas
 	geo_data1.forEach(function(d) {d.properties.reducedla = d.properties.landarea/meanla});
 
-
+	//Find maximal scaling: maximum of the "value of variable (yvar) per land area unit"
 	var scalingmax = d3.max(geo_data1.map(function(d,i){
 		if ((data[i]===undefined) || (["Alaska","Hawaii"].indexOf(d.properties.name)!==-1)) return 0;
 		else return data[i][yvar]/d.properties.reducedla;
 	}));
-
-	var minareascaled = d3.min(data.map(function(d) {return d[yvar]/scalingmax}));
-	
-	//scalingmax = scalingmax/(.02/minareascaled);
 
 	//.filter(function(d) {return d[xvar]!=="11";})
 	mapg.selectAll('path.outlines').data(vm.model.geo_data.state)
