@@ -33,7 +33,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	
 	
 	//Plot the map	
-    var mapg = svg.append('g')
+    var mapg = svg.append('g').attr("clip-path", "url(#clip)")
     		.attr('class', 'map');
 
     //Set D3 scales
@@ -87,8 +87,6 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 			// geo_data1[iir][yvar]=data[iir][yvar];
 		}
 	};
-
-	
 
 	// Create a unit projection.
 	var projection = d3.geo.albersUsa().scale(1).translate([0, 0]);
