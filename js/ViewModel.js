@@ -14,9 +14,23 @@ BDSVis.ViewModel = function(model) {
 
 	this.DrawUI = function(){
 
-		//UI elements for Save and Show Data
 		var bug=d3.select("#buttonsundergraph");
 		bug.selectAll('*').remove();
+
+		//UI elements for plotting regime switching: cartograms/map, heatchart/plot
+		
+		if (vm.geomap()) {
+			var sel=bug.append("select").on("change", function() {vm.cartogram=this.value; vm.getBDSdata();});
+			sel.append("option").text("Map").attr("value",0)
+			sel.append("option").text("Cartogram N/C").attr("value",1).property("selected",function(d) { return vm.cartogram===1;});
+		} else {
+			var sel=bug.append("select").on("change", function() {vm.heatchart=this.value; vm.getBDSdata();});
+			sel.append("option").text("Barchart").attr("value",0)
+			sel.append("option").text("Heatchart").attr("value",1).property("selected",function(d) { return vm.heatchart===1;});
+		};
+		bug.append("h4").text(" ")
+
+		//UI elements for Save and Show Data and
 		bug.append("button").text("Show Data").on("click",vm.toggleshowdata);
 		if (!vm.timelapse) {
 			bug.append("button").text("Save SVG").on("click",function() {BDSVis.util.savesvg('svg');});
@@ -168,6 +182,8 @@ BDSVis.ViewModel = function(model) {
 
 	this.region = "US";
 	this.cartogram = 1;
+
+	this.heatchart = 0;
 
 	//Set the incompatible variables to values corresponding totals
 	function SetToTotals(varname) {
