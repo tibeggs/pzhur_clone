@@ -113,7 +113,7 @@ BDSVis.processAPIdata = function(data,request,vm) {
 		})); //d3.merge flattens the array
 
 	vm.TableView.makeDataTable(data,request.cvar,request.xvar,vm); //Make the table displaying the data
-
+	
 	if (vm.geomap())
 		BDSVis.makeMap(data,request,vm);
 	else if (vm.heatchart)
