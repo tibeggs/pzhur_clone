@@ -7,13 +7,15 @@ BDSVis.makeHeatChart = function (data,request,vm,dataunfiltered) {
 	width=pv.width;
 	height=pv.height;
 	
-	var yvar=request[vm.model.yvars];
 	var cvar = request.cvar;
 	var cvarr=vm.model.LookUpVar(cvar);
 	var xvar = request.xvar;
 	var xvarr=vm.model.LookUpVar(xvar);
 
 	var YvarsAsLegend = (cvar === vm.model.yvars);
+	//If yvars is also a c-variable, then we got melted data from updateBDSdata function, with all yvars contained in the "value" column
+	var yvar=YvarsAsLegend?"value":request[vm.model.yvars];
+
 
 	var Tooltiptext = function(d) {
 		var ttt=vm.model.NameLookUp(d[vm.model.yvars],vm.model.yvars);
