@@ -33,6 +33,8 @@ BDSVis.makeHeatChart = function (data,request,vm,dataunfiltered) {
 			.domain(data.map(function(d) {return d[cvar]})) //For only showing categories for which data exists
 			.rangeRoundBands([height, 0], 0);
 
+	var cvarlist = cScale.domain();
+
 	var ymin=d3.min(data, function(d) { return +d[yvar]; });
 	var ymax=d3.max(data, function(d) { return +d[yvar]; });
 	var maxabs=d3.max([Math.abs(ymin),Math.abs(ymax)]);
@@ -112,6 +114,21 @@ BDSVis.makeHeatChart = function (data,request,vm,dataunfiltered) {
 		.attr("transform","translate(-7,0)");
 
 		yAxisLabels.call(pv.wrap,pv.margin.left-10);
+
+	//Set the title of the plot
+	var ptitle=(YvarsAsLegend && request[vm.model.yvars].length>1)?("Various "+vm.model.yvars+"s"):(vm.model.NameLookUp(request[vm.model.yvars],vm.model.yvars)); //If many yvars say "various", otherwise the yvar name
+	
+	//Continue forming title
+	for (var key in data[0]) {
+		//X-var should not be in the title, yvar is taken care of. Also check that the name exists in model.variables (e.g. yvar names don't)
+		if ((key!==xvar) && (key!==yvar) && (key!==vm.model.yvars) && !((key===vm.model.timevar) && (vm.timelapse)) && (vm.model.VarExists(key))) {
+			if (key!==cvar) ptitle+=vm.model.PrintTitle(data[0][key],key);
+			else if (cvarlist.length === 1) ptitle+=vm.model.PrintTitle(data[0][key],key);
+			else if (key!==vm.model.yvars) ptitle+=" by " + vm.model.NameLookUp(key,"var");
+		} 		
+	};
+	
+	pv.SetPlotTitle(ptitle);
 
 	//X-axis label
 	pv.SetXaxisLabel(xvarr.name,d3.max(xAxisLabels[0].map(function(d) {return d.getBBox().y+d.getBBox().height;})));
