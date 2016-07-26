@@ -108,9 +108,11 @@ BDSVis.makeHeatChart = function (data,request,vm,dataunfiltered) {
 	var yAxisLabels=svg.append("g")
 		.attr("class", "y axis")
 		.call(yAxis)
-		.selectAll(".tick text");
+		.selectAll(".tick text")
+		.attr("transform","translate(-7,0)");
 
-		//yAxisLabels.call(pv.wrap,pv.margin.left);
+		yAxisLabels.call(pv.wrap,pv.margin.left-10);
 
-
+	//X-axis label
+	pv.SetXaxisLabel(xvarr.name,d3.max(xAxisLabels[0].map(function(d) {return d.getBBox().y+d.getBBox().height;})));
 };
