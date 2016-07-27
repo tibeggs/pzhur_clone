@@ -135,4 +135,53 @@ BDSVis.makeHeatChart = function (data,request,vm,dataunfiltered) {
 
 	//X-axis label
 	pv.SetXaxisLabel(xvarr.name,d3.max(xAxisLabels[0].map(function(d) {return d.getBBox().y+d.getBBox().height;})));
+
+	var legendsvg=pv.legendsvg;
+	//legendsvg.call(d3.behavior.zoom().on("zoom",colorscalerefresh));
+
+	var colorbar={height:200, width:20, nlevels:5, nlabels:5, fontsize:15, levels:[]};
+
+	var hScale = scaletype.copy().domain([ymin,ymax]).range([0,colorbar.height]); //Scale for height of the rectangles in the colorbar
+	var y2levelsScale = scaletype.copy().domain([ymin,ymax]).range([0,colorbar.nlevels]); //Scale for levels of the colorbar
+
+	for (var i=0; i<colorbar.nlevels+1; i++) colorbar.levels.push(y2levelsScale.invert(i));
+
+	var legendtitle = legendsvg.append("text").attr("class","legtitle").text(vm.model.NameLookUp(yvar,vm.model.yvars)).attr("x",-20).attr("y",-20).attr("dy","1em");
+	legendtitle.call(pv.wrap,pv.legendwidth);
+	//legendtitle.selectAll("tspan").attr("x",function(d) { return (pv.legendwidth-this.getComputedTextLength())/2.; })
+	var titleheight = legendtitle.node().getBBox().height;
+	legendsvg=legendsvg.append("g").attr("transform","translate(20,"+titleheight+")");
+
+	var legNumFormat= function(d) {
+		if (Math.abs(d)>1)
+			return d3.format(".3s")(d);
+		else if (Math.abs(d)>5e-2)
+			return d3.format(".2f")(d);
+		else return d3.format(".f")(d);
+	};
+	
+	//Make the colorbar
+	legendsvg.selectAll("circle")
+		.data(colorbar.levels)
+		.enter()
+		.append("circle")
+		.attr("fill",  yScale)
+		//.attr("width",20)
+		.attr("cy",hScale)
+		.attr("r", rScale)
+		.append("title").text(legNumFormat);
+
+	//Make the labels of the colorbar
+	legendsvg.selectAll("text.leglabel")
+		.data(colorbar.levels.filter(function(d,i) {return !(i % ~~(colorbar.nlevels/colorbar.nlabels));})) //Choose rectangles to put labels next to
+		.enter()
+		.append("text")
+		.attr("fill", "black")
+		.attr("class","leglabel")
+		.attr("font-size", colorbar.fontsize+"px")
+		.attr("x",colorbar.width+23)
+		.attr("y",function(d) {return .4*colorbar.fontsize+hScale(d);})
+		.text(legNumFormat);
+
+	//legendsvg.append("text").attr("y",1.2*colorbar.fontsize+colorbar.height).style("font-size","10px").text("Zoom over the colorbar to change color scale");
 };
