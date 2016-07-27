@@ -64,7 +64,8 @@ BDSVis.makeHeatChart = function (data,request,vm,dataunfiltered) {
 	var barwidth=width/xScale.domain().length,
 		barheight=height/cScale.domain().length;
 
-	var rScale=d3.scale.sqrt().domain([0,ymax]).range([0,.5*Math.min(barwidth,barheight)]);
+	var rScale=(vm.logscale)?d3.scale.log():d3.scale.sqrt();
+	rScale.domain([ymin/2.,ymax]).range([0,.5*Math.min(barwidth,barheight)]);
 
 	// 	var bars=
 	// 	chart.selectAll("rect.plotbar")

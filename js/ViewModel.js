@@ -22,7 +22,7 @@ BDSVis.ViewModel = function(model) {
 		if (vm.geomap()) {
 			var sel=bug.append("select").on("change", function() {vm.cartogram=+this.value; vm.getBDSdata();});
 			sel.append("option").text("Map").attr("value",0).property("selected",function(d) { return vm.cartogram===0;});
-			sel.append("option").text("Cartogram N/C").attr("value",1).property("selected",function(d) { return vm.cartogram===1;});
+			sel.append("option").text("Non-cont Cartogram").attr("value",1).property("selected",function(d) { return vm.cartogram===1;});
 		} else {
 			var sel=bug.append("select").on("change", function() {vm.heatchart=+this.value; vm.getBDSdata();});
 			sel.append("option").text("Barchart").attr("value",0).property("selected",function(d) { return (!vm.heatchart);});
@@ -181,8 +181,7 @@ BDSVis.ViewModel = function(model) {
 	};
 
 	this.region = "US";
-	this.cartogram = 1;
-
+	this.cartogram = 0;
 	this.heatchart = 0;
 
 	//Set the incompatible variables to values corresponding totals
