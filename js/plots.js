@@ -309,7 +309,7 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 			.attr("fill","red")
 			.attr("transform", function(d) { return "translate(" + (xScale(d[xvar])+xScale.rangeBand()/2.) + "," + 0 + ")"; });
 
-		if(vm.zoombyrect) pv.lowerrightcornertext.text("Double-click on bar to remove category");
+		if (!vm.zoombyrect) pv.lowerrightcornertext.text("Double-click on bar to remove category");
 	};
 
 	//Making Legend
