@@ -81,7 +81,7 @@ BDSVis.ViewModel = function(model) {
 				.selectAll("option").data(vm.model[varr1code]).enter()
 				.append("option")
 				.property("selected", function(d){
-					var selind = vm.SelectedOpts[varr1code].indexOf(vm.model.IsContinuous(varr)?d:d.code); 
+					var selind = vm.SelectedOpts[varr1code].indexOf(vm.model.IsContinuous(varr)?d.toString():d.code);
 					return vm.multiple(varr.code)?(selind!==-1):(selind===0);
 				})
 				.text(function(d) {return vm.model.IsContinuous(varr1code)?d:d.name;})
@@ -222,7 +222,7 @@ BDSVis.ViewModel = function(model) {
 	this.SelectedOpts = {};
 	this.IncludedXvarValues = {};
 	function AddVarToArrays(varr) {
-		var initial = (vm.model.IsContinuous(varr))?[vm.model[varr.code][varr.default]]:[vm.model[varr.code][varr.default].code];
+		var initial = (vm.model.IsContinuous(varr))?[vm.model[varr.code][varr.default].toString()]:[vm.model[varr.code][varr.default].code];
 		vm.SelectedOpts[varr.code]=initial;
 		vm.IncludedXvarValues[varr.code]=vm.model.GetCodes(varr.code);
 	};
