@@ -292,7 +292,8 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 		   	.attr("y",function(d) {return yScale(Math.max(0,+d[yvar]))})
 		   	.attr("height", function(d) {return Math.abs(yScale(y0)-yScale(+d[yvar]))})
 		   	.on("dblclick",function(d) {
-		   		if(!vm.zoombyrect) return;
+
+		   		//if(!vm.zoombyrect) return;
 				var ind = vm.IncludedXvarValues[xvar].indexOf(d[xvar]);
 				vm.IncludedXvarValues[xvar].splice(ind,1);
 				BDSVis.processAPIdata(data,request,vm);

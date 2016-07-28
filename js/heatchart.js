@@ -59,7 +59,7 @@ BDSVis.makeHeatChart = function (data,request,vm,dataunfiltered) {
 		yScale.domain([ymin,ymid(ymin,ymax),ymax]).range([purple,"#bbbbbb",golden]);
 		//yScale.domain([ymin,ymid,ymax]).range(["red","#ccffcc","blue"]);
 
-	var chart=svg.append("g");//.attr("clip-path", "url(#clip)");
+	var chart=svg.append("g").attr("clip-path", "url(#clip)");
 	
 	var barwidth=width/xScale.domain().length,
 		barheight=height/cScale.domain().length;
@@ -97,6 +97,11 @@ BDSVis.makeHeatChart = function (data,request,vm,dataunfiltered) {
 	  		.attr("cy", function(d) {return cScale(d[cvar])+.5*barheight;})
 	    	.attr("cx", function(d) { return xScale(d[xvar])+.5*barwidth;})
 	    	.attr("fill", function(d) { return yScale(d[yvar]); })
+	    	.on("dblclick",function(d) {
+				var ind = vm.IncludedXvarValues[xvar].indexOf(d[xvar]);
+				vm.IncludedXvarValues[xvar].splice(ind,1);
+				BDSVis.processAPIdata(data,request,vm);
+			})
 	    	.append("title").text(Tooltiptext);
 
 	var xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickFormat(function(d){ return vm.model.NameLookUp(d,xvar)});
