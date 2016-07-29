@@ -189,4 +189,61 @@ BDSVis.makeHeatChart = function (data,request,vm,dataunfiltered) {
 		.text(legNumFormat);
 
 	//legendsvg.append("text").attr("y",1.2*colorbar.fontsize+colorbar.height).style("font-size","10px").text("Zoom over the colorbar to change color scale");
+
+	// Timelapse animation
+	function updateyear(yr) {
+
+		curyearmessage.transition().duration(vm.timelapsespeed).text(yr); //Display year
+
+		//pv.maintitle.text("");
+
+		var dataset=data.filter(function(d) {return +d[vm.model.timevar]===yr}); //Select data corresponding to the year
+
+		vm.TableView.makeDataTable(dataset,cvar,xvar,vm);
+		
+		//The data4bars is only needed for smooth transition in animations. There have to be rectangles of 0 height for missing data. data4bars is created
+		//empty outside this function. The following loop fills in / updates to actual data values from current year
+
+		// d3.merge(data4bars).forEach(function(d) {d[yvar]=0;}); //Set every bar to 0 so that missing bars disappear
+
+		// dataset.forEach( function(d) { //Set the values of existing bars
+		// 	data4bars [ xScale.domain().indexOf(d[xvar]) ] [ cvarlist.indexOf(d[cvar]) ][yvar]=+d[yvar];
+		// });
+		
+  // 		var bars=chart.selectAll("rect.plotbar").data(d3.merge(data4bars));
+
+  		// UPDATE
+		  // Update old elements as needed.
+		dots
+			.data(dataset)
+			.transition().duration(vm.timelapsespeed)
+	  		.attr("r",function(d) {return rScale(d[yvar]);})
+	    	.attr("fill", function(d) { return yScale(d[yvar]); })
+	   
+	};
+
+	//Run timelapse animation
+	if (vm.timelapse) {
+		
+		//This array is only needed for smooth transition in animations. There have to be bars of 0 height for missing data.
+		//Create array with entry for all values of xvar and all values of cvar.
+		// var data4bars = xScale.domain().map(function(xv) {return cvarlist.map(function(cv) {return (obj={}, obj[xvar]=xv, obj[cvar]=cv,obj);});});
+
+		//Create bars for every xvar/cvar combination
+		chart.selectAll("circle.plotdot").remove();
+		//chart.selectAll("rect.plotbar").data(d3.merge(data4bars)).enter().append("rect").attr("class", "plotbar").attr("width", barwidth);
+		
+		var timerange = d3.extent(data, function(d) { return +d[vm.model.timevar] });
+		var step=vm.model.LookUpVar(vm.model.timevar).range[2];
+		var iy=Math.max(timerange[0], vm.timelapsefrom);
+		var curyearmessage=svg.append("text").attr("x",width/2).attr("y",height/2).attr("font-size",100).attr("fill-opacity",.3);
+		var intervalfunction = function() {
+  			updateyear(iy);
+  			if (iy<Math.min(timerange[1],vm.timelapseto)) iy+=step; else iy=Math.max(timerange[0], vm.timelapsefrom);
+  			vm.TimeLapseCurrYear=iy;//vm.model[vm.model.timevar][iy];
+			clearInterval(vm.tlint);
+			vm.tlint=setInterval(intervalfunction, vm.timelapsespeed);
+		}
+		vm.tlint=setInterval(intervalfunction, vm.timelapsespeed);
+	};
 };
