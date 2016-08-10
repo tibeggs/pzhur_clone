@@ -91,18 +91,20 @@ BDSVis.makeHeatChart = function (data,request,vm,dataunfiltered) {
 
 	var dots = chart.selectAll("circle.plotdot")
 	    	.data(data);
+
 	  		
-	  	dots.enter().append("circle").attr("class","plotdot")
-	  		.attr("r",function(d) {return rScale(d[yvar]);})
-	  		.attr("cy", function(d) {return cScale(d[cvar])+.5*barheight;})
-	    	.attr("cx", function(d) { return xScale(d[xvar])+.5*barwidth;})
-	    	.attr("fill", function(d) { return yScale(d[yvar]); })
-	    	.on("dblclick",function(d) {
-				var ind = vm.IncludedXvarValues[xvar].indexOf(d[xvar]);
-				vm.IncludedXvarValues[xvar].splice(ind,1);
-				BDSVis.processAPIdata(data,request,vm);
-			})
-	    	.append("title").text(Tooltiptext);
+  	dots.enter().append("circle").attr("class","plotdot")
+  		.attr("r",function(d) {return rScale(d[yvar]);})
+  		.attr("cy", function(d) {return cScale(d[cvar])+.5*barheight;})
+    	.attr("cx", function(d) { return xScale(d[xvar])+.5*barwidth;})
+    	.attr("fill", function(d) { return yScale(d[yvar]); })
+    	.on("dblclick",function(d) {
+			var ind = vm.IncludedXvarValues[xvar].indexOf(d[xvar]);
+			vm.IncludedXvarValues[xvar].splice(ind,1);
+			BDSVis.processAPIdata(data,request,vm);
+		})
+    	.append("title").text(Tooltiptext);
+
 
 	var xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickFormat(function(d){ return vm.model.NameLookUp(d,xvar)});
 	var xAxisLabels=svg.append("g")
@@ -211,11 +213,21 @@ BDSVis.makeHeatChart = function (data,request,vm,dataunfiltered) {
 		// });
 		
   // 		var bars=chart.selectAll("rect.plotbar").data(d3.merge(data4bars));
+ 		 var dots = chart.selectAll("circle.plotdot")
+	    	.data(dataset)
+	    // 	.enter()
+	    // 	.append("circle")
+	    // 	.attr("class","plotdot")
+	  		// //.attr("r",function(d) {return rScale(d[yvar]);})
+	  	// .attr("cy", function(d) {return cScale(d[cvar])+.5*barheight;})
+	    // 	.attr("cx", function(d) { return xScale(d[xvar])+.5*barwidth;})
+	    // 	//.attr("fill", function(d) { return yScale(d[yvar]); })
+	    // 	.append("title").text(Tooltiptext);
 
   		// UPDATE
 		  // Update old elements as needed.
 		dots
-			.data(dataset)
+			//.data(dataset)
 			.transition().duration(vm.timelapsespeed)
 	  		.attr("r",function(d) {return rScale(d[yvar]);})
 	    	.attr("fill", function(d) { return yScale(d[yvar]); })
@@ -225,13 +237,16 @@ BDSVis.makeHeatChart = function (data,request,vm,dataunfiltered) {
 	//Run timelapse animation
 	if (vm.timelapse) {
 		
-		//This array is only needed for smooth transition in animations. There have to be bars of 0 height for missing data.
+		//This array is only needed for smooth transition in animations. There have to be dots of 0 height for missing data.
 		//Create array with entry for all values of xvar and all values of cvar.
-		// var data4bars = xScale.domain().map(function(xv) {return cvarlist.map(function(cv) {return (obj={}, obj[xvar]=xv, obj[cvar]=cv,obj);});});
+		var data4dots = xScale.domain().map(function(xv) {return cvarlist.map(function(cv) {return (obj={}, obj[xvar]=xv, obj[cvar]=cv,obj);});});
 
 		//Create bars for every xvar/cvar combination
 		chart.selectAll("circle.plotdot").remove();
-		//chart.selectAll("rect.plotbar").data(d3.merge(data4bars)).enter().append("rect").attr("class", "plotbar").attr("width", barwidth);
+		chart.selectAll("circle.plotdot").data(d3.merge(data4dots)).enter()
+			.append("circle").attr("class", "plotdot")
+			.attr("cy", function(d) {return cScale(d[cvar])+.5*barheight;})
+	    	.attr("cx", function(d) { return xScale(d[xvar])+.5*barwidth;});
 		
 		var timerange = d3.extent(data, function(d) { return +d[vm.model.timevar] });
 		var step=vm.model.LookUpVar(vm.model.timevar).range[2];
