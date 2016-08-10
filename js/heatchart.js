@@ -30,12 +30,17 @@ BDSVis.makeHeatChart = function (data,request,vm,dataunfiltered) {
 			.domain(data.map(function(d) {return d[xvar]})) //For only showing categories for which data exists
 			.rangeRoundBands([0, width], 0);
 
+	var cvarlist = d3.set(data.map(function(d) {return d[cvar]})).values(); //All the values of returned cvars
+		
+	cvarlist.sort(function(a,b) { //Sorted like in model.js
+			var arr=vm.model[cvar].map(function(d) {return d.code});
+			return arr.indexOf(a)-arr.indexOf(b);
+	});
+
 	var cScale = d3.scale.ordinal()
 			//.domain(vm.model.GetDomain(xvar)) //For showing all the categories (even empty ones) on x-axis in any case
-			.domain(data.map(function(d) {return d[cvar]})) //For only showing categories for which data exists
+			.domain(cvarlist) //For only showing categories for which data exists
 			.rangeRoundBands([height, 0], 0);
-
-	var cvarlist = cScale.domain();
 
 	var ymin=d3.min(data, function(d) { return +d[yvar]; });
 	var ymax=d3.max(data, function(d) { return +d[yvar]; });
@@ -206,15 +211,15 @@ BDSVis.makeHeatChart = function (data,request,vm,dataunfiltered) {
 		//The data4bars is only needed for smooth transition in animations. There have to be rectangles of 0 height for missing data. data4bars is created
 		//empty outside this function. The following loop fills in / updates to actual data values from current year
 
-		// d3.merge(data4bars).forEach(function(d) {d[yvar]=0;}); //Set every bar to 0 so that missing bars disappear
+		d3.merge(data4dots).forEach(function(d) {d[yvar]=0;}); //Set every bar to 0 so that missing bars disappear
 
-		// dataset.forEach( function(d) { //Set the values of existing bars
-		// 	data4bars [ xScale.domain().indexOf(d[xvar]) ] [ cvarlist.indexOf(d[cvar]) ][yvar]=+d[yvar];
-		// });
+		dataset.forEach( function(d) { //Set the values of existing bars
+			data4dots [ xScale.domain().indexOf(d[xvar]) ] [ cvarlist.indexOf(d[cvar]) ][yvar]=+d[yvar];
+		});
 		
   // 		var bars=chart.selectAll("rect.plotbar").data(d3.merge(data4bars));
  		 var dots = chart.selectAll("circle.plotdot")
-	    	.data(dataset)
+	    	.data(d3.merge(data4dots))
 	    // 	.enter()
 	    // 	.append("circle")
 	    // 	.attr("class","plotdot")
@@ -227,10 +232,12 @@ BDSVis.makeHeatChart = function (data,request,vm,dataunfiltered) {
   		// UPDATE
 		  // Update old elements as needed.
 		dots
-			//.data(dataset)
 			.transition().duration(vm.timelapsespeed)
 	  		.attr("r",function(d) {return rScale(d[yvar]);})
 	    	.attr("fill", function(d) { return yScale(d[yvar]); })
+
+	   // dots.append("title").text(Tooltiptext);
+	   // debugger;
 	   
 	};
 
@@ -241,10 +248,12 @@ BDSVis.makeHeatChart = function (data,request,vm,dataunfiltered) {
 		//Create array with entry for all values of xvar and all values of cvar.
 		var data4dots = xScale.domain().map(function(xv) {return cvarlist.map(function(cv) {return (obj={}, obj[xvar]=xv, obj[cvar]=cv,obj);});});
 
+
 		//Create bars for every xvar/cvar combination
 		chart.selectAll("circle.plotdot").remove();
 		chart.selectAll("circle.plotdot").data(d3.merge(data4dots)).enter()
 			.append("circle").attr("class", "plotdot")
+			.attr("r",0)
 			.attr("cy", function(d) {return cScale(d[cvar])+.5*barheight;})
 	    	.attr("cx", function(d) { return xScale(d[xvar])+.5*barwidth;});
 		
