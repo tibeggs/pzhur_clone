@@ -107,7 +107,15 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	// Update the projection to use computed scale & translate.
 	projection.scale(s).translate(t);
 
-	
+	var carto = d3.cartogram()
+            .projection(projection)
+            .properties(function(d) {return d.properties;})
+            .value(function(d) {return +d.properties[landarea];});
+
+    //debugger;
+    //geo_data1=carto.features(vm.model.full_geo_data, vm.model.full_geo_data.objects.states.geometries);
+
+
 	//Calculate relative land areas and how to scale selected states
 
 	//Mean Land Area
