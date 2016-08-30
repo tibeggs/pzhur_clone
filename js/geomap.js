@@ -161,8 +161,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 			})
 			.data(data)
 			.attr("transform", function(d,i) {
-				if (vm.cartogram === 0) return "translate(" + pv.translate + ")"+"scale(" + pv.scale + ")";
-				else return StatesRescaling(d,i);
+				return StatesRescaling(d,i);
 			})
 			.style('fill', function(d) {return yScale(d[yvar]);})
 			.attr("fill-opacity",.9)
@@ -177,7 +176,11 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 			})
 			.append("title").text(function(d){return LUName(d)+": "+d3.format(",")(d[yvar]);});
 
+	
 	function StatesRescaling(d,i) {
+		//The function calculates the proper rescaling and translating of states/MSA for non-contiguous cartogram
+
+		if (vm.cartogram === 0) return "translate(" + pv.translate + ")"+"scale(" + pv.scale + ")";
 		var noscale = ["Alaska","Hawaii","Puerto Rico"].indexOf(geo_data1[i].properties.name)!==-1;
 		if (noscale) return;
 		else {
@@ -238,14 +241,6 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	pv.zoom = d3.behavior.zoom().on("zoom",refresh);
 	svg.call(pv.zoom);
 
-	// mapg.selectAll('path.outlines').data(vm.model.geo_data.state)
-	// 		.enter()
-	// 		.append('path')
-	// 		.attr('class','outlines')
-	// 		.style('fill', "none")
-	// 		.style('stroke', 'black')
-	// 		.style('stroke-width', 0.1)
-	// 		.attr('d', d3.geo.path().projection(d3.geo.albersUsa().scale(800).translate([width / 2, height / 2.])))
 
 	//Making Legend
 	var legendsvg=vm.PlotView.legendsvg;
@@ -315,18 +310,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 				.transition().duration(vm.timelapsespeed)
 				.style('fill', function(d) { return yScale(d[yvar]);})
 				.attr("transform", function(d,i) {
-					if (vm.cartogram === 0) return "translate(" + pv.translate + ")"+"scale(" + pv.scale + ")";
-					var noscale = ["Alaska","Hawaii","Puerto Rico"].indexOf(geo_data1[i].properties.name)!==-1;
-					if (noscale) return;
-					else {
-						var centroid = path.centroid(geo_data1[i]),
-						x = centroid[0],
-						y = centroid[1];
-						return "translate(" + x + "," + y + ")"
-						// + "scale(" + Math.sqrt(data[i][yvar]/ymax || 0) + ")"
-						+ "scale(" + (Math.sqrt(d[yvar]/geo_data1[i].properties.reducedla/scalingmax))*pv.scale + ")"
-						+ "translate(" + -x + "," + -y + ")";
-					}
+					return StatesRescaling(d,i);
 				})
 		mapg.selectAll('title').data(dataset).text(function(d){return LUName(d)+": "+d3.format(",")(d[yvar]);});
 	};
