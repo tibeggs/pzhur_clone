@@ -110,11 +110,10 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	var carto = d3.cartogram()
             .projection(projection)
             .properties(function(d) {return d.properties;})
-            .value(function(d) {return +d.properties[landarea];});
-
-    //debugger;
-    //geo_data1=carto.features(vm.model.full_geo_data, vm.model.full_geo_data.objects.states.geometries);
-
+            .value(function(d,i) {return +d.properties[landarea]+212885012434;});
+    
+    var geo_data1=carto.features(vm.model.full_geo_data, vm.model.full_geo_data.objects.states.geometries);
+   
 
 	//Calculate relative land areas and how to scale selected states
 
@@ -140,6 +139,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 			.style('stroke-width', 0.1)
 			.attr('d', path)
 			.attr("transform",(vm.cartogram!==1)?("translate(" + pv.translate + ")"+"scale(" + pv.scale + ")"):"");
+			//.attr("transform","translate(" + pv.translate + ")"+"scale(" + pv.scale + ")");
 
 	var map = mapg.selectAll('path.datacontour')
 			.data(geo_data1)
