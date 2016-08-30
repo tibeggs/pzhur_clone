@@ -112,7 +112,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
             .properties(function(d) {return d.properties;})
             .value(function(d,i) {return +d.properties[landarea]+212885012434;});
     
-    var geo_data1=carto.features(vm.model.full_geo_data, vm.model.full_geo_data.objects.states.geometries);
+    //var geo_data1=carto.features(vm.model.full_geo_data, vm.model.full_geo_data.objects.states.geometries);
    
 
 	//Calculate relative land areas and how to scale selected states
@@ -162,17 +162,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 			.data(data)
 			.attr("transform", function(d,i) {
 				if (vm.cartogram === 0) return "translate(" + pv.translate + ")"+"scale(" + pv.scale + ")";
-				var noscale = ["Alaska","Hawaii","Puerto Rico"].indexOf(geo_data1[i].properties.name)!==-1;
-				if (noscale) return;
-				else {
-					var centroid = path.centroid(geo_data1[i]),
-					x = centroid[0],
-					y = centroid[1];
-					return "translate(" + x + "," + y + ")"
-					// + "scale(" + Math.sqrt(data[i][yvar]/ymax || 0) + ")"
-					+ "scale(" + (Math.sqrt(d[yvar]/geo_data1[i].properties.reducedla/scalingmax))*pv.scale + ")"
-					+ "translate(" + -x + "," + -y + ")";
-				}
+				else return StatesRescaling(d,i);
 			})
 			.style('fill', function(d) {return yScale(d[yvar]);})
 			.attr("fill-opacity",.9)
@@ -186,6 +176,20 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 				//vm.getBDSdata();
 			})
 			.append("title").text(function(d){return LUName(d)+": "+d3.format(",")(d[yvar]);});
+
+	function StatesRescaling(d,i) {
+		var noscale = ["Alaska","Hawaii","Puerto Rico"].indexOf(geo_data1[i].properties.name)!==-1;
+		if (noscale) return;
+		else {
+			var centroid = path.centroid(geo_data1[i]),
+			x = centroid[0],
+			y = centroid[1];
+			return "translate(" + x + "," + y + ")"
+			// + "scale(" + Math.sqrt(data[i][yvar]/ymax || 0) + ")"
+			+ "scale(" + (Math.sqrt(d[yvar]/geo_data1[i].properties.reducedla/scalingmax))*pv.scale + ")"
+			+ "translate(" + -x + "," + -y + ")";
+		}
+	};
 
 
 	//d3.select("body").append("div").text(JSON.stringify(data))
@@ -215,17 +219,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 			if (vm.cartogram === 1)
 				mapg.selectAll('path.datacontour').data(data)
 				.attr("transform", function(d,i) {
-					var noscale = ["Alaska","Hawaii","Puerto Rico"].indexOf(geo_data1[i].properties.name)!==-1;
-					if (noscale) return;
-					else {
-						var centroid = path.centroid(geo_data1[i]),
-						x = centroid[0],
-						y = centroid[1];
-						return "translate(" + x + "," + y + ")"
-						// + "scale(" + Math.sqrt(data[i][yvar]/ymax || 0) + ")"
-						+ "scale(" + (Math.sqrt(d[yvar]/geo_data1[i].properties.reducedla/scalingmax))*pv.scale + ")"
-						+ "translate(" + -x + "," + -y + ")";
-					}
+					return StatesRescaling(d,i);
 				})
 			else mapg.selectAll('path').attr("transform", t);
 		}
