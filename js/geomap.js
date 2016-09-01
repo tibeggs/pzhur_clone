@@ -14,7 +14,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	var yvar=request[vm.model.yvars];
 	var xvar=request.xvar;
 
-	var LUName = function(d) {return vm.model.NameLookUp(d[xvar],xvar);}
+	var LUName = function(d) {return vm.model.NameLookUp(d[xvar],xvar);} //Returns full name of the variable value by its value returned by IP (aka code), and varname
 
 	//Set the title of the plot
 	var ptitle=vm.model.NameLookUp(yvar,vm.model.yvars); //If many yvars say "various", otherwise the yvar name
@@ -37,6 +37,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
     		.attr('class', 'map');
 
     //Set D3 scales
+
 	var ymin=d3.min(data, function(d) { return +d[yvar]; });
 	var ymax=d3.max(data, function(d) { return +d[yvar]; });
 	var maxabs=d3.max([Math.abs(ymin),Math.abs(ymax)]);
@@ -48,7 +49,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 		return scaletype.invert(.5*(scaletype(ymax)+scaletype(ymin)));
 	};
 
-	var yScale = scaletype.copy();
+	var yScale = scaletype.copy(); //Color scale for the map
 	
 	var purple="rgb(112,79,161)"; var golden="rgb(194,85,12)"; var teal="rgb(22,136,51)";
 
@@ -60,12 +61,11 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 		//yScale.domain([ymin,ymid,ymax]).range(["red","#ccffcc","blue"]);
 
 
-	var geo_data1=vm.model.geo_data[xvar].slice(0),
+	var geo_data1=vm.model.geo_data[xvar].slice(0), //Data with geographical contours of states/MSA
 		emptystates=0,
-		timerange = d3.extent(data, function(d) { return +d[vm.model.timevar] });
+		timerange = d3.extent(data, function(d) { return +d[vm.model.timevar] }); //Time range of the time lapse
 
-	
-
+			
 	if (vm.timelapse) { //In time lapse regime, select only the data corresponding to the current year
 		var datafull=data;
 		data=data.filter(function(d) {return +d[vm.model.timevar]===timerange[0];});
@@ -94,7 +94,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	// Create a path generator.
 	var path = d3.geo.path().projection(projection);
 
-	// Compute the bounds of a feature of interest, then derive scale & translate.
+	// Compute the bounds of a feature of interest, then derive scale & translate such that it fits within the bounds
 	var b = geo_data1.slice(0,data.length).map(path.bounds),
 		leftbound = d3.min(b.map(function(d) {return d[0][0]}).filter(function(d) {return Math.abs(d)!==Infinity}));
 		rightbound = d3.max(b.map(function(d) {return d[1][0]}).filter(function(d) {return Math.abs(d)!==Infinity}));
@@ -107,6 +107,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	// Update the projection to use computed scale & translate.
 	projection.scale(s).translate(t);
 
+	//Cartogram.js contiguos cartogram
 	var carto = d3.cartogram()
             .projection(projection)
             .properties(function(d) {return d.properties;})
@@ -117,16 +118,10 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 
 	//Calculate relative land areas and how to scale selected states
 
-	//Mean Land Area
-	var meanla = d3.mean(geo_data1.filter(function(d) {return (xir.indexOf(d.properties.name)!==-1);}).map(function(d) {return d.properties.landarea;}));
-
-	//Reduced land areas
-	geo_data1.forEach(function(d) {d.properties.reducedla = d.properties.landarea/meanla});
-
 	//Find maximal scaling: maximum of the "value of variable (yvar) per land area unit"
 	var scalingmax = d3.max(geo_data1.map(function(d,i){
 		if ((data[i]===undefined) || (["Alaska","Hawaii"].indexOf(d.properties.name)!==-1)) return 0;
-		else return data[i][yvar]/d.properties.reducedla;
+		else return data[i][yvar]/d.properties.landarea;
 	}));
 
 	//.filter(function(d) {return d[xvar]!=="11";})
@@ -151,7 +146,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 			.attr('fill-opacity', 0)
 			.style('stroke', 'black')
 			.style('stroke-width', 0.3)
-			.on("dblclick",function(d) {
+			.on("dblclick",function(d) { //Add the state/MSA to the data set upon double-click to its outline
 				var xvcode = vm.model[xvar].filter(function(d1) {return d1.name===d.properties.name;})[0].code;
 				vm.IncludedXvarValues[xvar].push(xvcode);
 				//request[xvar].push(xvcode);
@@ -167,7 +162,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 			.attr("fill-opacity",.9)
 			.style('stroke-width', 0.3)
 			.style('stroke', 'white')
-			.on("dblclick",function(d) {
+			.on("dblclick",function(d) { //Remove the state/MSA from the data set upon double-click
 				var ind = vm.IncludedXvarValues[xvar].indexOf(vm.model[xvar].filter(function(d1) {return d1.name===LUName(d);})[0].code);
 				vm.IncludedXvarValues[xvar].splice(ind,1);
 				BDSVis.processAPIdata(vm.dataunfiltered,request,vm);
@@ -189,7 +184,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 			y = centroid[1];
 			return "translate(" + x + "," + y + ")"
 			// + "scale(" + Math.sqrt(data[i][yvar]/ymax || 0) + ")"
-			+ "scale(" + (Math.sqrt(d[yvar]/geo_data1[i].properties.reducedla/scalingmax))*pv.scale + ")"
+			+ "scale(" + (Math.sqrt(d[yvar]/geo_data1[i].properties.landarea/scalingmax))*pv.scale + ")"
 			+ "translate(" + -x + "," + -y + ")";
 		}
 	};
@@ -200,8 +195,8 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	//Zooming
 
 	function zoomscale(scale) {
-		var mn=ymin,//+d3.event.translate[0]*(ymax-ymin)/1e+3,
-			mx=ymax,//+d3.event.translate[1]*(ymax-ymin)/1e+3,
+		var mn=ymin,
+			mx=ymax,
 			md=ymid(ymin,ymax);
 		if ((ymin<0) && !vm.logscale)
 			yScale.domain([-d3.max([Math.abs(mn),Math.abs(mx)])*scale,0,d3.max([Math.abs(mn),Math.abs(mx)])*scale]);
