@@ -247,6 +247,8 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 	
 	if (vm.model.IsContinuous(xvarr)) {
 		//Make a scatter plot if x-variable is continuous
+	
+		vm.regimeselector.property("disabled",true)
 
 		// Define the line
 		var valueline = d3.svg.line().interpolate("monotone")

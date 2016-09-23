@@ -124,7 +124,8 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 		else return data[i][yvar]/d.properties.landarea;
 	}));
 
-	//.filter(function(d) {return d[xvar]!=="11";})
+
+	//Plot state outlines for all states
 	mapg.selectAll('path.outlines').data(vm.model.geo_data.state)
 			.enter()
 			.append('path')
@@ -139,7 +140,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	var map = mapg.selectAll('path.datacontour')
 			.data(geo_data1)
 			.enter()
-			.append('path')
+			.append('path') //State/MSA outlines for states/MSA present in the data
 			.attr("class","datacontour")
 			.attr('d',path)
 			.style('fill', "white")
