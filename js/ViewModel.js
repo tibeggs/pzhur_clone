@@ -235,8 +235,8 @@ BDSVis.ViewModel = function(model) {
 	});
 
 	//Initial values of X-axis variable and C- variable
-	this.xvar = "geo";
-	this.cvar = "measure";
+	this.xvar = "fage4";
+	this.cvar = "sic1";
 
 	this.PlotView.Init();
 	this.PlotView.DisplayWaitingMessage();

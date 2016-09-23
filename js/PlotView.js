@@ -77,6 +77,8 @@ BDSVis.PlotView = {
 			.attr("class","yaxislabel")
 			.attr("transform","translate("+16+","+.5*(height + margin.top + this.xaxislabelheight + this.titleheight)+")rotate(-90)");
 
+		console.log(this.yaxislabel.text())
+
 		//Text in the lower right corner of the plot (Like "double-click to remove")
 		this.lowerrightcornertext=this.svgcont.append("g").append("text").attr("class","leglabel")
 			.attr("x",width+margin.left+ margin.right)
@@ -235,6 +237,27 @@ BDSVis.PlotView = {
 			.attr("y",h)
 			//.attr("dy","1em");
 		this.svgcont.attr("height",h+pv.margin.bottom);
+
+		this.AdjustUIElements();
+	},
+
+	SetYaxisLabel : function(ylab,offset) {
+		var offs = offset || 0;
+		var pv = this;
+		var h = pv.margin.top + pv.margin.bottom + pv.titleheight + pv.height+offs;
+		this.yaxislabel
+			.text(ylab)		
+			.attr("transform","rotate(-90)");
+
+		var yaxlrect=this.yaxislabel.node().getBoundingClientRect();
+		while ((-yaxlrect.top+yaxlrect.bottom)>pv.height)  {
+			var fs=this.yaxislabel.style("font-size");
+			this.yaxislabel.style("font-size",+fs.slice(0,-2)-1);
+			yaxlrect=this.yaxislabel.node().getBoundingClientRect();
+		} 
+		
+		this.yaxislabel
+			.attr("transform","translate("+14+","+(pv.height + pv.margin.top + this.xaxislabelheight + this.titleheight - yaxlrect.top + yaxlrect.bottom)*.5+")rotate(-90)");
 
 		this.AdjustUIElements();
 	},

@@ -388,8 +388,13 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 	pv.SetPlotTitle(ptitle);
 
 	//Y-axis label
-	if ((yvar!=="value") && (vm.model.NameLookUp(yvar,vm.model.yvars).indexOf("rate")!==-1))
-		pv.yaxislabel.text("% change"); else pv.yaxislabel.text(" ");
+
+	if (!YvarsAsLegend) {
+		var  yvarname=vm.model.NameLookUp(yvar,vm.model.yvars);
+		if (yvarname.indexOf("rate")!==-1)
+			pv.SetYaxisLabel(yvarname+", % change",0);
+		else pv.SetYaxisLabel(yvarname);
+	}
 
 	//X-axis label
 	pv.SetXaxisLabel(xvarr.name,d3.max(xAxisLabels[0].map(function(d) {return d.getBBox().y+d.getBBox().height;})));
