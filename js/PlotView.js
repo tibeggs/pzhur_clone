@@ -166,7 +166,7 @@ BDSVis.PlotView = {
 
 			if (!vm.geomap()) {
 				//Legend variable (cvar) selector
-				this.cvarselector.html('Legend variable:<br><br>')
+				this.cvarselector.html(vm.heatchart?'Y-axis variable:<br><br>':'Legend variable:<br><br>')
 				selector = this.cvarselector.append("select");
 				AddOptionsToVarSelector(selector,vm.model.variables.filter(function(d){return  (d.aslegend && d.code!==vm.xvar)}),"cvar",false);			
 				selector.on("change", function() { vm.setcvar(this.value);} );
