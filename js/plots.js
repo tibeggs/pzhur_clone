@@ -388,9 +388,8 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 	pv.SetPlotTitle(ptitle);
 
 	//Y-axis label
-
-	if (!YvarsAsLegend) {
-		var  yvarname=vm.model.NameLookUp(yvar,vm.model.yvars);
+    var yvarname=vm.model.NameLookUp((YvarsAsLegend)?request[vm.model.yvars][0]:yvar,vm.model.yvars);
+	if ((!YvarsAsLegend) || ( request[vm.model.yvars].length==1 )){
 		if (yvarname.indexOf("rate")!==-1)
 			pv.SetYaxisLabel(yvarname+", % change",0);
 		else pv.SetYaxisLabel(yvarname);
