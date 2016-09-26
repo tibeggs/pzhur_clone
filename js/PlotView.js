@@ -2,7 +2,7 @@ var BDSVis = BDSVis || {};
 
 //The visual elements of the plot: SVGs for the graph/map and legend. Also UI elements positioned on top of the SVG
 BDSVis.PlotView = {
-	margin : {top: 20, right: 30, bottom: 20, left: 80},
+	margin : {top: 20, right: 30, bottom: 20, left: 100},
 	width0 : 850,
 	height0 : 450,
 	legendwidth: 250,
@@ -12,8 +12,10 @@ BDSVis.PlotView = {
 		//Define margins and dimensions of the SVG element containing the chart
 		
 		var margin = this.margin;
+
 		this.width = this.width0 - margin.left - margin.right;
 		this.height = this.height0 - margin.top - margin.bottom;
+
 
 		//Select the SVG element,, set sizes
 

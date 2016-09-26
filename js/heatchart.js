@@ -197,6 +197,9 @@ BDSVis.makeHeatChart = function (data,request,vm,dataunfiltered) {
 
 	//legendsvg.append("text").attr("y",1.2*colorbar.fontsize+colorbar.height).style("font-size","10px").text("Zoom over the colorbar to change color scale");
 
+	
+	pv.SetYaxisLabel(vm.model.NameLookUp(cvar,'var'));
+
 	// Timelapse animation
 	function updateyear(yr) {
 

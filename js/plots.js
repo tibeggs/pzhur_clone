@@ -393,7 +393,7 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 		if (yvarname.indexOf("rate")!==-1)
 			pv.SetYaxisLabel(yvarname+", % change",0);
 		else pv.SetYaxisLabel(yvarname);
-	}
+	};
 
 	//X-axis label
 	pv.SetXaxisLabel(xvarr.name,d3.max(xAxisLabels[0].map(function(d) {return d.getBBox().y+d.getBBox().height;})));
