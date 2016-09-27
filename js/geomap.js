@@ -209,12 +209,15 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 			.style("fill",function(d) {return yScale(d[yvar]);})
 	};
 
-	function refresh() {
-		
+	function refresh(d1) {
+		console.log(pv.scale,d1)
 		if (vm.zoombyrect) {
-			pv.translate = d3.event.translate.slice(0); pv.scale = d3.event.scale+0.;
+			if (d1===undefined) {
+				pv.translate = d3.event.translate.slice(0); pv.scale = d3.event.scale+0.;
+			} else {
+				pv.scale = pv.scale*d1;
+			};
 			var t="translate(" + pv.translate + ")"+"scale(" + pv.scale + ")";
-
 			if (vm.cartogram === 1)
 				mapg.selectAll('path.datacontour').data(data)
 				.attr("transform", function(d,i) {
@@ -235,7 +238,10 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	
 
 	pv.zoom = d3.behavior.zoom().on("zoom",refresh);
-	svg.call(pv.zoom);
+	mapg.call(pv.zoom);
+	var zoombuttons=svg.append("g").attr("transform","translate(-10,"+height/2.+")");
+	zoombuttons.data([1.15]).append("text").attr("class","unselectable").text("+").style("font-size","48").on("click",refresh);
+	zoombuttons.data([.87]).append("text").attr("class","unselectable").attr("y",".75em").text("−").style("font-size","48").on("click",refresh);
 
 
 	//Making Legend
