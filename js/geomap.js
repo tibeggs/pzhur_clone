@@ -216,6 +216,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 				pv.translate = d3.event.translate.slice(0); pv.scale = d3.event.scale+0.;
 			} else {
 				pv.scale = pv.scale*d1;
+				pv.zoom.scale(pv.scale).event(svg)
 			};
 			var t="translate(" + pv.translate + ")"+"scale(" + pv.scale + ")";
 			if (vm.cartogram === 1)
@@ -238,8 +239,8 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	
 
 	pv.zoom = d3.behavior.zoom().on("zoom",refresh);
-	mapg.call(pv.zoom);
-	var zoombuttons=svg.append("g").attr("transform","translate(-30,"+height/2.+")");
+	svg.call(pv.zoom);
+	var zoombuttons=pv.svgcont.append("g").attr("transform","translate(20,"+height/2.+")");
 	zoombuttons.data([1.15]).append("text").attr("class","unselectable").text("+").style("font-size","48").on("click",refresh);
 	zoombuttons.data([.87]).append("text").attr("class","unselectable").attr("y",".75em").text("−").style("font-size","48").on("click",refresh);
 
