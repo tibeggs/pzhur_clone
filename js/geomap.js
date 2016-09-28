@@ -120,7 +120,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 
 	//Find maximal scaling: maximum of the "value of variable (yvar) per land area unit"
 	var scalingmax = d3.max(geo_data1.map(function(d,i){
-		if ((data[i]===undefined) || (["Alaska","Hawaii"].indexOf(d.properties.name)!==-1)) return 0;
+		if ((data[i]===undefined) || (["Alaska","Hawaii","District of Columbia"].indexOf(d.properties.name)!==-1)) return 0;
 		else return data[i][yvar]/d.properties.landarea;
 	}));
 
