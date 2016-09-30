@@ -232,8 +232,16 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 		};
 	};
 
-	function colorscalerefresh() {
-		zoomscale(d3.event.scale);
+	function colorscalerefresh(d1) {
+	
+		if (d3.event.scale!==undefined) {
+			zoomscale(d3.event.scale);
+		} 
+		else {
+			pv.colorscale = (pv.colorscale || 1)*d1;
+			legendsvgzoom.scale(pv.colorscale).event(legendsvg);
+			zoomscale(pv.colorscale);
+		}
 	};
 
 	
@@ -248,7 +256,8 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	//Making Legend
 	var legendsvg=vm.PlotView.legendsvg;
 
-	legendsvg.call(d3.behavior.zoom().on("zoom",colorscalerefresh));
+	var legendsvgzoom = d3.behavior.zoom().on("zoom",colorscalerefresh);
+	legendsvg.call(legendsvgzoom);
 
 	var colorbar={height:200, width:20, nlevels:50, nlabels:5, fontsize:15, levels:[]};
 
@@ -261,7 +270,10 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	legendtitle.call(pv.wrap,pv.legendwidth);
 	//legendtitle.selectAll("tspan").attr("x",function(d) { return (pv.legendwidth-this.getComputedTextLength())/2.; })
 	var titleheight = legendtitle.node().getBBox().height;
+	legendsvg.data([.87]).append("text").attr("class","unselectable").attr("x",-20).attr("y",titleheight+colorbar.fontsize).text("−").style("font-size","24").on("click",colorscalerefresh);
+	legendsvg.data([1.15]).append("text").attr("class","unselectable").attr("x",-20).attr("y",titleheight+0.4*colorbar.fontsize+colorbar.height).text("+").style("font-size","24").on("click",colorscalerefresh);
 	legendsvg=legendsvg.append("g").attr("transform","translate(0,"+titleheight+")");
+
 
 	var legNumFormat= function(d) {
 		if (Math.abs(d)>1)
