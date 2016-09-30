@@ -266,7 +266,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	var legNumFormat= function(d) {
 		if (Math.abs(d)>1)
 			return d3.format(".3s")(d);
-		else if (Math.abs(d)>5e-2)
+		else if ((Math.abs(d)>5e-2) || (Math.abs(d)<1e-6))
 			return d3.format(".2f")(d);
 		else return d3.format(".f")(d);
 	};

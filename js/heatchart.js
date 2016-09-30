@@ -128,7 +128,7 @@ BDSVis.makeHeatChart = function (data,request,vm,dataunfiltered) {
 		.selectAll(".tick text")
 		.attr("transform","translate(-7,0)");
 
-		yAxisLabels.call(pv.wrap,pv.margin.left-10);
+		yAxisLabels.call(pv.wrap,pv.margin.left-20);
 
 	//Set the title of the plot
 	var ptitle=(YvarsAsLegend && request[vm.model.yvars].length>1)?("Various "+vm.model.yvars+"s"):(vm.model.NameLookUp(request[vm.model.yvars],vm.model.yvars)); //If many yvars say "various", otherwise the yvar name
@@ -197,7 +197,7 @@ BDSVis.makeHeatChart = function (data,request,vm,dataunfiltered) {
 
 	//legendsvg.append("text").attr("y",1.2*colorbar.fontsize+colorbar.height).style("font-size","10px").text("Zoom over the colorbar to change color scale");
 
-	
+
 	pv.SetYaxisLabel(vm.model.NameLookUp(cvar,'var'));
 
 	// Timelapse animation
