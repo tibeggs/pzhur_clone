@@ -207,6 +207,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 			.attr("fill", yScale);
 		mapg.selectAll('path.datacontour')
 			.style("fill",function(d) {return yScale(d[yvar]);})
+		slider.attr("transform","translate(-10,"+(titleheight+hScale(md*scale))+")");
 	};
 
 	function refresh(d1) {
@@ -272,7 +273,9 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	var titleheight = legendtitle.node().getBBox().height;
 	legendsvg.data([.87]).append("text").attr("class","unselectable").attr("x",-20).attr("y",titleheight+colorbar.fontsize).text("−").style("font-size","24").on("click",colorscalerefresh);
 	legendsvg.data([1.15]).append("text").attr("class","unselectable").attr("x",-20).attr("y",titleheight+0.4*colorbar.fontsize+colorbar.height).text("+").style("font-size","24").on("click",colorscalerefresh);
+	var slider=legendsvg.append("path").attr("d",d3.svg.symbol().type('triangle-up')).attr("transform","translate(-10,"+(titleheight+hScale(ymid(ymin,ymax)))+")");
 	legendsvg=legendsvg.append("g").attr("transform","translate(0,"+titleheight+")");
+
 
 
 	var legNumFormat= function(d) {
