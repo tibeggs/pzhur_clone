@@ -254,6 +254,8 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	zoombuttons.data([.87]).append("text").attr("class","unselectable").attr("y",".75em").text("−").style("font-size","48").on("click",refresh);
 
 
+
+
 	//Making Legend
 	var legendsvg=vm.PlotView.legendsvg;
 
@@ -273,9 +275,30 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	var titleheight = legendtitle.node().getBBox().height;
 	legendsvg.data([.87]).append("text").attr("class","unselectable").attr("x",-20).attr("y",titleheight+colorbar.fontsize).text("−").style("font-size","24").on("click",colorscalerefresh);
 	legendsvg.data([1.15]).append("text").attr("class","unselectable").attr("x",-20).attr("y",titleheight+0.4*colorbar.fontsize+colorbar.height).text("+").style("font-size","24").on("click",colorscalerefresh);
-	var slider=legendsvg.append("path").attr("d",d3.svg.symbol().type('triangle-up')).attr("transform","translate(-10,"+(titleheight+hScale(ymid(ymin,ymax)))+")");
-	legendsvg=legendsvg.append("g").attr("transform","translate(0,"+titleheight+")");
+	
+	var draglistener = d3.behavior.drag()
+		 // .on("dragstart", function(d) {
+           	
+   //         	debugger;
+   //          d3.event.sourceEvent.stopPropagation();
+   //          // it's important that we suppress the mouseover event on the node being dragged. Otherwise it will absorb the mouseover event and the underlying node will not detect it d3.select(this).attr('pointer-events', 'none');
+   //      })
+        .on("drag", function(d) {
+        	pv.colorscale = (pv.colorscale || 1);
+        	console.log(d3.mouse(this)[1]);
+        	slider.attr("transform","translate(-10,"+(titleheight+d3.mouse(this)[1])+")");
+        	//zoomscale(pv.colorscale);
+        });
 
+
+	var slider=legendsvg.append("path")
+		.call(draglistener)
+		.attr("d",d3.svg.symbol().type('triangle-up'))
+		.attr("transform","translate(-10,"+(titleheight+hScale(ymid(ymin,ymax)))+")");
+
+	
+	
+	legendsvg=legendsvg.append("g").attr("transform","translate(0,"+titleheight+")");
 
 
 	var legNumFormat= function(d) {
