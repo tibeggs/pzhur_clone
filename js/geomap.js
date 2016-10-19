@@ -43,7 +43,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	var maxabs=d3.max([Math.abs(ymin),Math.abs(ymax)]);
 	
 	//Define which scale to use, for the map and the colorbar. Note that log scale can be replaced by any other here (like sqrt), the colormap will adjust accordingly.
-	var scaletype = (vm.logscale)?d3.scale.log():d3.scale.linear();
+	var scaletype = (vm.logscale && (ymin>0))?d3.scale.log():d3.scale.linear();
 	//Midpoint of the colorscale
 	var ymid= function(ymin,ymax) {
 		return scaletype.invert(.5*(scaletype(ymax)+scaletype(ymin)));
@@ -53,9 +53,9 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	
 	var purple="rgb(112,79,161)"; var golden="rgb(194,85,12)"; var teal="rgb(22,136,51)";
 
-	if ((ymin<0) && !vm.logscale) //If there are negative values use blue to red scale with white(ish) for 0 and strength of color corresponding to absolute value
+	if (ymin<0) //If there are negative values use blue to red scale with white(ish) for 0 and strength of color corresponding to absolute value
 		yScale.domain([-maxabs,0,maxabs]).range(["#CB2027","#eeeeee","#265DAB"]);
-	else
+	else 
 		//yScale.domain([ymin,ymax]).range(["#eeeeee","#265DAB"]);
 		yScale.domain([ymin,ymid(ymin,ymax),ymax]).range([purple,"#bbbbbb",golden]);
 		//yScale.domain([ymin,ymid,ymax]).range(["red","#ccffcc","blue"]);
@@ -198,16 +198,18 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	function zoomscale(scale) {
 		var mn=ymin,
 			mx=ymax,
-			md=ymid(ymin,ymax);
+			md=ymid(ymin,ymax)*scale;
 		if ((ymin<0) && !vm.logscale)
 			yScale.domain([-d3.max([Math.abs(mn),Math.abs(mx)])*scale,0,d3.max([Math.abs(mn),Math.abs(mx)])*scale]);
-		else
-			yScale.domain([mn,md*scale,mx]);
+		else {
+			yScale.domain([mn,md,mx]);
+			slider.attr("transform","translate(-10,"+(titleheight+hScale(md))+")");
+		}
 		legendsvg.selectAll("rect")
 			.attr("fill", yScale);
 		mapg.selectAll('path.datacontour')
 			.style("fill",function(d) {return yScale(d[yvar]);})
-		slider.attr("transform","translate(-10,"+(titleheight+hScale(md*scale))+")");
+		
 	};
 
 	function refresh(d1) {
@@ -228,21 +230,21 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 			else mapg.selectAll('path').attr("transform", t);
 		}
 		else {
-			pv.colorscale = d3.event.scale;
-			zoomscale(d3.event.scale);
+			colorscalerefresh(d1);
+			// pv.colorscale = d3.event.scale;
+			// if ((pv.colorscale)>ymax/(ymid(ymin,ymax)+1e-10)) pv.colorscale = ymax/(ymid(ymin,ymax)+1e-10);
+			// zoomscale(pv.colorscale);
 		};
 	};
 
 	function colorscalerefresh(d1) {
-	
-		if (d3.event.scale!==undefined) {
-			zoomscale(d3.event.scale);
-		} 
-		else {
-			pv.colorscale = (pv.colorscale || 1)*d1;
-			legendsvgzoom.scale(pv.colorscale).event(legendsvg);
-			zoomscale(pv.colorscale);
-		}
+
+		pv.colorscale = d3.event.scale || ((pv.colorscale || 1)*d1);
+		if (ymin>=0)
+				if ((pv.colorscale)>ymax/(ymid(ymin,ymax)+1e-10)) pv.colorscale = ymax/(ymid(ymin,ymax)+1e-10);
+		if (d3.event.scale===undefined) legendsvgzoom.scale(pv.colorscale).event(legendsvg);
+		zoomscale(pv.colorscale);
+		
 	};
 
 	
@@ -277,24 +279,28 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	legendsvg.data([1.15]).append("text").attr("class","unselectable").attr("x",-20).attr("y",titleheight+0.4*colorbar.fontsize+colorbar.height).text("+").style("font-size","24").on("click",colorscalerefresh);
 	
 	var draglistener = d3.behavior.drag()
-		 // .on("dragstart", function(d) {
-           	
-   //         	debugger;
-   //          d3.event.sourceEvent.stopPropagation();
-   //          // it's important that we suppress the mouseover event on the node being dragged. Otherwise it will absorb the mouseover event and the underlying node will not detect it d3.select(this).attr('pointer-events', 'none');
-   //      })
+		 .on("dragstart", function(d) {
+            d3.event.sourceEvent.stopPropagation();
+            // it's important that we suppress the mouseover event on the node being dragged. Otherwise it will absorb the mouseover event and the underlying node will not detect it 
+            //d3.select(this).attr('pointer-events', 'none');
+        })
         .on("drag", function(d) {
-        	pv.colorscale = (pv.colorscale || 1);
-        	console.log(d3.mouse(this)[1]);
-        	slider.attr("transform","translate(-10,"+(titleheight+d3.mouse(this)[1])+")");
-        	//zoomscale(pv.colorscale);
+        	var mousey = d3.mouse(legendsvg.node())[1];
+        	var sliderposition = mousey+hScale(ymid(ymin,ymax))-2*titleheight
+        	pv.colorscale = hScale.invert(mousey)/ymid(ymin,ymax);
+        	if ((sliderposition>titleheight) && (sliderposition<colorbar.height+titleheight))
+        		{
+        			slider.attr("transform","translate(-10,"+sliderposition+")");
+        			legendsvgzoom.scale(pv.colorscale).event(legendsvg);
+        			zoomscale(pv.colorscale);
+        		}	
         });
 
-
-	var slider=legendsvg.append("path")
-		.call(draglistener)
-		.attr("d",d3.svg.symbol().type('triangle-up'))
-		.attr("transform","translate(-10,"+(titleheight+hScale(ymid(ymin,ymax)))+")");
+    if (ymin>=0)
+		var slider=legendsvg.append("path")
+			.call(draglistener)
+			.attr("d",d3.svg.symbol().type('triangle-up'))
+			.attr("transform","translate(-10,"+(titleheight+hScale(ymid(ymin,ymax)))+")");
 
 	
 	
