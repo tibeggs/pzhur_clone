@@ -199,7 +199,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 		var mn=ymin,
 			mx=ymax,
 			md=ymid(ymin,ymax)*scale;
-		if ((ymin<0) && !vm.logscale)
+		if (ymin<0)
 			yScale.domain([-d3.max([Math.abs(mn),Math.abs(mx)])*scale,0,d3.max([Math.abs(mn),Math.abs(mx)])*scale]);
 		else {
 			yScale.domain([mn,md,mx]);
@@ -212,10 +212,15 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 		
 	};
 
-	function refresh(d1) {
-		
-		if (vm.zoombyrect) {
-			if (d1===undefined) {
+	function refresh(d1) {		
+		if (vm.zoombyrect) 
+			zoomtranslaterefresh(d1)
+		else
+			colorscalerefresh(d1);
+	};
+
+	function zoomtranslaterefresh(d1) {
+		if (d1===undefined) {
 				pv.translate = d3.event.translate.slice(0); pv.scale = d3.event.scale+0.;
 			} else {
 				pv.scale = pv.scale*d1;
@@ -228,17 +233,9 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 					return StatesRescaling(d,i);
 				})
 			else mapg.selectAll('path').attr("transform", t);
-		}
-		else {
-			colorscalerefresh(d1);
-			// pv.colorscale = d3.event.scale;
-			// if ((pv.colorscale)>ymax/(ymid(ymin,ymax)+1e-10)) pv.colorscale = ymax/(ymid(ymin,ymax)+1e-10);
-			// zoomscale(pv.colorscale);
-		};
 	};
 
 	function colorscalerefresh(d1) {
-
 		pv.colorscale = d3.event.scale || ((pv.colorscale || 1)*d1);
 		if (ymin>=0)
 				if ((pv.colorscale)>ymax/(ymid(ymin,ymax)+1e-10)) pv.colorscale = ymax/(ymid(ymin,ymax)+1e-10);
@@ -246,16 +243,13 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 		zoomscale(pv.colorscale);
 		
 	};
-
 	
 
 	pv.zoom = d3.behavior.zoom().on("zoom",refresh);
 	svg.call(pv.zoom);
 	var zoombuttons=pv.svgcont.append("g").attr("transform","translate(20,"+height/2.+")");
-	zoombuttons.data([1.15]).append("text").attr("class","unselectable").text("+").style("font-size","48").on("click",refresh);
-	zoombuttons.data([.87]).append("text").attr("class","unselectable").attr("y",".75em").text("−").style("font-size","48").on("click",refresh);
-
-
+	zoombuttons.data([1.15]).append("text").attr("class","unselectable").text("+").style("font-size","48").on("click",zoomtranslaterefresh);
+	zoombuttons.data([.87]).append("text").attr("class","unselectable").attr("y",".75em").text("−").style("font-size","48").on("click",zoomtranslaterefresh);
 
 
 	//Making Legend
