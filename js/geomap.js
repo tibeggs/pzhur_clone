@@ -280,9 +280,9 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
         })
         .on("drag", function(d) {
         	var mousey = d3.mouse(legendsvg.node())[1];
-        	var sliderposition = mousey+hScale(ymid(ymin,ymax))-2*titleheight
+        	var sliderposition = mousey+.5*colorbar.height;
         	pv.colorscale = hScale.invert(mousey)/ymid(ymin,ymax);
-        	if ((sliderposition>titleheight) && (sliderposition<colorbar.height+titleheight))
+        	if ((mousey>0) && (mousey<colorbar.height))
         		{
         			slider.attr("transform","translate(-10,"+sliderposition+")");
         			legendsvgzoom.scale(pv.colorscale).event(legendsvg);
