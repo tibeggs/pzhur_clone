@@ -198,7 +198,8 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	function zoomscale(scale) {
 		var mn=ymin,
 			mx=ymax,
-			md=ymid(ymin,ymax)*scale;
+			//md=ymid(ymin,ymax)*scale;
+			md=ymax-(ymax-ymin)*Math.exp(Math.log((ymax-ymid(ymin,ymax))/(ymax-ymin))*scale);
 		if (ymin<0)
 			yScale.domain([-d3.max([Math.abs(mn),Math.abs(mx)])*scale,0,d3.max([Math.abs(mn),Math.abs(mx)])*scale]);
 		else {
@@ -236,9 +237,9 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	};
 
 	function colorscalerefresh(d1) {
-		pv.colorscale = d3.event.scale || ((pv.colorscale || 1)*d1);
-		if (ymin>=0)
-				if ((pv.colorscale)>ymax/(ymid(ymin,ymax)+1e-10)) pv.colorscale = ymax/(ymid(ymin,ymax)+1e-10);
+		pv.colorscale = d3.event.scale || ((pv.colorscale || 1.0)*d1);
+		// if (ymin>=0)
+		// 	if ((pv.colorscale)>ymax/(ymid(ymin,ymax)+1e-10)) pv.colorscale = ymax/(ymid(ymin,ymax)+1e-10);
 		if (d3.event.scale===undefined) legendsvgzoom.scale(pv.colorscale).event(legendsvg);
 		zoomscale(pv.colorscale);
 		
@@ -281,7 +282,8 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
         .on("drag", function(d) {
         	var mousey = d3.mouse(legendsvg.node())[1];
         	var sliderposition = mousey+.5*colorbar.height;
-        	pv.colorscale = hScale.invert(mousey)/ymid(ymin,ymax);
+        	//pv.colorscale = hScale.invert(mousey)/ymid(ymin,ymax);
+        	pv.colorscale = Math.log((ymax-hScale.invert(mousey))/(ymax-ymin))/Math.log((ymax-ymid(ymin,ymax))/(ymax-ymin));
         	if ((mousey>0) && (mousey<colorbar.height))
         		{
         			slider.attr("transform","translate(-10,"+sliderposition+")");
