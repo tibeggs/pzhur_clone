@@ -29,6 +29,7 @@
   d3.cartogram = function() {
 
     function carto(topology, geometries) {
+       debugger;
       // copy it first
       topology = copy(topology);
 
@@ -74,7 +75,7 @@
       if (iterations <= 0) {
         return objects;
       }
-
+      debugger;
      var i = 0;
       while (i++ < iterations) {
         var areas = objects.map(path.area);

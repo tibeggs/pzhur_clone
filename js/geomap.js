@@ -107,14 +107,15 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	// Update the projection to use computed scale & translate.
 	projection.scale(s).translate(t);
 
-	//Cartogram.js contiguos cartogram
+	//Cartogram.js contiguous cartogram
 	var carto = d3.cartogram()
             .projection(projection)
             .properties(function(d) {return d.properties;})
-            .value(function(d,i) {return +d.properties[landarea]+212885012434;});
+            //.value(function(d,i) {return +d.properties[landarea];});
+            //.value(function(d,i) {return +data[i][yvar];});
+            .value(function(d,i) {return 10000;});
     
-    //var geo_data1=carto.features(vm.model.full_geo_data, vm.model.full_geo_data.objects.states.geometries);
-   
+    geo_data1=carto.features(vm.model.full_geo_data, vm.model.full_geo_data.objects.states.geometries);
 
 	//Calculate relative land areas and how to scale selected states
 
@@ -124,29 +125,31 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 		else return data[i][yvar]/d.properties.landarea;
 	}));
 
+	var features = carto(vm.model.full_geo_data, vm.model.full_geo_data.objects.states.geometries).features
+
 
 	//Plot state outlines for all states
-	mapg.selectAll('path.outlines').data(vm.model.geo_data.state)
-			.enter()
-			.append('path')
-			.attr('class','outlines')
-			.style('fill', "white")
-			.style('stroke', 'black')
-			.style('stroke-width', 0.1)
-			.attr('d', path)
-			.attr("transform",(vm.cartogram!==1)?("translate(" + pv.translate + ")"+"scale(" + pv.scale + ")"):"");
-			//.attr("transform","translate(" + pv.translate + ")"+"scale(" + pv.scale + ")");
+	// mapg.selectAll('path.outlines').data(vm.model.geo_data.state)
+	// 		.enter()
+	// 		.append('path')
+	// 		.attr('class','outlines')
+	// 		.style('fill', "white")
+	// 		.style('stroke', 'black')
+	// 		.style('stroke-width', 0.1)
+	// 		.attr('d', path)
+	// 		.attr("transform",(vm.cartogram!==1)?("translate(" + pv.translate + ")"+"scale(" + pv.scale + ")"):"");
+	// 		//.attr("transform","translate(" + pv.translate + ")"+"scale(" + pv.scale + ")");
 
 	var map = mapg.selectAll('path.datacontour')
-			.data(geo_data1)
+			.data(features)
 			.enter()
 			.append('path') //State/MSA outlines for states/MSA present in the data
 			.attr("class","datacontour")
-			.attr('d',path)
-			.style('fill', "white")
-			.attr('fill-opacity', 0)
-			.style('stroke', 'black')
-			.style('stroke-width', 0.3)
+			.attr('d',carto.path)
+			// .style('fill', "white")
+			// .attr('fill-opacity', 0)
+			// .style('stroke', 'black')
+			// .style('stroke-width', 0.3)
 			.on("dblclick",function(d) { //Add the state/MSA to the data set upon double-click to its outline
 				var xvcode = vm.model[xvar].filter(function(d1) {return d1.name===d.properties.name;})[0].code;
 				vm.IncludedXvarValues[xvar].push(xvcode);
