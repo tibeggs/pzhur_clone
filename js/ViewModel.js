@@ -6,10 +6,10 @@ BDSVis.ViewModel = function(model) {
 	//Reference to the model, which contains variable names and name look up tables/functions (in model.js file)
 	this.model = model;
 
-	//Reference to the visual elements of the plot: SVGs for the graph/map and legend
+	//Reference to the visual elements of the plot: SVGs for the graph/map and legend (PlotView.js)
 	this.PlotView = BDSVis.PlotView;
 
-	//Reference to the table showing the data;
+	//Reference to the table showing the data; (TableView.js)
 	this.TableView = BDSVis.TableView;
 
 	this.DrawUI = function(){

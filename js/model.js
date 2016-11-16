@@ -341,6 +341,7 @@ BDSVis.Model = {
 				msa.regions = d3.set(msa.regions).values();	
 			})
 
+			//Set regions to which the state belongs
 			tmod.state.forEach(function(st) {
 				st.regions = [];
 				tmod.regions.forEach(function(region) {
