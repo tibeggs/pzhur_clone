@@ -85,7 +85,9 @@ rect.zoom {
 }
 
 .selectors {
-  font: 12px sans-serif;
+    font: 12px sans-serif;
+    display: flex;
+    justify-content: space-between;
 }
 
 .selectors select {
