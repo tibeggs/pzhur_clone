@@ -86,8 +86,7 @@ rect.zoom {
 
 .selectors {
     font: 12px sans-serif;
-    display: flex;
-    justify-content: space-between;
+    float: right;
 }
 
 .selectors select {
