@@ -91,9 +91,8 @@ rect.zoom {
 }
 
 .selectors select {
-    width: 200px;
-    margin-left: 0px;
-    float: right;
+  width: 200px;
+  margin-left: 0px;
 }
 
 
@@ -102,11 +101,10 @@ rect.zoom {
 }
 
 .selectors h4 {
-    display: inline-block;
-    font-weight: normal;
-    width: 130px;
-    margin: 0px;
-    float: right;
+  display:inline-block;
+  font-weight: normal;
+  width: 130px;
+  margin: 0px;
 }
 
 .selectors button {
@@ -124,23 +122,21 @@ rect.zoom {
   width: 180px;
 }
 
-    .selectors button:disabled {
-        opacity: 0.6;
-        float: right;
-    }
+.selectors button:disabled {
+  opacity: 0.6;
+}
 
-    .selectors button.activebutton {
-        color: #ffffff;
-        background-color: green;
-        background: green;
-        background-image: -webkit-linear-gradient(top, #005500, #337733);
-        background-image: -moz-linear-gradient(top, #005500, #337733);
-        background-image: -ms-linear-gradient(top, #005500, #337733);
-        background-image: -o-linear-gradient(top, #005500, #337733);
-        background-image: linear-gradient(top, #005500, #337733);
-        opacity: 1;
-        float: right;
-    }
+.selectors button.activebutton {
+  color: #ffffff;
+  background-color: green;
+  background: green;
+  background-image: -webkit-linear-gradient(top, #005500, #337733);
+  background-image: -moz-linear-gradient(top, #005500, #337733);
+  background-image: -ms-linear-gradient(top, #005500, #337733);
+  background-image: -o-linear-gradient(top, #005500, #337733);
+  background-image: linear-gradient(top, #005500, #337733);
+  opacity: 1;
+}
 
 .graph-title {
   fill: black;
