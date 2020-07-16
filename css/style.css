@@ -91,8 +91,9 @@ rect.zoom {
 }
 
 .selectors select {
-  width: 200px;
-  margin-left: 0px;
+    width: 200px;
+    margin-left: 0px;
+    float: right;
 }
 
 
