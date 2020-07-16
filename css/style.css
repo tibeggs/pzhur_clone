@@ -44,10 +44,11 @@ rect.zoom {
 }
 
 #plotarea {
-  margin-top: 5px;
-  margin-bottom: 15px;
-  margin-left: 0px;
-  font: 12px sans-serif;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    margin-left: 0px;
+    font: 12px sans-serif;
+    float: left;
 }
 
 
