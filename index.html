@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -8,50 +8,51 @@
 
 <body>
 
-  <div id="plotarea">
-    <div id="logbutton"></div>
-    <svg id="chartsvg">
-    </svg>
-    <div id="xvarselector"></div>
-    <div id="cvarselector"></div>
-    <div id="buttonsundergraph">
-    </div>
-    
-    <span id="showdata" style="display: none">
-    <div id="datashowarea" class="datatable">
-      <a download="BDSdata.xls" href="#" onclick="return ExcellentExport.excel(this, 'graphdata', 'Firms');">Export table to Excel</a>;
-      <a download="BDSdata.csv" href="#" onclick="return ExcellentExport.csv(this, 'graphdata');">CSV</a>
-      <table id="graphdata">
-      </table>
-    </div>
-    <div class="datatable">
-      <table id="graphdataheaders">
-      </table>
-    </div>
-   </div>
-   </span>
- 
+    <div id="plotarea">
+        <div id="logbutton"></div>
+        <svg id="chartsvg">
+        </svg>
+        <div id="xvarselector"></div>
+        <div id="cvarselector"></div>
+        <div id="buttonsundergraph">
+        </div>
 
-  <span class="selectors">
-  </span>
+        <span id="showdata" style="display: none">
+            <div id="datashowarea" class="datatable">
+                <a download="BDSdata.xls" href="#" onclick="return ExcellentExport.excel(this, 'graphdata', 'Firms');">Export table to Excel</a>;
+                <a download="BDSdata.csv" href="#" onclick="return ExcellentExport.csv(this, 'graphdata');">CSV</a>
+                <table id="graphdata">
+                </table>
+            </div>
+            <div class="datatable">
+                <table id="graphdataheaders">
+                </table>
+            </div>
+    </div>
+    </span>
 
-<br>
- 
-	<script src="js/d3.min.js"></script>
-  <!-- <script src="js/d3tip.js"></script> -->
-  <script src="js/cartogram.js"></script>
-  <script src="js/topojson.v1.min.js"></script>
-  <script src="js/colorbrewer.min.js"></script>
-  <script src="js/excellentexport.min.js"></script>
-  <script src="js/utilities.js"></script>
-  <script src="js/model.js"></script>
-  <script src="js/ViewModel.js"></script>
-  <script src="js/TableView.js"></script>
-  <script src="js/PlotView.js"></script>
-  <script src="js/apirequest.js"></script>
-  <script src="js/geomap.js"></script>
-  <script src="js/heatchart.js"></script>
-  <script src="js/plots.js"></script>
-  <script src="js/app.js"></script>
+    <div class="seldiv">
+        <span class="selectors">
+        </span>
+    </div>
+
+    <br>
+
+    <script src="js/d3.min.js"></script>
+    <!-- <script src="js/d3tip.js"></script> -->
+    <script src="js/cartogram.js"></script>
+    <script src="js/topojson.v1.min.js"></script>
+    <script src="js/colorbrewer.min.js"></script>
+    <script src="js/excellentexport.min.js"></script>
+    <script src="js/utilities.js"></script>
+    <script src="js/model.js"></script>
+    <script src="js/ViewModel.js"></script>
+    <script src="js/TableView.js"></script>
+    <script src="js/PlotView.js"></script>
+    <script src="js/apirequest.js"></script>
+    <script src="js/geomap.js"></script>
+    <script src="js/heatchart.js"></script>
+    <script src="js/plots.js"></script>
+    <script src="js/app.js"></script>
 </body>
 </html>	

@@ -85,6 +85,12 @@ rect.zoom {
   padding: 5px;
 }
 
+.seldiv {
+    font: 12px sans-serif;
+    float: right;
+    background:"blue"
+}
+
 .selectors {
     font: 12px sans-serif;
     float: right;
