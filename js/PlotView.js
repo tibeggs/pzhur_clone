@@ -146,30 +146,22 @@ BDSVis.PlotView = {
 				}
 			});
 
-			function AddOptionsToVarSelector(selector, varvalues, whichvar, group) { //Create a selector option for each variable value, set which are selected
-
-				//var btn = document.createElement("BUTTON");
-				//btn.onclick = return d.code === (group ? vm.SelectedOpts[vm[whichvar]][0] : vm[whichvar]);
-
-				//btn.innerHTML = function (d) { return d.name; }
-				//selector.appendChild(btn);
-
-				
+			function AddOptionsToVarSelector(selector,varvalues,whichvar,group) { //Create a selector option for each variable value, set which are selected
 				selector.selectAll("option")
 					.data(varvalues).enter().append("option")
 					.attr("value",function(d) {return d.code;})
 					.text(function(d) {return d.name;})
 					.property("selected",function(d){
-							
+							return d.code===(group?vm.SelectedOpts[vm[whichvar]][0]:vm[whichvar]);
 					});
 			};
 
 			//X-axis variable selector			
-			var selector = this.xvarselector.appendChild("select");
+			var selector = this.xvarselector.appendChild("button");
 			AddOptionsToVarSelector(selector,vm.model.variables.filter(function(d){return (d.asaxis && d.code!==vm.cvar)}),"xvar",false);
 			selector.on("change", function() { vm.setxvar(this.value);} );
 			if (vm.model.IsGroup(vm.xvar)) {
-				var groupselector = this.xvarselector.appendChild("select");
+				var groupselector = this.xvarselector.append("select");
 				AddOptionsToVarSelector(groupselector,vm.model[vm.xvar],"xvar",true);
 				groupselector.on("change", function() {vm.SelectedOpts[vm.xvar]=[this.value]; vm.getBDSdata();});
 			};
