@@ -57,6 +57,13 @@ rect.zoom {
 #headbanner {
     background-color: darkblue;
 }
+#footbanner {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 60px; /* Height of the footer */
+    background: #6cf;
+}
 
 
 #datashowarea {
@@ -96,7 +103,7 @@ rect.zoom {
     margin-top: 5px;
     margin-bottom: 15px;
     margin-left: 0px;
-    /*float: left;*/
+    float: right;
     background: lightblue;
     border-radius: 25px;
     border: 2px solid blue;
