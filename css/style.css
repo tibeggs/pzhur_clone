@@ -96,7 +96,7 @@ rect.zoom {
     margin-top: 5px;
     margin-bottom: 15px;
     margin-left: 0px;
-    float: left;
+    /*float: left;*/
     background: lightblue;
     border-radius: 25px;
     border: 2px solid blue;
