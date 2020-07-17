@@ -157,7 +157,7 @@ BDSVis.PlotView = {
 			};
 
 			//X-axis variable selector			
-			var selector = this.xvarselector.appendChild("select");
+			var selector = this.xvarselector.append("select");
 			AddOptionsToVarSelector(selector,vm.model.variables.filter(function(d){return (d.asaxis && d.code!==vm.cvar)}),"xvar",false);
 			selector.on("change", function() { vm.setxvar(this.value);} );
 			if (vm.model.IsGroup(vm.xvar)) {
