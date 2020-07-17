@@ -48,7 +48,6 @@ rect.zoom {
     margin-bottom: 15px;
     margin-left: 0px;
     font: 12px sans-serif;
-    float: left;
     background: lightblue;
     border-radius: 25px;
     border: 2px solid blue;
@@ -101,7 +100,6 @@ rect.zoom {
     margin-top: 5px;
     margin-bottom: 15px;
     margin-left: 0px;
-    float: right;
     background: lightblue;
     border-radius: 25px;
     border: 2px solid blue;
