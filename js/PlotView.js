@@ -146,14 +146,22 @@ BDSVis.PlotView = {
 				}
 			});
 
-			function AddOptionsToVarSelector(selector,varvalues,whichvar,group) { //Create a selector option for each variable value, set which are selected
-				selector.selectAll("option")
-					.data(varvalues).enter().append("option")
-					.attr("value",function(d) {return d.code;})
-					.text(function(d) {return d.name;})
-					.property("selected",function(d){
-							return d.code===(group?vm.SelectedOpts[vm[whichvar]][0]:vm[whichvar]);
-					});
+			function AddOptionsToVarSelector(selector, varvalues, whichvar, group) { //Create a selector option for each variable value, set which are selected
+
+				var btn = document.createElement("BUTTON");
+				btn.onclick = return d.code === (group ? vm.SelectedOpts[vm[whichvar]][0] : vm[whichvar]);
+
+				btn.innerHTML = function (d) { return d.name; }
+				selector.appendChild(btn);
+
+				
+				//selector.selectAll("option")
+				//	.data(varvalues).enter().append("option")
+				//	.attr("value",function(d) {return d.code;})
+				//	.text(function(d) {return d.name;})
+				//	.property("selected",function(d){
+							
+				//	});
 			};
 
 			//X-axis variable selector			
