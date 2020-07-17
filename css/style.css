@@ -54,6 +54,12 @@ rect.zoom {
     border: 2px solid blue;
 }
 
+#headbanner {
+    background: darkblue;
+    border-radius: 25px;
+    border: 2px solid blue;
+}
+
 
 #datashowarea {
   display:block; 
