@@ -159,7 +159,7 @@ BDSVis.PlotView = {
 				var btn = document.createElement("Button");
 				btn.innerHTML = varvalues.name;
 				btn.onclick = function (){ vm.setxvar(this.value); }
-				selector.appendChild(btn);
+				selector.append(btn);
 
 			};
 			//X-axis variable selector		
