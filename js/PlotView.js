@@ -164,7 +164,8 @@ BDSVis.PlotView = {
 			};
 			//X-axis variable selector		
 			var selector = this.xvarselector;
-			AddButtonToVarSelector(selector, vm.model.variables.filter(function (d) { return (d.asaxis && d.code !== vm.cvar) }), "xvar", false));
+			console.log(selector.tagName);
+			AddButtonToVarSelector(selector, vm.model.variables.filter(function (d) { return (d.asaxis && d.code !== vm.cvar) }), "xvar", false);
 			//var selector = this.xvarselector.append("select");
 			//AddOptionsToVarSelector(selector,vm.model.variables.filter(function(d){return (d.asaxis && d.code!==vm.cvar)}),"xvar",false);
 			//selector.on("change", function() { vm.setxvar(this.value);} );
