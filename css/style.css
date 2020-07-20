@@ -40,7 +40,8 @@ rect.zoom {
 
 .plotbar {
   stroke: white;
-  stroke-width: .1;
+  stroke-width: .5;
+  fill: blueviolet;
 }
 
 #plotarea {
@@ -140,6 +141,10 @@ rect.zoom {
   text-decoration: none;
   width: 180px;
 }
+
+    .selectors button:hover {
+        background: cadetblue;
+    }
 
 .selectors button:disabled {
   opacity: 0.6;
