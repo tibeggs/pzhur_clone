@@ -86,6 +86,7 @@ BDSVis.PlotView = {
 
 		//UI controls on top of the chart refresh
 		this.xvarselector.selectAll("select").remove();
+		this.xvarselector.selectAll("button").remove();
 		this.cvarselector.selectAll("select").remove();
 		this.scaleui.selectAll("*").remove();
 		if (!vm.timelapse) { //Add UI controls if not in Time Lapse regime
@@ -155,17 +156,38 @@ BDSVis.PlotView = {
 							return d.code===(group?vm.SelectedOpts[vm[whichvar]][0]:vm[whichvar]);
 					});
 			};
-			function AddButtonToVarSelector(selector, varvalues, whichvar, group) {
+
+			function SelectorButtonClick(value) {
+				vm.setxvar(value)
+				//console.log(value);
+				//console.log(vm.model[vm.xvar]);
+
+			}
+
+			function CreateButtonSelector(selector,name, value) {
 				var btn = document.createElement("Button");
-				btn.innerHTML = varvalues.name;
-				btn.onclick = function (){ vm.setxvar(this.value); }
-				//selector.append(btn);
+
+				btn.innerHTML = name;
+				btn.value = value;
+				btn.onclick = function () { SelectorButtonClick(value) };
+				selector[0][0].appendChild(btn);
+            }
+
+
+
+			function AddButtonToVarSelector(selector, varvalues, whichvar, group) {
+				for (i in varvalues) {
+					name = varvalues[i].name;
+					value = varvalues[i].code;
+					CreateButtonSelector(selector,name,value)
+				};
+			
+				
 				//selector.selectAll("input").data(varvalues.name).enter().append("input").attr("type", "button").attr("class", "button").attr("value", function d() { return d; })
 
 			};
 			//X-axis variable selector		
 			var selector = this.xvarselector;
-			console.log(this.xvarselector.tagName);
 			AddButtonToVarSelector(selector, vm.model.variables.filter(function (d) { return (d.asaxis && d.code !== vm.cvar) }), "xvar", false);
 			//var selector = this.xvarselector.append("select");
 			//AddOptionsToVarSelector(selector,vm.model.variables.filter(function(d){return (d.asaxis && d.code!==vm.cvar)}),"xvar",false);
