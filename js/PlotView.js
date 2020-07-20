@@ -155,11 +155,19 @@ BDSVis.PlotView = {
 							return d.code===(group?vm.SelectedOpts[vm[whichvar]][0]:vm[whichvar]);
 					});
 			};
+			function AddButtonToVarSelector(selector, varvalues, whichvar, group) {
+				var btn = document.createElement("Button");
+				btn.innerHTML = varvalues.name;
+				btn.onclick = function (){ vm.setxvar(this.value); }
+				selector.appendChild(btn);
 
-			//X-axis variable selector			
-			var selector = this.xvarselector.append("select");
-			AddOptionsToVarSelector(selector,vm.model.variables.filter(function(d){return (d.asaxis && d.code!==vm.cvar)}),"xvar",false);
-			selector.on("change", function() { vm.setxvar(this.value);} );
+			};
+			//X-axis variable selector		
+			var selector = this.xvarselector;
+			AddButtonToVarSelector(selector, vm.model.variables.filter(function (d) { return (d.asaxis && d.code !== vm.cvar) }), "xvar", false));
+			//var selector = this.xvarselector.append("select");
+			//AddOptionsToVarSelector(selector,vm.model.variables.filter(function(d){return (d.asaxis && d.code!==vm.cvar)}),"xvar",false);
+			//selector.on("change", function() { vm.setxvar(this.value);} );
 			if (vm.model.IsGroup(vm.xvar)) {
 				var groupselector = this.xvarselector.append("select");
 				AddOptionsToVarSelector(groupselector,vm.model[vm.xvar],"xvar",true);
