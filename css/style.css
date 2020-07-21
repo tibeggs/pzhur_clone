@@ -40,12 +40,13 @@ rect.zoom {
 
 .plotbar {
   stroke: white;
+
   stroke-width: .5;
   fill: blueviolet;
 }
 
 #plotarea {
-    margin-top: 5px;
+    margin-top: 50px;
     margin-bottom: 15px;
     margin-left: 0px;
     font: 12px sans-serif;
@@ -56,11 +57,26 @@ rect.zoom {
 
 #headbanner {
     background-color: darkblue;
+    color: white;
 }
+
 #footbanner {
     background-color: #efefef;
     flex: 0 0 50px; /*or just height:50px;*/
     margin-top: auto;
+}
+
+#xvarselector button {
+    background-color: #4CAF50; /* Green */
+    border: none;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
 }
 
 
@@ -94,7 +110,7 @@ rect.zoom {
 #buttonsundergraph h4{
   display:inline-block;
   font-weight: normal;
-  padding: 5px;
+  /*padding: 5px;*/
 }
 
 #seldiv {

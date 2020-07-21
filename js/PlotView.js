@@ -312,9 +312,12 @@ BDSVis.PlotView = {
 		sellength = sellength.right-sellength.left;
 
 		this.xvarselector
-			.style("position","absolute")
-			.style("left",(chartrect.left+wsX+(this.margin.left+this.margin.right+this.width-sellength)/2.)+"px")
-			.style("top",(xaxlrect.top+wsY)+"px");
+			.style("position", "relative")
+			.style("flex")
+			//.style("left",(chartrect.left+wsX+(this.margin.left+this.margin.right+this.width-sellength)/2.)+"px")
+			//.style("top", (chartrect.top + wsY-75) + "px");
+			//.style("top",(xaxlrect.top+wsY)+"px");
+			;
 
 		this.cvarselector
 			.style("position","absolute")
