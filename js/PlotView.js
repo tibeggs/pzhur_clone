@@ -160,7 +160,7 @@ BDSVis.PlotView = {
 			function SelectorButtonClick(value) {
 				vm.setxvar(value)
 				//console.log(value);
-				//console.log(vm.model[vm.xvar]);
+				console.log(vm.xvar);
 
 			}
 
@@ -169,6 +169,7 @@ BDSVis.PlotView = {
 
 				btn.innerHTML = name;
 				btn.value = value;
+				btn.className = xclass;
 				btn.onclick = function () { SelectorButtonClick(value) };
 				selector[0][0].appendChild(btn);
             }
@@ -179,7 +180,12 @@ BDSVis.PlotView = {
 				for (i in varvalues) {
 					name = varvalues[i].name;
 					value = varvalues[i].code;
-					CreateButtonSelector(selector,name,value)
+					if (vm.xvar === value) {
+						xclass = "xbtn active";
+					} else {
+						xclass = "xbtn";
+                    }
+					CreateButtonSelector(selector, name, value, xclass)
 				};
 			
 				
@@ -188,7 +194,7 @@ BDSVis.PlotView = {
 			};
 			//X-axis variable selector		
 			var selector = this.xvarselector;
-			AddButtonToVarSelector(selector, vm.model.variables.filter(function (d) { return (d.asaxis && d.code !== vm.cvar) }), "xvar", false);
+			AddButtonToVarSelector(selector, vm.model.variables.filter(function (d) { return (d.asaxis /*&& d.code !== vm.cvar*/) }), "xvar", false);
 			//var selector = this.xvarselector.append("select");
 			//AddOptionsToVarSelector(selector,vm.model.variables.filter(function(d){return (d.asaxis && d.code!==vm.cvar)}),"xvar",false);
 			//selector.on("change", function() { vm.setxvar(this.value);} );
@@ -310,6 +316,7 @@ BDSVis.PlotView = {
 
 		var sellength=this.xvarselector.node().getBoundingClientRect();
 		sellength = sellength.right-sellength.left;
+
 
 		this.xvarselector
 			.style("position", "relative")

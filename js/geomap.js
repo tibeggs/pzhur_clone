@@ -145,7 +145,8 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 			.enter()
 			.append('path') //State/MSA outlines for states/MSA present in the data
 			.attr("class","datacontour")
-			.attr('d',path)
+		.attr('d', path)
+
 			.style('fill', "white")
 			.attr('fill-opacity', 0)
 			.style('stroke', 'black')

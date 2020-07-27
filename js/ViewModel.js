@@ -63,7 +63,7 @@ BDSVis.ViewModel = function(model) {
 			return;
 		};
 
-		//UI elements for variable selection
+		//UI elements for measure selection
 		var selectors = d3.select('.selectors');
 		selectors.selectAll('*').remove();
 
@@ -88,36 +88,93 @@ BDSVis.ViewModel = function(model) {
 				.attr("value",function(d) {return vm.model.IsContinuous(varr1code)?d:d.code;}); 
 		};
 
-		vm.model.variables.forEach(function(varr) { //For each variable create selector and buttons
-		
-			selectors.append("h4").text(varr.name+":"); //Add the title for selector
-			
-			AddSelectorWOptions(varr, false); //Add the selector for the variable
+		//UI elements for variable selection
+		var selectorm = d3.select('.selectorm');
+		selectorm.selectAll('*').remove();
 
-			if (vm.model.IsGroup(varr)) { //Add selector for the choice selected in the group variable selector
-				selectors.append("br");
-				selectors.append("h4");
-				AddSelectorWOptions(varr, true);
-			};
-		
-			if (varr.aslegend) { //Add the 'Compare' button
-				
-				var cbut = selectors.append("button")
-						.on("click", function() {vm.setcvar(varr.code);})
+		function AddSelectorMOptions(varr, isundergroupvar) {
+			var varr1code = isundergroupvar ? vm.SelectedOpts[varr.code][0] : varr.code;
+			var multiple = vm.multiple(varr.code) && (!vm.model.IsGroup(varr) || isundergroupvar);
+			selectorm.append("select")//Add the selector
+				.on("change", function () {
+					vm.SelectedOpts[varr1code] = d3.selectAll(this.childNodes)[0].filter(function (d) { return d.selected }).map(function (d) { return d.value });
+					vm.getBDSdata();
+				})
+				.property("multiple", multiple)
+				.classed("tallselector", multiple)
+				.property("disabled", (vm.xvar === varr.code) && (!vm.model.IsGroup(varr) || isundergroupvar))
+				.selectAll("option").data(vm.model[varr1code]).enter()
+				.append("option")
+				.property("selected", function (d) {
+					var selind = vm.SelectedOpts[varr1code].indexOf(vm.model.IsContinuous(varr) ? d.toString() : d.code);
+					return vm.multiple(varr.code) ? (selind !== -1) : (selind === 0);
+				})
+				.text(function (d) { return vm.model.IsContinuous(varr1code) ? d : d.name; })
+				.attr("value", function (d) { return vm.model.IsContinuous(varr1code) ? d : d.code; });
+		};
+
+		vm.model.variables.forEach(function (varr) { //For each variable create selector and buttons
+			console.log(varr);
+			if (varr.name != "Measure") { //Exception for measure
+				selectors.append("h4").text(varr.name + ":"); //Add the title for selector
+
+				AddSelectorWOptions(varr, false); //Add the selector for the variable
+
+				if (vm.model.IsGroup(varr)) { //Add selector for the choice selected in the group variable selector
+					selectors.append("br");
+					selectors.append("h4");
+					AddSelectorWOptions(varr, true);
+				};
+
+				if (varr.aslegend) { //Add the 'Compare' button
+
+					var cbut = selectors.append("button")
+						.on("click", function () { vm.setcvar(varr.code); })
 						.classed("activebutton", vm.multiple(varr.code))
-						.property("disabled", (vm.geomap() || (vm.xvar===varr.code) || (vm.cvar===varr.code)))
-						.text("Compare "+varr.name+"s");
-				if (vm.model.IsGroup(varr.code))
-					cbut.text("Compare "+vm.model.NameLookUp(vm.SelectedOpts[varr.code][0],'var')+"s")
-			};
+						.property("disabled", (vm.geomap() || (vm.xvar === varr.code) || (vm.cvar === varr.code)))
+						.text("Compare " + varr.name + "s");
+					if (vm.model.IsGroup(varr.code))
+						cbut.text("Compare " + vm.model.NameLookUp(vm.SelectedOpts[varr.code][0], 'var') + "s")
+				};
 
-			if (varr.asaxis) //Add the 'Make X' button
-				selectors.append("button")
-						.on("click", function() {vm.setxvar(varr.code);})
-						.classed("activebutton",vm.xvar===varr.code)
-						.property("disabled", (!vm.model.IsGeomapvar(varr)) && ((vm.xvar===varr.code) || (vm.cvar===varr.code)))
-						.text(vm.model.IsGeomapvar(varr)?"See Map":"Make X-axis");
-			selectors.append("br");
+				if (varr.asaxis) //Add the 'Make X' button
+					selectors.append("button")
+						.on("click", function () { vm.setxvar(varr.code); })
+						.classed("activebutton", vm.xvar === varr.code)
+						.property("disabled", (!vm.model.IsGeomapvar(varr)) && ((vm.xvar === varr.code) || (vm.cvar === varr.code)))
+						.text(vm.model.IsGeomapvar(varr) ? "See Map" : "Make X-axis");
+				selectors.append("br");
+			}
+			else {
+				AddSelectorMOptions(varr, false); //Add the selector for the variable
+
+				if (vm.model.IsGroup(varr)) { //Add selector for the choice selected in the group variable selector
+					selectorm.append("br");
+					selectorm.append("h4");
+					AddSelectorMOptions(varr, true);
+				};
+
+				if (varr.aslegend) { //Add the 'Compare' button
+
+					var cbut = selectorm.append("button")
+						.on("click", function () { vm.setcvar(varr.code); })
+						.classed("activebutton", vm.multiple(varr.code))
+						.property("disabled", (vm.geomap() || (vm.xvar === varr.code) || (vm.cvar === varr.code)))
+						.text("Compare " + varr.name + "s");
+					if (vm.model.IsGroup(varr.code))
+						cbut.text("Compare " + vm.model.NameLookUp(vm.SelectedOpts[varr.code][0], 'var') + "s")
+				};
+
+				if (varr.asaxis) //Add the 'Make X' button
+					selectorm.append("button")
+						.on("click", function () { vm.setxvar(varr.code); })
+						.classed("activebutton", vm.xvar === varr.code)
+						.property("disabled", (!vm.model.IsGeomapvar(varr)) && ((vm.xvar === varr.code) || (vm.cvar === varr.code)))
+						.text(vm.model.IsGeomapvar(varr) ? "See Map" : "Make X-axis");
+				selectorm.append("br");
+
+            }
+			
 		});
 	};
 

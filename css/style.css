@@ -42,7 +42,7 @@ rect.zoom {
   stroke: white;
 
   stroke-width: .5;
-  fill: blueviolet;
+/*  fill: blueviolet;*/
 }
 
 #plotarea {
@@ -79,6 +79,10 @@ rect.zoom {
     cursor: pointer;
 }
 
+    #xvarselector .active {
+        background-color: blue;
+    }
+
 
 #datashowarea {
   display:block; 
@@ -113,8 +117,16 @@ rect.zoom {
   /*padding: 5px;*/
 }
 
+.toolContainer {
+    display: flex;
+}
+.toolChild {
+    flex:1;
+}
+
+
 #seldiv {
-    margin-top: 5px;
+    margin-top: 50px;
     margin-bottom: 15px;
     margin-left: 0px;
     background: lightblue;

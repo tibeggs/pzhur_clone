@@ -11,32 +11,43 @@
         <h1>Placeholder</h1>
     </header>
 
-    <div id="xvarselector"></div>
-    <div id="plotarea">
-        <div id="logbutton"></div>
-        <svg id="chartsvg"></svg>
+    
+    <div class="toolContainer">
+        <div id="plotarea" class="toolChild">
+            <div id="logbutton"></div>
+            <svg id="chartsvg"></svg>
 
-        <div id="cvarselector"></div>
-        <div id="buttonsundergraph">
+            <div id="cvarselector"></div>
+            <div id="buttonsundergraph">
+            </div>
+
+            <span id="showdata" style="display: none">
+                <div id="datashowarea" class="datatable">
+                    <a download="BDSdata.xls" href="#" onclick="return ExcellentExport.excel(this, 'graphdata', 'Firms');">Export table to Excel</a>;
+                    <a download="BDSdata.csv" href="#" onclick="return ExcellentExport.csv(this, 'graphdata');">CSV</a>
+                    <table id="graphdata">
+                    </table>
+                </div>
+                <div class="datatable">
+                    <table id="graphdataheaders">
+                    </table>
+                </div>
         </div>
-
-        <span id="showdata" style="display: none">
-            <div id="datashowarea" class="datatable">
-                <a download="BDSdata.xls" href="#" onclick="return ExcellentExport.excel(this, 'graphdata', 'Firms');">Export table to Excel</a>;
-                <a download="BDSdata.csv" href="#" onclick="return ExcellentExport.csv(this, 'graphdata');">CSV</a>
-                <table id="graphdata">
-                </table>
-            </div>
-            <div class="datatable">
-                <table id="graphdataheaders">
-                </table>
-            </div>
-    </div>
-    </span>
-
-    <div id="seldiv">
-        <span class="selectors">
         </span>
+
+        <div id="seldiv" class="toolChild">
+            <div id="xvarselector">
+                <p>X Axis</p>
+            </div>
+            <div id="mvarselector">
+                <p>Measure</p>
+                <span class="selectorm">
+                </span>
+            </div>
+            <p>Filters</p>
+            <span class="selectors">
+            </span>
+        </div>
     </div>
 
     <br>
@@ -62,7 +73,7 @@
 
 
     <footer id="footbanner">
-        <p>Placholder</p>
+        <p>Placeholder</p>
     </footer>
 </body>
 
