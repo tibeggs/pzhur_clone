@@ -46,7 +46,7 @@ rect.zoom {
 }
 
 #plotarea {
-    margin-top: 50px;
+    /*margin-top: 50px;*/
     margin-bottom: 15px;
     margin-left: 0px;
     font: 12px sans-serif;
@@ -118,6 +118,7 @@ rect.zoom {
 }
 
 .toolContainer {
+    margin-top: 25px;
     display: flex;
 }
 .toolChild {
@@ -126,7 +127,7 @@ rect.zoom {
 
 
 #seldiv {
-    margin-top: 50px;
+   /* margin-top: 50px;*/
     margin-bottom: 15px;
     margin-left: 0px;
     background: lightblue;

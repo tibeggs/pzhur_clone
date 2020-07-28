@@ -114,7 +114,7 @@ BDSVis.ViewModel = function(model) {
 		};
 
 		vm.model.variables.forEach(function (varr) { //For each variable create selector and buttons
-			console.log(varr);
+			//console.log(varr);
 			if (varr.name != "Measure") { //Exception for measure
 				selectors.append("h4").text(varr.name + ":"); //Add the title for selector
 
@@ -173,8 +173,7 @@ BDSVis.ViewModel = function(model) {
 						.text(vm.model.IsGeomapvar(varr) ? "See Map" : "Make X-axis");
 				selectorm.append("br");
 
-            }
-			
+            }		
 		});
 	};
 
@@ -296,9 +295,11 @@ BDSVis.ViewModel = function(model) {
 	this.cvar = "sic1";
 
 	this.PlotView.Init();
+	
 	this.PlotView.DisplayWaitingMessage();
 	//this.DrawUI();
 
 	//Call initial plot
 	vm.getBDSdata();
+	
 };
