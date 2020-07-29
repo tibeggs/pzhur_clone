@@ -35,7 +35,7 @@ BDSVis.PlotView = {
         this.scale = 1;
         this.translate = [0, 0];
 
-
+        this.initialized = 1;
     },
 
     Refresh: function (data, request, vm) {
@@ -310,18 +310,22 @@ BDSVis.PlotView = {
         // var wsY = supportPageOffset ? window.pageYOffset : isCSS1Compat ? document.documentElement.scrollTop : document.body.scrollTop;
 
         var bug = document.getElementById('buttonsundergraph').offsetTop;;
+        var pa = document.getElementById('headbanner').offsetTop;
+        var pa1 = document.getElementById('plotarea').offsetTop;
         console.log(bug);
+        console.log(pa);
+        console.log(pa1);
+        console.log(this.margin.top);
+
         var wsY = window.scrollY || window.pageYOffset;
         var wsX = window.scrollX || window.pageXOffset;
 
         var chartrect = this.svgcont.node().getBoundingClientRect();
-        console.log(chartrect.top);
         var xaxlrect = this.xaxislabel.node().getBoundingClientRect();
 
         var sellength = this.xvarselector.node().getBoundingClientRect();
         sellength = sellength.right - sellength.left;
 
-        console.log((chartrect.top + wsY + this.margin.top) + bug + "px");
         this.xvarselector
             .style("position", "relative")
             .style("flex")
@@ -332,12 +336,14 @@ BDSVis.PlotView = {
         this.cvarselector
             .style("position", "absolute")
             .style("left", (chartrect.left + wsX + this.width + this.margin.left + this.margin.right) + "px")
-            .style("top", (chartrect.top + wsY + this.margin.top) + "px");
+            .style("top", (pa + bug + this.margin.top*3) + "px");
+            //.style("top", (chartrect.top + wsY + this.margin.top) + "px");
 
         this.scaleui
             .style("position", "absolute")
             .style("left", (this.yaxislabel.node().getBoundingClientRect().left + wsX) + "px")
-            .style("top", (xaxlrect.top + wsY) + "px");
+            .style("top", (pa + bug + this.margin.top * 30) + "px");
+            //.style("top", (xaxlrect.top + wsY) + "px");
     },
 
     wrap: function (text, width) {
