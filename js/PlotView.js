@@ -335,7 +335,6 @@ BDSVis.PlotView = {
             .style("top", (chartrect.top + wsY + this.margin.top) + "px");
 
         this.scaleui
-            .style("position", "absolute")
             .style("left", (this.yaxislabel.node().getBoundingClientRect().left + wsX) + "px")
             .style("top", (xaxlrect.top + wsY) + "px");
     },
