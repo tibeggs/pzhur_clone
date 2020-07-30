@@ -333,15 +333,13 @@ BDSVis.PlotView = {
             .style("left", (chartrect.left + wsX + this.width + this.margin.left + this.margin.right) + "px")
             .style("top", (pa + bug + this.margin.top*3) + "px");
             //.style("top", (chartrect.top + wsY + this.margin.top) + "px");
-
-        console.log(wsY);
-        console.log(xaxlrect.top);
         
         this.scaleui
             .style("position", "relative")
             .style("left", (this.yaxislabel.node().getBoundingClientRect().left + wsX) + "px")
             //.style("top", (pa + bug + this.margin.top * 30) + "px");
-            .style("top", (xaxlrect.top + wsY) + "px");
+            //.style("top", (xaxlrect.top + wsY) + "px");
+            .style("top", "500px");
     },
 
     wrap: function (text, width) {
