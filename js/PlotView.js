@@ -339,7 +339,7 @@ BDSVis.PlotView = {
             .style("left", (this.yaxislabel.node().getBoundingClientRect().left + wsX) + "px")
             //.style("top", (pa + bug + this.margin.top * 30) + "px");
             //.style("top", (xaxlrect.top + wsY) + "px");
-            .style("top", "10px");
+            .style("top", "600px");
     },
 
     wrap: function (text, width) {
