@@ -339,7 +339,7 @@ BDSVis.PlotView = {
             .style("left", "10px")
             //.style("top", (pa + bug + this.margin.top * 30) + "px");
             //.style("top", (xaxlrect.top + wsY) + "px");
-            .style("top", "500px");
+            .style("top", "700px");
     },
 
     wrap: function (text, width) {
