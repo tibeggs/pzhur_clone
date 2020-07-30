@@ -61,11 +61,11 @@ rect.zoom {
 }
 
 #footbanner {
-     display: block;
+    display: block;
     text-align: center;
     font-size: 0.75em;
     bottom:0;
-    width: 100%;
+    width: 10%;
     height: 30px;
     position: fixed;
     background-color: #efefef;
