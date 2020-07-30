@@ -61,9 +61,14 @@ rect.zoom {
 }
 
 #footbanner {
+     display: block;
+    text-align: center;
+    font-size: 0.75em;
+    bottom:0;
+    width: 100%;
+    height: 30px;
+    position: fixed;
     background-color: #efefef;
-    flex: 0 0 50px; /*or just height:50px;*/
-    margin-top: auto;
 }
 
 #xvarselector button {
