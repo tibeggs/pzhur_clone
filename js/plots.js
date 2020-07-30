@@ -243,12 +243,19 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 	// 	.offset(function(d) {return [-10, yScale(d[yvar]/2.)];})
 	// 	.html(Tooltiptext);
 	// svg.call(tip);
-
-	
-	if (vm.model.IsContinuous(xvarr)) {
+	var vegimexdfv = 0;
+	var regimex = (vm.regimeselector == undefined) ? vegimexdfv : 9;
+	// ||vm.regimeselector[0][0].value==2
+	if (vm.regimeselector != undefined) {
+		regimex = vm.regimeselector[0][0].value;
+    }
+	console.log(regimex);
+	if (regimex == 2)
+	//if (vm.model.IsContinuous(xvarr) || regimex == 2)
+	{
 		//Make a scatter plot if x-variable is continuous
 	
-		vm.regimeselector.property("disabled",true)
+		//vm.regimeselector.property("disabled",true)
 
 		// Define the line
 		var valueline = d3.svg.line().interpolate("monotone")

@@ -20,13 +20,16 @@ BDSVis.ViewModel = function(model) {
 		//UI elements for plotting regime switching: cartograms/map, heatchart/plot
 		
 		if (vm.geomap()) {
-			vm.regimeselector=bug.append("select").on("change", function() {vm.cartogram=+this.value; vm.getBDSdata();});
-			vm.regimeselector.append("option").text("Map").attr("value",0).property("selected",function(d) { return vm.cartogram===0;});
-			vm.regimeselector.append("option").text("Non-cont Cartogram").attr("value",1).property("selected",function(d) { return vm.cartogram===1;});
-		} else if (!vm.model.IsContinuous(vm.ActualVarCode(vm.xvar))) {
+			vm.regimeselector = bug.append("select").on("change", function () { vm.cartogram = +this.value; vm.getBDSdata(); });
+			vm.regimeselector.append("option").text("Map").attr("value", 0).property("selected", function (d) { return vm.cartogram === 0; });
+			vm.regimeselector.append("option").text("Non-cont Cartogram").attr("value", 1).property("selected", function (d) { return vm.cartogram === 1; });
+		} else //if (!vm.model.IsContinuous(vm.ActualVarCode(vm.xvar))) {
+		{
 			vm.regimeselector=bug.append("select").on("change", function() {vm.heatchart=+this.value; vm.getBDSdata();});
-			vm.regimeselector.append("option").text("Barchart").attr("value",0).property("selected",function(d) { return (!vm.heatchart);});
-			vm.regimeselector.append("option").text("Spotchart").attr("value",1).property("selected",function(d) { return vm.heatchart;});
+			vm.regimeselector.append("option").text("Barchart").attr("value", 0).property("selected", function (d) { return (!vm.heatchart);});
+			vm.regimeselector.append("option").text("Spotchart").attr("value", 1).property("selected", function (d) { return vm.heatchart; });
+			vm.regimeselector.append("option").text("Linechart").attr("value", 2).property("selected", function (d) { return vm.heatchart; });
+			
 		};
 		bug.append("h4").text(" ");
 
@@ -198,7 +201,11 @@ BDSVis.ViewModel = function(model) {
 	this.toggleshowdata = function () {
 		//This function executes in click to 'Show Data' button.
 		vm.ShowData = !vm.ShowData;
-		d3.select("#showdata").style("display",vm.ShowData?"block":"none");
+		d3.select("#showdata").style("display", vm.ShowData ? "block" : "none");
+		d3.select("#chartsvg").style("display", vm.ShowData ? "none" : "");
+		d3.select("#cvarselector").style("display", vm.ShowData ? "none" : "");
+		d3.select("#logbutton").style("display", vm.ShowData ? "none" : "");
+		//d3.select("#showdata").style("display", vm.ShowData ? "block" : "none");
 		vm.TableView.SetLowerHeadersWidth();
 	};
 

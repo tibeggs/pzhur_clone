@@ -161,7 +161,6 @@ BDSVis.PlotView = {
             function SelectorButtonClick(value) {
                 vm.setxvar(value)
                 //console.log(value);
-                console.log(vm.xvar);
 
             }
 
@@ -312,10 +311,6 @@ BDSVis.PlotView = {
         var bug = document.getElementById('buttonsundergraph').offsetTop;;
         var pa = document.getElementById('headbanner').offsetTop;
         var pa1 = document.getElementById('plotarea').offsetTop;
-        console.log(bug);
-        console.log(pa);
-        console.log(pa1);
-        console.log(this.margin.top);
 
         var wsY = window.scrollY || window.pageYOffset;
         var wsX = window.scrollX || window.pageXOffset;
