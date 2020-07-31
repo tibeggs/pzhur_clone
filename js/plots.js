@@ -243,13 +243,12 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 	// 	.offset(function(d) {return [-10, yScale(d[yvar]/2.)];})
 	// 	.html(Tooltiptext);
 	// svg.call(tip);
-	var vegimexdfv = 0;
+	var vegimexdfv;
 	var regimex = (vm.regimeselector == undefined) ? vegimexdfv : 9;
 	// ||vm.regimeselector[0][0].value==2
 	if (vm.regimeselector != undefined) {
 		regimex = vm.regimeselector[0][0].value;
     }
-	console.log(regimex);
 	if (regimex == 2)
 	//if (vm.model.IsContinuous(xvarr) || regimex == 2)
 	{
