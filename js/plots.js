@@ -24,7 +24,7 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 
 	//Setting D3 scales
 	var xScale, yScale, yScale1, ymin, y0;
-	if (vm.model.IsContinuous(xvarr))
+	if (vm.model.IsContinuous(xvarr) & regimex == 2)
 		xScale = d3.scale.linear()
 			.domain([vm.model[xvar][0],vm.model[xvar][vm.model[xvar].length-1]])
 			.range([0, width]);
@@ -57,7 +57,7 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 	yScale1.domain([yScale1.domain()[0],yScale1.domain()[1]*1.1]); //Add 10% space above the highest data point
 
 	if (limits!==undefined) {
-		if (vm.model.IsContinuous(xvarr)) {
+		if (vm.model.IsContinuous(xvarr) & regimex == 2) {
 			yScale1.domain([limits[2],limits[3]]);
 			xScale.domain([limits[0],limits[1]]);
 		} else {
@@ -78,7 +78,7 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 	var normscale=d3.scale.linear().domain([0,cvarlist.length-1]).range(["#265DAB","#dddddd"]);
 			
 	var colors = function(d) {
-		if (vm.model.IsContinuous(xvarr)) return colorbrewer.Dark2[8][cvarlist.indexOf(d) % 8];//colarr[i % colarr.length];
+		if (vm.model.IsContinuous(xvarr) & regimex == 2) return colorbrewer.Dark2[8][cvarlist.indexOf(d) % 8];//colarr[i % colarr.length];
 		else if (vm.model.IsContinuous(cvarr)) return cScale(d);
 		else if (cvarr.customcolor) return cvarr.colorscale[d];
 		else return colorbrewer.BrBG[11][10 - (cvarlist.indexOf(d) % 11)];//colarr[i % colarr.length];//normscale(i);
@@ -96,7 +96,7 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 
 	var xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickFormat(function(d){ return vm.model.NameLookUp(d,xvar)});
 
-	if (vm.model.IsContinuous(xvarr)) xAxis.tickFormat(d3.format("d"));
+	if (vm.model.IsContinuous(xvarr) & regimex == 2) xAxis.tickFormat(d3.format("d"));
 
 	var xAxis0 = d3.svg.axis().scale(xScale).tickFormat("").orient("bottom");
 
@@ -169,7 +169,7 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 			.attr("transform", function(d) { return "translate(" + (xScale(d[xvar])+xScale.rangeBand()/2.) + "," + height*.98 + ")"; });	
 	};
 
-	if(vm.model.IsContinuous(xvarr))
+	if (vm.model.IsContinuous(xvarr) & regimex == 2)
 		pv.zoom = d3.behavior.zoom().x(xScale).y(yScale1).on("zoom",  refresh);
 	else 
 		pv.zoom = d3.behavior.zoom().y(yScale1).on("zoom",  refreshBars); 
@@ -222,7 +222,7 @@ BDSVis.makePlot = function (data,request,vm,limits) {
 				rect.remove();
 				if (m[0] !== origin[0] && m[1] !== origin[1]) {
 					//Find new extents/limits of the plot from the rectangle size and call the plot function with them as argument
-					if (vm.model.IsContinuous(xvarr)) {
+					if (vm.model.IsContinuous(xvarr) & regimex == 2) {
 						var leftright=[origin[0], m[0]].map(xScale.invert).sort();
 						var topbottom=[origin[1], m[1]].map((yScale1).invert).sort(function(a,b) {return a>b});
 						BDSVis.makePlot(data,request,vm,d3.merge([leftright,topbottom]));

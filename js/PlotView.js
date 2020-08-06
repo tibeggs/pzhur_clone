@@ -103,8 +103,8 @@ BDSVis.PlotView = {
                 vm.logscale = !vm.logscale;
                 if (vm.geomap())
                     BDSVis.makeMap(data, request, vm);
-                else if ((vm.heatchart) && !(vm.model.IsContinuous(request.xvar)))
-                    BDSVis.makeHeatChart(data, request, vm);
+                //else if ((!vm.heatchart) && (regimeselector[0][0].value != 2)) /*!(vm.model.IsContinuous(request.xvar)))*/
+                //    BDSVis.makeHeatChart(data, request, vm);
                 else
                     BDSVis.makePlot(data, request, vm);
             });
@@ -206,7 +206,7 @@ BDSVis.PlotView = {
 
             if (!vm.geomap()) {
                 //Legend variable (cvar) selector
-                this.cvarselector.html(vm.heatchart ? 'Y-axis variable:<br><br>' : 'Legend variable:<br><br>')
+                //this.cvarselector.html(vm.heatchart ? 'Y-axis variable:<br><br>' : 'Legend variable:<br><br>')
                 selector = this.cvarselector.append("select");
                 AddOptionsToVarSelector(selector, vm.model.variables.filter(function (d) { return (d.aslegend && d.code !== vm.xvar) }), "cvar", false);
                 selector.on("change", function () { vm.setcvar(this.value); });

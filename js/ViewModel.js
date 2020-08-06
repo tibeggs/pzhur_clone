@@ -27,7 +27,7 @@ BDSVis.ViewModel = function(model) {
 		{
 			vm.regimeselector=bug.append("select").on("change", function() {vm.heatchart=+this.value; vm.getBDSdata();});
 			vm.regimeselector.append("option").text("Barchart").attr("value", 0).property("selected", function (d) { return (!vm.heatchart);});
-			vm.regimeselector.append("option").text("Spotchart").attr("value", 1).property("selected", function (d) { return vm.heatchart; });
+			//vm.regimeselector.append("option").text("Spotchart").attr("value", 1).property("selected", function (d) { return vm.heatchart; });
 			vm.regimeselector.append("option").text("Linechart").attr("value", 2).property("selected", function (d) { return vm.heatchart; });
 			
 		};
@@ -191,6 +191,7 @@ BDSVis.ViewModel = function(model) {
 	this.getBDSdata = function () {
 		d3.select(".selectors").selectAll('*').property("disabled",true);//remove();// Disable all selectors and buttons while data is loading
 		BDSVis.getAPIdata(vm);
+		this.PlotView.Refresh();
 		//DrawUI();
 	};
 
