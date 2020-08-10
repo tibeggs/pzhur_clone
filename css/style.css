@@ -71,6 +71,12 @@ rect.zoom {
     background-color: #efefef;
 }
 
+#keybuttons {
+    display:flex;
+}
+#
+
+
 #xvarselector button {
     background-color: #4CAF50; /* Green */
     border: none;
@@ -139,6 +145,28 @@ rect.zoom {
     border-radius: 25px;
     border: 2px solid blue;
 }
+
+.xbtn {
+    background-color: #4CAF50; /* Green */
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+}
+
+    .xbtn active {
+        background-color: steelblue; /* Green */
+        border: none;
+        color: white;
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+    }
 
 .selectors {
     font: 12px sans-serif;

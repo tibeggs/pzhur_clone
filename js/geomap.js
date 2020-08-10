@@ -3,7 +3,6 @@ var BDSVis = BDSVis || {};
 //This function makes the geographical map
 BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	//"vm" is the reference to ViewModel
-
 	//Initialize the SVG elements and get width and length for scales
 	var pv=vm.PlotView;
 	pv.Refresh(data,request,vm);

@@ -359,7 +359,8 @@ BDSVis.Model = {
 	//Init : function(error, state_geodata, msa_geodata, msa_codes) {
 	Init : function() {
 
-		var tmod=this;
+		var tmod = this;
+		tmod.regimex =9;
 		
 ////////		//Customization of variables: copying of code/name tables, creating colorscales etc
 		this.ifsize=this.fsize;

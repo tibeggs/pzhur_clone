@@ -194,19 +194,22 @@ BDSVis.PlotView = {
             };
             //X-axis variable selector		
             var selector = this.xvarselector;
+
             //AddButtonToVarSelector(selector, vm.model.variables.filter(function (d) { return (d.asaxis /*&& d.code !== vm.cvar*/) }), "xvar", false);
             var selector = this.xvarselector.append("select");
             AddOptionsToVarSelector(selector, vm.model.variables.filter(function (d) { return (d.asaxis && d.code !== vm.cvar) }), "xvar", false);
             selector.on("change", function () { vm.setxvar(this.value); });
+            selector[0][0].id = "xelector1"
             if (vm.model.IsGroup(vm.xvar)) {
                 var groupselector = this.xvarselector.append("select");
                 AddOptionsToVarSelector(groupselector, vm.model[vm.xvar], "xvar", true);
                 groupselector.on("change", function () { vm.SelectedOpts[vm.xvar] = [this.value]; vm.getBDSdata(); });
+                groupselector[0][0].id = "xelector2";
             };
 
             if (!vm.geomap()) {
                 //Legend variable (cvar) selector
-                //this.cvarselector.html(vm.heatchart ? 'Y-axis variable:<br><br>' : 'Legend variable:<br><br>')
+                this.cvarselector.html(vm.heatchart ? 'Legend variable:<br><br>' : 'Legend variable:<br><br>')
                 selector = this.cvarselector.append("select");
                 AddOptionsToVarSelector(selector, vm.model.variables.filter(function (d) { return (d.aslegend && d.code !== vm.xvar) }), "cvar", false);
                 selector.on("change", function () { vm.setcvar(this.value); });
@@ -228,6 +231,8 @@ BDSVis.PlotView = {
                 selector.on("change", function () { vm.region = this.value; vm.getBDSdata(); });
             };
         };
+        
+
         this.AdjustUIElements();
     },
 
@@ -331,9 +336,9 @@ BDSVis.PlotView = {
         this.cvarselector
             .style("position", "absolute")
             .style("left", (chartrect.left + wsX + this.width + this.margin.left + this.margin.right) + "px")
-            .style("top", (pa + bug + this.margin.top*3) + "px");
-            //.style("top", (chartrect.top + wsY + this.margin.top) + "px");
-        
+            .style("top", (pa + bug + this.margin.top * 3) + "px");
+        //.style("top", (chartrect.top + wsY + this.margin.top) + "px");
+
         this.scaleui
             .style("position", "absolute")
             .style("left", "10px")

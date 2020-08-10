@@ -83,7 +83,7 @@ BDSVis.getAPIdata = function (vm) {
 BDSVis.processAPIdata = function(data,request,vm) {
 	//"vm" is the reference to ViewModel
 
-
+	var tmod = vm.model;
 
  	//Filter the obtained data, so that only what is requested remains (API does not filter all the variables)
  	vm.dataunfiltered = data.slice(0);
@@ -113,12 +113,18 @@ BDSVis.processAPIdata = function(data,request,vm) {
 		})); //d3.merge flattens the array
 
 	vm.TableView.makeDataTable(data,request.cvar,request.xvar,vm); //Make the table displaying the data
-	
-	if (vm.geomap())
-		BDSVis.makeMap(data,request,vm);
+
+	if (tmod.regimex == 1/*vm.geomap()*/) {
+		BDSVis.makeMap(data, request, vm);
+		document.getElementById("xelector1").disabled = true;
+    }
+		
 	//else if ((vm.heatchart) && !(vm.model.IsContinuous(request.xvar)))
 	//	BDSVis.makeHeatChart(data,request,vm);
-	else
-		BDSVis.makePlot(data,request,vm);
+	else {
+		console.log(tmod.regimex);
+		BDSVis.makePlot(data, request, vm);
+    }
+		
 };
 
