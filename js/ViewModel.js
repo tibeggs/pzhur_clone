@@ -65,7 +65,7 @@ BDSVis.ViewModel = function (model) {
                 name = varvalues[i].name;
                 value = varvalues[i].code;
 
-                if (vm.xvar === value) {
+                if (tmod.regimex == value) {
                     xclass = "xbtn active";
                 } else {
                     xclass = "xbtn";
@@ -77,7 +77,7 @@ BDSVis.ViewModel = function (model) {
         var rkey = [{ name: "Barchart", code: 0 }, { name: "LineChart", code: 2 }, { name: "Map", code: 1 }];
         vm.regimeselector = [[{ value: 0 }]]
 
-        if (vm.geomap()) {
+        if (vm.geomap() & tmod.regimex !=0) {
             vm.regimeselector = bug.append("select").on("change", function () { vm.cartogram = +this.value; vm.getBDSdata(); });
             vm.regimeselector.append("option").text("Map").attr("value", 0).property("selected", function (d) { return vm.cartogram === 0; });
             vm.regimeselector.append("option").text("Non-cont Cartogram").attr("value", 1).property("selected", function (d) { return vm.cartogram === 1; });
@@ -94,7 +94,13 @@ BDSVis.ViewModel = function (model) {
         bug.append("h4").text(" ");
 
         //UI elements for Save and Show Data and
-        bug.append("button").text("Show Data").on("click", vm.toggleshowdata);
+        var btnt = document.createElement("Button");
+        btnt.id = "showdatabtn";
+        btnt.innerHTML = "Show Data";
+        btnt.className = "xbtn";
+        btnt.onclick =  vm.toggleshowdata;;
+        rgb[0][0].appendChild(btnt);
+        //rgb.append("button").text("Show Data").on("click", vm.toggleshowdata);
         if (!vm.timelapse) {
             bug.append("button").text("Save SVG").on("click", function () { BDSVis.util.savesvg('svg'); });
             bug.append("button").text("Save PNG").on("click", function () { BDSVis.util.savesvg('png'); });
@@ -262,12 +268,31 @@ BDSVis.ViewModel = function (model) {
     this.toggleshowdata = function () {
         //This function executes in click to 'Show Data' button.
         vm.ShowData = !vm.ShowData;
+
+        var section = document.getElementById("regimebuttons");
+        var btns = section.getElementsByClassName("xbtn");
+        for (var i = 0; i < btns.length; i++) {
+            btns[i].addEventListener("click", function () {
+                var current = document.getElementsByClassName("active");
+                current[0].className = current[0].className.replace(" active", "");
+                this.className += " active";
+            });
+        };
+
+        //if (vm.ShowData) {
+        //    document.getElementById("#showdatabtn")/*.className("xbtn active")*/;
+        //}
+        //else {
+        //    document.getElementById("#showdatabtn").className("xbtn");
+        //}
+
         d3.select("#showdata").style("display", vm.ShowData ? "block" : "none");
         d3.select("#chartsvg").style("display", vm.ShowData ? "none" : "");
         d3.select("#cvarselector").style("display", vm.ShowData ? "none" : "");
         d3.select("#logbutton").style("display", vm.ShowData ? "none" : "");
         //d3.select("#showdata").style("display", vm.ShowData ? "block" : "none");
         vm.TableView.SetLowerHeadersWidth();
+        vm.getBDSdata();
     };
 
     //TIME LAPSE BUTTON

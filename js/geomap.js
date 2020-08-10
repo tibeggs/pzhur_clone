@@ -24,7 +24,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	};
 
 
-	//Filter by region
+	//Filter by region creating a problem
 	data = data.filter(function(d1){
 		return vm.model[xvar][vm.model[xvar].map(function(d) {return d.code}).indexOf(d1[xvar])].regions.indexOf(vm.region)>-1;
 	})

@@ -1,10 +1,10 @@
 .axis text {
-  font: 10px sans-serif;
+    font: 10px sans-serif;
 }
 
 rect.zoom {
-  stroke: steelblue;
-  fill: none;
+    stroke: steelblue;
+    fill: none;
 }
 
 .unselectable {
@@ -17,32 +17,31 @@ rect.zoom {
 }
 
 .svguibox {
-  stroke-width: 1;
-  stroke: #000;
-  /*shape-rendering: crispEdges;*/
+    stroke-width: 1;
+    stroke: #000;
+    /*shape-rendering: crispEdges;*/
 }
 
 .svguitext {
-   font: 14px sans-serif;
+    font: 14px sans-serif;
 }
 
 .axis path,
 .axis line {
-  fill: none;
-  stroke: #000;
-  shape-rendering: crispEdges;
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
 }
 
 .plotline {
-  stroke-width: 2;
-  fill: none;
+    stroke-width: 2;
+    fill: none;
 }
 
 .plotbar {
-  stroke: white;
-
-  stroke-width: .5;
-/*  fill: blueviolet;*/
+    stroke: white;
+    stroke-width: .5;
+    /*  fill: blueviolet;*/
 }
 
 #plotarea {
@@ -64,7 +63,7 @@ rect.zoom {
     display: block;
     text-align: center;
     font-size: 0.75em;
-    bottom:0;
+    bottom: 0;
     width: 10%;
     height: 30px;
     position: fixed;
@@ -72,8 +71,9 @@ rect.zoom {
 }
 
 #keybuttons {
-    display:flex;
+    display: flex;
 }
+
 #
 
 
@@ -90,55 +90,56 @@ rect.zoom {
     cursor: pointer;
 }
 
-    #xvarselector .active {
-        background-color: blue;
-    }
+#xvarselector .active {
+    background-color: blue;
+}
 
 
 #datashowarea {
-  display:block; 
-  overflow:auto; 
-  height: 250px;
-  padding:0px;
+    display: block;
+    overflow: auto;
+    height: 250px;
+    padding: 0px;
 }
 
 .datatable table, th, td {
-        border: 1px solid black;
-        border-collapse: collapse;
-        padding: 2px;
+    border: 1px solid black;
+    border-collapse: collapse;
+    padding: 2px;
 }
 
 /*.datatable table tbody { height:200px; overflow-y:scroll; display:block; }
 .datatable table thead { display:block; }*/
 
 #datashowareatable {
-  display:block; 
-  overflow:auto; 
-  height: 200px;
+    display: block;
+    overflow: auto;
+    height: 200px;
 }
 
 #buttonsundergraph {
-  font: 12px sans-serif;
-  text-align: center;
+    font: 12px sans-serif;
+    text-align: center;
 }
 
-#buttonsundergraph h4{
-  display:inline-block;
-  font-weight: normal;
-  /*padding: 5px;*/
-}
+    #buttonsundergraph h4 {
+        display: inline-block;
+        font-weight: normal;
+        /*padding: 5px;*/
+    }
 
 .toolContainer {
     margin-top: 25px;
     display: flex;
 }
+
 .toolChild {
-    flex:1;
+    flex: 1;
 }
 
 
 #seldiv {
-   /* margin-top: 50px;*/
+    /* margin-top: 50px;*/
     margin-bottom: 15px;
     margin-left: 0px;
     background: lightblue;
@@ -157,8 +158,8 @@ rect.zoom {
     font-size: 16px;
 }
 
-    .xbtn active {
-        background-color: steelblue; /* Green */
+.active {
+        background-color: darkblue;
         border: none;
         color: white;
         padding: 15px 32px;
@@ -166,110 +167,115 @@ rect.zoom {
         text-decoration: none;
         display: inline-block;
         font-size: 16px;
-    }
+}
+.xbtn:hover {
+    background-color: #005500;
+
+}
+
 
 .selectors {
     font: 12px sans-serif;
 }
 
-.selectors select {
-  width: 200px;
-  margin-left: 0px;
-}
+    .selectors select {
+        width: 200px;
+        margin-left: 0px;
+    }
 
 
 .tallselector {
-  height: 180px;
+    height: 180px;
 }
 
 .selectors h4 {
-  display:inline-block;
-  font-weight: normal;
-  width: 130px;
-  margin: 0px;
+    display: inline-block;
+    font-weight: normal;
+    width: 130px;
+    margin: 0px;
 }
 
 .selectors button {
-  color: #000000;
-  background: #d9d9d9;
-  background-image: -webkit-linear-gradient(top, #d9d9d9, #b8b8b8);
-  background-image: -moz-linear-gradient(top, #d9d9d9, #b8b8b8);
-  background-image: -ms-linear-gradient(top, #d9d9d9, #b8b8b8);
-  background-image: -o-linear-gradient(top, #d9d9d9, #b8b8b8);
-  background-image: linear-gradient(to bottom, #d9d9d9, #b8b8b8);
-  padding: 1px 5px 1px 5px;
-  border-radius: 3px;
-  border-width: 1px;
-  text-decoration: none;
-  width: 180px;
+    color: #000000;
+    background: #d9d9d9;
+    background-image: -webkit-linear-gradient(top, #d9d9d9, #b8b8b8);
+    background-image: -moz-linear-gradient(top, #d9d9d9, #b8b8b8);
+    background-image: -ms-linear-gradient(top, #d9d9d9, #b8b8b8);
+    background-image: -o-linear-gradient(top, #d9d9d9, #b8b8b8);
+    background-image: linear-gradient(to bottom, #d9d9d9, #b8b8b8);
+    padding: 1px 5px 1px 5px;
+    border-radius: 3px;
+    border-width: 1px;
+    text-decoration: none;
+    width: 180px;
 }
 
     .selectors button:hover {
         background: cadetblue;
     }
 
-.selectors button:disabled {
-  opacity: 0.6;
-}
+    .selectors button:disabled {
+        opacity: 0.6;
+    }
 
-.selectors button.activebutton {
-  color: #ffffff;
-  background-color: green;
-  background: green;
-  background-image: -webkit-linear-gradient(top, #005500, #337733);
-  background-image: -moz-linear-gradient(top, #005500, #337733);
-  background-image: -ms-linear-gradient(top, #005500, #337733);
-  background-image: -o-linear-gradient(top, #005500, #337733);
-  background-image: linear-gradient(top, #005500, #337733);
-  opacity: 1;
-}
+    .selectors button.activebutton {
+        color: #ffffff;
+        background-color: green;
+        background: green;
+        background-image: -webkit-linear-gradient(top, #005500, #337733);
+        background-image: -moz-linear-gradient(top, #005500, #337733);
+        background-image: -ms-linear-gradient(top, #005500, #337733);
+        background-image: -o-linear-gradient(top, #005500, #337733);
+        background-image: linear-gradient(top, #005500, #337733);
+        opacity: 1;
+    }
 
 .graph-title {
-  fill: black;
-  font: 20px sans-serif;
+    fill: black;
+    font: 20px sans-serif;
 }
 
 .leglabel {
-  font: 14px sans-serif;
+    font: 14px sans-serif;
 }
 
 .xaxislabel {
-  font: 16px sans-serif;
+    font: 16px sans-serif;
 }
 
 .yaxislabel {
-  font: 16px sans-serif;
+    font: 16px sans-serif;
 }
 
 .legtitle {
-  font: 16px sans-serif;
+    font: 16px sans-serif;
 }
 
 .d3-tip {
-  line-height: 1;
-  font-weight: bold;
-  padding: 12px;
-  background: rgba(0, 0, 0, 0.8);
-  color: #fff;
-  border-radius: 2px;
+    line-height: 1;
+    font-weight: bold;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    border-radius: 2px;
 }
 
-/* Creates a small triangle extender for the tooltip */
-.d3-tip:after {
-  box-sizing: border-box;
-  display: inline;
-  font-size: 10px;
-  width: 100%;
-  line-height: 1;
-  color: rgba(0, 0, 0, 0.8);
-  content: "\25BC";
-  position: absolute;
-  text-align: center;
-}
+    /* Creates a small triangle extender for the tooltip */
+    .d3-tip:after {
+        box-sizing: border-box;
+        display: inline;
+        font-size: 10px;
+        width: 100%;
+        line-height: 1;
+        color: rgba(0, 0, 0, 0.8);
+        content: "\25BC";
+        position: absolute;
+        text-align: center;
+    }
 
-/* Style northward tooltips differently */
-.d3-tip.n:after {
-  margin: -1px 0 0 0;
-  top: 100%;
-  left: 0;
-}
+    /* Style northward tooltips differently */
+    .d3-tip.n:after {
+        margin: -1px 0 0 0;
+        top: 100%;
+        left: 0;
+    }
