@@ -31,7 +31,7 @@ BDSVis.ViewModel = function (model) {
             //console.log(tmod.regimeselector[0][0].value);
             //!vm.heatchart; vm.heatchart = +this.value; vm.getBDSdata();
             //tmod.regimeselector[0][0].value = this.value;
-            
+
             //tmod.regimeselector[0][0].value = this.value
         }
         //if (tmod.regimeselector != undefined) {
@@ -51,8 +51,8 @@ BDSVis.ViewModel = function (model) {
             if (value == 2) {
                 btn.onclick = function () { !vm.heatchart; vm.heatchart = +this.value; vm.getBDSdata(); vm.regimeselector[0][0].value = this.value; selectElement("xelector1", "year2"); tmod.regimex = this.value; };
             }
-            if (value==0) {
-                btn.onclick = function () { vm.heatchart; vm.heatchart = +this.value; vm.getBDSdata(); vm.regimeselector[0][0].value = this.value; tmod.regimex = this.value; tmod.regimex = this.value;};
+            if (value == 0) {
+                btn.onclick = function () { vm.heatchart; vm.heatchart = +this.value; vm.getBDSdata(); vm.regimeselector[0][0].value = this.value; tmod.regimex = this.value; tmod.regimex = this.value; };
             }
             if (value == 1) {
                 btn.onclick = function () { !vm.heatchart; vm.heatchart = +this.value; vm.getBDSdata(); vm.regimeselector[0][0].value = this.value; selectElement("xelector1", "geo"); tmod.regimex = this.value; };
@@ -77,7 +77,7 @@ BDSVis.ViewModel = function (model) {
         var rkey = [{ name: "Barchart", code: 0 }, { name: "LineChart", code: 2 }, { name: "Map", code: 1 }];
         vm.regimeselector = [[{ value: 0 }]]
 
-        if (vm.geomap() & tmod.regimex !=0) {
+        if (vm.geomap() & tmod.regimex != 0) {
             vm.regimeselector = bug.append("select").on("change", function () { vm.cartogram = +this.value; vm.getBDSdata(); });
             vm.regimeselector.append("option").text("Map").attr("value", 0).property("selected", function (d) { return vm.cartogram === 0; });
             vm.regimeselector.append("option").text("Non-cont Cartogram").attr("value", 1).property("selected", function (d) { return vm.cartogram === 1; });
@@ -98,7 +98,7 @@ BDSVis.ViewModel = function (model) {
         btnt.id = "showdatabtn";
         btnt.innerHTML = "Show Data";
         btnt.className = "xbtn";
-        btnt.onclick =  vm.toggleshowdata;;
+        btnt.onclick = vm.toggleshowdata;;
         rgb[0][0].appendChild(btnt);
         //rgb.append("button").text("Show Data").on("click", vm.toggleshowdata);
         if (!vm.timelapse) {
@@ -154,8 +154,24 @@ BDSVis.ViewModel = function (model) {
                     return vm.multiple(varr.code) ? (selind !== -1) : (selind === 0);
                 })
                 .text(function (d) { return vm.model.IsContinuous(varr1code) ? d : d.name; })
-                .attr("value", function (d) { return vm.model.IsContinuous(varr1code) ? d : d.code; });
+                .attr("value", function (d) { return vm.model.IsContinuous(varr1code) ? d : d.code; })
+                ;
         };
+
+        //modal show function
+        function ModalShow() {
+            var modal = document.getElementById("modal");
+            modal.style.display = "block";
+        };
+
+
+        //UI element for showing Modal
+        function AddModalButton(varr, isundergroupvar) {
+            selectors.append("button")
+                .on("click", function () { ModalShow(); })
+                .classed("activebutton", vm.xvar === varr.code)
+                .text("Show Modal");
+        }
 
         //UI elements for variable selection
         var selectorm = d3.select('.selectorm');
@@ -165,6 +181,7 @@ BDSVis.ViewModel = function (model) {
             var varr1code = isundergroupvar ? vm.SelectedOpts[varr.code][0] : varr.code;
             var multiple = vm.multiple(varr.code) && (!vm.model.IsGroup(varr) || isundergroupvar);
             selectorm.append("select")//Add the selector
+                //.attr("class", "modal")//setup as modal
                 .on("change", function () {
                     vm.SelectedOpts[varr1code] = d3.selectAll(this.childNodes)[0].filter(function (d) { return d.selected }).map(function (d) { return d.value });
                     vm.getBDSdata();
@@ -179,7 +196,8 @@ BDSVis.ViewModel = function (model) {
                     return vm.multiple(varr.code) ? (selind !== -1) : (selind === 0);
                 })
                 .text(function (d) { return vm.model.IsContinuous(varr1code) ? d : d.name; })
-                .attr("value", function (d) { return vm.model.IsContinuous(varr1code) ? d : d.code; });
+                .attr("value", function (d) { return vm.model.IsContinuous(varr1code) ? d : d.code; })
+                ;
         };
 
         vm.model.variables.forEach(function (varr) { //For each variable create selector and buttons
@@ -206,16 +224,18 @@ BDSVis.ViewModel = function (model) {
                         cbut.text("Compare " + vm.model.NameLookUp(vm.SelectedOpts[varr.code][0], 'var') + "s")
                 };
 
-                if (varr.asaxis) //Add the 'Make X' button
-                    selectors.append("button")
-                        .on("click", function () { vm.setxvar(varr.code); })
-                        .classed("activebutton", vm.xvar === varr.code)
-                        .property("disabled", (!vm.model.IsGeomapvar(varr)) && ((vm.xvar === varr.code) || (vm.cvar === varr.code)))
-                        .text(vm.model.IsGeomapvar(varr) ? "See Map" : "Make X-axis");
+                //if (varr.asaxis) //Add the 'Make X' button
+                //    selectors.append("button")
+                //        .on("click", function () { vm.setxvar(varr.code); })
+                //        .classed("activebutton", vm.xvar === varr.code)
+                //        .property("disabled", (!vm.model.IsGeomapvar(varr)) && ((vm.xvar === varr.code) || (vm.cvar === varr.code)))
+                //        .text(vm.model.IsGeomapvar(varr) ? "Make X-axis" : "Make X-axis");
+                //        //.text(vm.model.IsGeomapvar(varr) ? "See Map" : "Make X-axis");
                 selectors.append("br");
             }
             else {
                 AddSelectorMOptions(varr, false); //Add the selector for the variable
+                //AddModalButton(varr,false);
 
                 if (vm.model.IsGroup(varr)) { //Add selector for the choice selected in the group variable selector
                     selectorm.append("br");
@@ -269,18 +289,18 @@ BDSVis.ViewModel = function (model) {
         //This function executes in click to 'Show Data' button.
         vm.ShowData = !vm.ShowData;
 
-        var section = document.getElementById("regimebuttons");
-        var btns = section.getElementsByClassName("xbtn");
-        for (var i = 0; i < btns.length; i++) {
-            btns[i].addEventListener("click", function () {
-                var current = document.getElementsByClassName("active");
-                current[0].className = current[0].className.replace(" active", "");
-                this.className += " active";
-            });
-        };
+        //var section = document.getElementById("regimebuttons");
+        //var btns = section.getElementsByClassName("xbtn");
+        //for (var i = 0; i < btns.length; i++) {
+        //    btns[i].addEventListener("click", function () {
+        //        var current = document.getElementsByClassName("active");
+        //        current[0].className = current[0].className.replace(" active", "");
+        //        this.className += " active";
+        //    });
+        //};
 
         //if (vm.ShowData) {
-        //    document.getElementById("#showdatabtn")/*.className("xbtn active")*/;
+        //    document.getElementById("#showdatabtn").className("xbtn active");
         //}
         //else {
         //    document.getElementById("#showdatabtn").className("xbtn");
@@ -355,7 +375,7 @@ BDSVis.ViewModel = function (model) {
         if (vm.geomap()) {
             vm.cvar = vm.model.yvars;
         }
-            
+
 
         var varname1 = vm.ActualVarCode(varname);
         vm.IncludedXvarValues[varname1] = vm.model.GetCodes(varname1);
