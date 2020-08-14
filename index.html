@@ -2,82 +2,22 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>US Census Business Dynamics Statistics Data Visualization</title>
+    <title>US Census Business Dynamics Statistics Data Visualization landing page</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
-
 <body>
-    <header id="headbanner">
-        <h1>Placeholder</h1>
-    </header>
-    <div id="keybuttons">
-        <div id="regimebuttons">
-        </div>
-        <div id="buttonsundergraph">
-        </div>
-    </div>
-    <div class="toolContainer">
-        <div id="plotarea" class="toolChild">
-            <div id="logbutton" style="position: relative"></div>
-            <svg id="chartsvg"></svg>
+    <a href="app.html">Go to App</a>
+    <br />
+    <br />
+    <label for="xvar">Xvar:</label>
+    <input type="text" id="xvar" name="xvar" />
+    <br />
+    <br />
+    <label for="cvar">Cvar</label>
+    <input type="text" id="cvar" name="cvar" />
+    <br />
+    <br />
+    <button onclick="grabinput()">Submit</button>
 
-            <div id="cvarselector"></div>
-            
-
-            <span id="showdata" style="display: none">
-                <div id="datashowarea" class="datatable">
-                    <a download="BDSdata.xls" href="#" onclick="return ExcellentExport.excel(this, 'graphdata', 'Firms');">Export table to Excel</a>;
-                    <a download="BDSdata.csv" href="#" onclick="return ExcellentExport.csv(this, 'graphdata');">CSV</a>
-                    <table id="graphdata">
-                    </table>
-                </div>
-                <div class="datatable">
-                    <table id="graphdataheaders">
-                    </table>
-                </div>
-        </div>
-        </span>
-
-        <div id="seldiv" class="toolChild">
-            <div id="xvarselector">
-                <p>X Axis</p>
-            </div>
-            <div id="mvarselector">
-                <p>Measure</p>
-                <span class="selectorm">
-                </span>
-            </div>
-            <p>Filters</p>
-            <span class="selectors">
-            </span>
-        </div>
-    </div>
-
-    <br>
-
-
-    <!-- <script src="Jerry Test"></script> -->
-    <script src="js/d3.min.js"></script>
-    <!-- <script src="js/d3tip.js"></script> -->
-    <script src="js/cartogram.js"></script>
-    <script src="js/topojson.v1.min.js"></script>
-    <script src="js/colorbrewer.min.js"></script>
-    <script src="js/excellentexport.min.js"></script>
-    <script src="js/utilities.js"></script>
-    <script src="js/model.js"></script>
-    <script src="js/ViewModel.js"></script>
-    <script src="js/TableView.js"></script>
-    <script src="js/PlotView.js"></script>
-    <script src="js/apirequest.js"></script>
-    <script src="js/geomap.js"></script>
-    <script src="js/heatchart.js"></script>
-    <script src="js/plots.js"></script>
-    <script src="js/app.js"></script>
-
+    <script src="js/landing.js"></script>
 </body>
-
-<footer id="footbanner">
-    <p>Placeholder v2</p>
-</footer>
-    
-</html>	

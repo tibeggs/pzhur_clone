@@ -400,6 +400,8 @@ BDSVis.ViewModel = function (model) {
     });
 
     //Initial values of X-axis variable and C- variable
+    console.log(this.xvar);
+    console.log(this.cvar);
     this.xvar = "fage4";
     this.cvar = "sic1";
 
