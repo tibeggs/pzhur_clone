@@ -164,34 +164,6 @@ BDSVis.PlotView = {
 
             }
 
-            function CreateButtonSelector(selector, name, value) {
-                var btn = document.createElement("Button");
-
-                btn.innerHTML = name;
-                btn.value = value;
-                btn.className = xclass;
-                btn.onclick = function () { SelectorButtonClick(value) };
-                selector[0][0].appendChild(btn);
-            }
-
-
-
-            function AddButtonToVarSelector(selector, varvalues, whichvar, group) {
-                for (i in varvalues) {
-                    name = varvalues[i].name;
-                    value = varvalues[i].code;
-                    if (vm.xvar === value) {
-                        xclass = "xbtn active";
-                    } else {
-                        xclass = "xbtn";
-                    }
-                    CreateButtonSelector(selector, name, value, xclass)
-                };
-
-
-                //selector.selectAll("input").data(varvalues.name).enter().append("input").attr("type", "button").attr("class", "button").attr("value", function d() { return d; })
-
-            };
             //X-axis variable selector		
             var selector = this.xvarselector;
 
@@ -231,7 +203,7 @@ BDSVis.PlotView = {
                 selector.on("change", function () { vm.region = this.value; vm.getBDSdata(); });
             };
         };
-        
+
 
         this.AdjustUIElements();
     },

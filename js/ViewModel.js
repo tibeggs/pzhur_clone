@@ -24,15 +24,11 @@ BDSVis.ViewModel = function (model) {
         function selectElement(id, valueToSelect) {
             let element = document.getElementById(id);
             element.value = valueToSelect;
-            //vm.setxvar(valueToSelect);
-            //vm.heatchart;
-            //vm.heatchart = +2;
             vm.setxvar(valueToSelect);
-            //console.log(tmod.regimeselector[0][0].value);
-            //!vm.heatchart; vm.heatchart = +this.value; vm.getBDSdata();
-            //tmod.regimeselector[0][0].value = this.value;
-
-            //tmod.regimeselector[0][0].value = this.value
+        }
+        function selectElementy(id, valueToSelect) {
+            let element = document.getElementById(id);
+            element.value = valueToSelect;
         }
         //if (tmod.regimeselector != undefined) {
         //    if (tmod.regimeselector[0][0].value == 2) {
@@ -157,33 +153,120 @@ BDSVis.ViewModel = function (model) {
                 .attr("value", function (d) { return vm.model.IsContinuous(varr1code) ? d : d.code; })
                 ;
         };
+        //get modal holder
+        var modalh = document.getElementById("modalholder");
 
-        //modal show function
-        function ModalShow() {
-            var modal = document.getElementById("modal");
-            modal.style.display = "block";
-        };
+        //Hidden Modal List
+        function CreateModal(varr, varr1code, isundergroupvar) {
+            var modalidtext = ("#" + varr.name + "_modal");
+            console.log(modalidtext);
+            d3.selectAll(modalidtext).remove();
+            modalm.selectAll("*").remove();
+            var modalt = document.createElement("div");
+            modalt.id = varr.name + "_modal";
+            modalt.className = "modal";
+            var modalb = document.createElement("div");
+            modalb.className = "modal-backing";
+            var modalhead = document.createElement("div");
+            modalhead.className = "modal-heading";
+            modalhead.innerHTML = varr.name;
+            modalb.appendChild(modalhead);
+            if (vm.cvar === varr.code) {
+                vm.model[varr1code].forEach(function (key, i) {
+                    var code = key.code;
+                    var name = key.name;
+                    var modalcspan = document.createElement("div");
+                    modalcspan.className = "modal-checkspan";
+                    let modali = document.createElement("input");
+                    modali.setAttribute("type", "checkbox")
+                    modali.id = name + "_button";
+                    modali.className = "modal-cb";
+                    //modali.onclick = function () {
+                    //    modalt.style.display = "none";
+                    //    vm.SelectedOpts[varr1code] = [code];
+                    //    console.log(vm.SelectedOpts[varr1code]);
+                    //    selectElementy("mselect", code);
+                    //    vm.getBDSdata();
+                    //};
+                    let modalil = document.createElement("span");
+                    modalil.innerHTML = name;
+                    modalcspan.appendChild(modali);
+                    modalcspan.appendChild(modalil);
+                    modalb.appendChild(modalcspan);
+                });
+                var btncbsub = document.createElement("button");
+                btncbsub.onclick = function () { modalt.style.display = "none"; }
+                btncbsub.innerHTML = "Submit";
+                modalb.appendChild(btncbsub);
+                var btncb = document.createElement("button");
+                btncb.onclick = function () { modalt.style.display = "none"; }
+                btncb.innerHTML = "X";
+                btncb.className = "close";
+                modalb.appendChild(btncb);
+            }
+            else {
+                vm.model[varr1code].forEach(function (key, i) {
+                    var code = key.code;
+                    //console.log(vm.model[varr1code][key]);
+                    var name = key.name;
+                    //console.log(code);
+                    let modali = document.createElement("button");
+                    modali.id = name + "_button";
+                    modali.className = "modal-button";
+                    modali.innerHTML = name;
+                    modali.onclick = function () {
+                        modalt.style.display = "none";
+                        console.log(code);
+                        vm.SelectedOpts[varr1code] = [code];
+                        console.log(vm.SelectedOpts[varr1code]);
+                        selectElementy("mselect", code);
+                        vm.getBDSdata();
+                    };
+                    modalb.appendChild(modali);
+                });
+            }
+            
+            
+            modalt.appendChild(modalb);
+            modalh.appendChild(modalt);
 
-
-        //UI element for showing Modal
-        function AddModalButton(varr, isundergroupvar) {
-            selectors.append("button")
-                .on("click", function () { ModalShow(); })
-                .classed("activebutton", vm.xvar === varr.code)
-                .text("Show Modal");
+            //var modal = document.getElementById("Measure_modal");
+            ////var btn = document.getElementById("mButton");
+            ////btn.onclick = function () {
+            ////    modal.style.display = "block";
+            ////};
+            //window.onclick = function (event) {
+            //    if (event.target == modal) {
+            //        modal.style.display = "none";
+            //    }
+            //}
         }
+        //window.onclick = function (event) {
+        //    //console.log(document.getElementById("foo"+"_modal"));
+        //    if (event.target == document.getElementById("foo" + "_modal")) {
+        //        modalh.style.display = "none";
+        //    }
+
 
         //UI elements for variable selection
         var selectorm = d3.select('.selectorm');
         selectorm.selectAll('*').remove();
+        var modalm = d3.select('.modalholder');
+        modalm.selectAll("*").remove();
+
 
         function AddSelectorMOptions(varr, isundergroupvar) {
             var varr1code = isundergroupvar ? vm.SelectedOpts[varr.code][0] : varr.code;
             var multiple = vm.multiple(varr.code) && (!vm.model.IsGroup(varr) || isundergroupvar);
-            selectorm.append("select")//Add the selector
+            CreateModal(varr, varr1code, isundergroupvar);
+            selectorm.append("select")
+                .attr("style","display:none")
+                .attr("id", "mselect")
+                //Add the selector
                 //.attr("class", "modal")//setup as modal
                 .on("change", function () {
                     vm.SelectedOpts[varr1code] = d3.selectAll(this.childNodes)[0].filter(function (d) { return d.selected }).map(function (d) { return d.value });
+                    console.log(vm.SelectedOpts[varr1code]);
                     vm.getBDSdata();
                 })
                 .property("multiple", multiple)
@@ -201,10 +284,8 @@ BDSVis.ViewModel = function (model) {
         };
 
         vm.model.variables.forEach(function (varr) { //For each variable create selector and buttons
-            //console.log(varr);
             if (varr.name != "Measure") { //Exception for measure
                 selectors.append("h4").text(varr.name + ":"); //Add the title for selector
-
                 AddSelectorWOptions(varr, false); //Add the selector for the variable
 
                 if (vm.model.IsGroup(varr)) { //Add selector for the choice selected in the group variable selector
@@ -244,6 +325,14 @@ BDSVis.ViewModel = function (model) {
                 };
 
                 if (varr.aslegend) { //Add the 'Compare' button
+
+                    var sbut = selectorm.append("button")
+                        .attr("class","selectorbut")
+                        .on("click", function () {
+                            var modal = document.getElementById("Measure_modal");
+                            modal.style.display = "block";
+                        })
+                        .text(varr.name);
 
                     var cbut = selectorm.append("button")
                         .on("click", function () { vm.setcvar(varr.code); })
