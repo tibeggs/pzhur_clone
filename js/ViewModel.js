@@ -164,16 +164,13 @@ BDSVis.ViewModel = function (model) {
         function AddSelectorMOptions(varr, isundergroupvar) {
             var varr1code = isundergroupvar ? vm.SelectedOpts[varr.code][0] : varr.code;
             var multiple = vm.multiple(varr.code) && (!vm.model.IsGroup(varr) || isundergroupvar);
-<<<<<<< Updated upstream
             selectorm.append("select")//Add the selector
-=======
             //CreateModal(varr, varr1code, isundergroupvar);
             selectorm.append("select")
                 //.attr("style","display:none")
                 .attr("id", "mselect")
                 //Add the selector
                 //.attr("class", "modal")//setup as modal
->>>>>>> Stashed changes
                 .on("change", function () {
                     vm.SelectedOpts[varr1code] = d3.selectAll(this.childNodes)[0].filter(function (d) { return d.selected }).map(function (d) { return d.value });
                     vm.getBDSdata();
@@ -233,9 +230,6 @@ BDSVis.ViewModel = function (model) {
                 };
 
                 if (varr.aslegend) { //Add the 'Compare' button
-
-<<<<<<< Updated upstream
-=======
                     //var sbut = selectorm.append("button")
                     //    .attr("class","selectorbut")
                     //    .on("click", function () {
@@ -244,7 +238,6 @@ BDSVis.ViewModel = function (model) {
                     //    })
                     //    .text(varr.name);
 
->>>>>>> Stashed changes
                     var cbut = selectorm.append("button")
                         .on("click", function () { vm.setcvar(varr.code); })
                         .classed("activebutton", vm.multiple(varr.code))
