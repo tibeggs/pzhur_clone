@@ -400,10 +400,23 @@ BDSVis.ViewModel = function (model) {
     });
 
     //Initial values of X-axis variable and C- variable
-    console.log(this.xvar);
-    console.log(this.cvar);
-    this.xvar = "fage4";
-    this.cvar = "sic1";
+    lxvar = localStorage.getItem("xvar");
+    lcvar = localStorage.getItem("cvar");
+    console.log(lxvar);
+    console.log(lcvar);
+    if (lxvar == null || lxvar == "") {
+        this.xvar = "fage4";
+    } else {
+        this.xvar = lxvar;
+    }
+    if (lcvar == null || lcvar == "") {
+        this.cvar = "sic1";
+    }
+    else {
+        this.cvar = lcvar;
+    }
+    
+    
 
     this.PlotView.Init();
 
