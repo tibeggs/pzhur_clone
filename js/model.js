@@ -360,7 +360,8 @@ BDSVis.Model = {
 	Init : function() {
 
 		var tmod = this;
-		tmod.regimex =0;
+		tmod.regimex = 0;
+		
 		
 ////////		//Customization of variables: copying of code/name tables, creating colorscales etc
 		this.ifsize=this.fsize;

@@ -31,7 +31,7 @@ BDSVis.ViewModel = function (model) {
             //console.log(tmod.regimeselector[0][0].value);
             //!vm.heatchart; vm.heatchart = +this.value; vm.getBDSdata();
             //tmod.regimeselector[0][0].value = this.value;
-            
+
             //tmod.regimeselector[0][0].value = this.value
         }
         //if (tmod.regimeselector != undefined) {
@@ -51,8 +51,8 @@ BDSVis.ViewModel = function (model) {
             if (value == 2) {
                 btn.onclick = function () { !vm.heatchart; vm.heatchart = +this.value; vm.getBDSdata(); vm.regimeselector[0][0].value = this.value; selectElement("xelector1", "year2"); tmod.regimex = this.value; };
             }
-            if (value==0) {
-                btn.onclick = function () { vm.heatchart; vm.heatchart = +this.value; vm.getBDSdata(); vm.regimeselector[0][0].value = this.value; tmod.regimex = this.value; tmod.regimex = this.value;};
+            if (value == 0) {
+                btn.onclick = function () { vm.heatchart; vm.heatchart = +this.value; vm.getBDSdata(); vm.regimeselector[0][0].value = this.value; tmod.regimex = this.value; tmod.regimex = this.value; };
             }
             if (value == 1) {
                 btn.onclick = function () { !vm.heatchart; vm.heatchart = +this.value; vm.getBDSdata(); vm.regimeselector[0][0].value = this.value; selectElement("xelector1", "geo"); tmod.regimex = this.value; };
@@ -77,7 +77,7 @@ BDSVis.ViewModel = function (model) {
         var rkey = [{ name: "Barchart", code: 0 }, { name: "LineChart", code: 2 }, { name: "Map", code: 1 }];
         vm.regimeselector = [[{ value: 0 }]]
 
-        if (vm.geomap() & tmod.regimex !=0) {
+        if (vm.geomap() & tmod.regimex != 0) {
             vm.regimeselector = bug.append("select").on("change", function () { vm.cartogram = +this.value; vm.getBDSdata(); });
             vm.regimeselector.append("option").text("Map").attr("value", 0).property("selected", function (d) { return vm.cartogram === 0; });
             vm.regimeselector.append("option").text("Non-cont Cartogram").attr("value", 1).property("selected", function (d) { return vm.cartogram === 1; });
@@ -98,7 +98,7 @@ BDSVis.ViewModel = function (model) {
         btnt.id = "showdatabtn";
         btnt.innerHTML = "Show Data";
         btnt.className = "xbtn";
-        btnt.onclick =  vm.toggleshowdata;;
+        btnt.onclick = vm.toggleshowdata;;
         rgb[0][0].appendChild(btnt);
         //rgb.append("button").text("Show Data").on("click", vm.toggleshowdata);
         if (!vm.timelapse) {
@@ -166,7 +166,6 @@ BDSVis.ViewModel = function (model) {
             var multiple = vm.multiple(varr.code) && (!vm.model.IsGroup(varr) || isundergroupvar);
             selectorm.append("select")//Add the selector
             //CreateModal(varr, varr1code, isundergroupvar);
-            selectorm.append("select")
                 //.attr("style","display:none")
                 .attr("id", "mselect")
                 //Add the selector
@@ -368,7 +367,7 @@ BDSVis.ViewModel = function (model) {
         if (vm.geomap()) {
             vm.cvar = vm.model.yvars;
         }
-            
+
 
         var varname1 = vm.ActualVarCode(varname);
         vm.IncludedXvarValues[varname1] = vm.model.GetCodes(varname1);
@@ -400,10 +399,15 @@ BDSVis.ViewModel = function (model) {
     });
 
     //Initial values of X-axis variable and C- variable
-    lxvar = localStorage.getItem("xvar");
-    lcvar = localStorage.getItem("cvar");
-    console.log(lxvar);
-    console.log(lcvar);
+    var lxvar = localStorage.getItem("xvar");
+    var lcvar = localStorage.getItem("cvar");
+    var lregi = localStorage.getItem("regi");
+    var lmeas = localStorage.getItem("meas");
+    console.log(lmeas);
+    console.log(vm.SelectedOpts["measure"]);
+    if (lregi != null & lregi != "") {
+        tmod.regimex = lregi;
+    }
     if (lxvar == null || lxvar == "") {
         this.xvar = "fage4";
     } else {
@@ -415,8 +419,11 @@ BDSVis.ViewModel = function (model) {
     else {
         this.cvar = lcvar;
     }
-    
-    
+    if (lmeas != null & lmeas != "") {
+        vm.SelectedOpts["measure"][0] = lmeas;
+    }
+
+
 
     this.PlotView.Init();
 
