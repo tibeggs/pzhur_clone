@@ -143,6 +143,7 @@ BDSVis.ViewModel = function (model) {
                 .on("change", function () {
                     vm.SelectedOpts[varr1code] = d3.selectAll(this.childNodes)[0].filter(function (d) { return d.selected }).map(function (d) { return d.value });
                     vm.getBDSdata();
+                    console.log(vm.SelectedOpts);
                 })
                 .property("multiple", multiple)
                 .classed("tallselector", multiple)
@@ -403,6 +404,16 @@ BDSVis.ViewModel = function (model) {
     var lcvar = localStorage.getItem("cvar");
     var lregi = localStorage.getItem("regi");
     var lmeas = localStorage.getItem("meas");
+    var lmeas = localStorage.getItem("meas");
+    var lsic = localStorage.getItem("sic");
+    var lstate = localStorage.getItem("state");
+    var lmetro = localStorage.getItem("metro");
+    var lyear = localStorage.getItem("year");
+    var lfage = localStorage.getItem("fage");
+    var lfsize = localStorage.getItem("fsize");
+    var lifsize = localStorage.getItem("ifsize");
+
+
     console.log(lmeas);
     console.log(vm.SelectedOpts["measure"]);
     if (lregi != null & lregi != "") {
@@ -420,7 +431,28 @@ BDSVis.ViewModel = function (model) {
         this.cvar = lcvar;
     }
     if (lmeas != null & lmeas != "") {
-        vm.SelectedOpts["measure"][0] = lmeas;
+        vm.SelectedOpts["measure"] = lmeas.split(',');
+    }
+    if (lsic != null & lsic != "") {
+        vm.SelectedOpts["sic1"] = lsic.split(',');
+    }
+    if (lstate != null & lstate != "") {
+        vm.SelectedOpts["state"] = lstate.split(',');
+    }
+    if (lmetro != null & lmetro != "") {
+        vm.SelectedOpts["metro"] = lmetro.split(',');
+    }
+    if (lyear != null & lyear != "") {
+        vm.SelectedOpts["year2"] = lyear.split(',');
+    }
+    if (lfage != null & lfage != "") {
+        vm.SelectedOpts["fage4"] = lfage.split(',');
+    }
+    if (lfsize != null & lfsize != "") {
+        vm.SelectedOpts["fsize"] = lfsize.split(',');
+    }
+    if (lifsize != null & lifsize != "") {
+        vm.SelectedOpts["ifsize"] = lifsize.split(',');
     }
 
 

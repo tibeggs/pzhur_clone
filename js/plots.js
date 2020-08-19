@@ -222,7 +222,7 @@ BDSVis.makePlot = function (data, request, vm, limits) {
                 rect.remove();
                 if (m[0] !== origin[0] && m[1] !== origin[1]) {
                     //Find new extents/limits of the plot from the rectangle size and call the plot function with them as argument
-                    if (vm.model.IsContinuous(xvarr) & regimex == 2) {
+                    if (vm.model.IsContinuous(xvarr) & tmod.regimex == 2) {
                         var leftright = [origin[0], m[0]].map(xScale.invert).sort();
                         var topbottom = [origin[1], m[1]].map((yScale1).invert).sort(function (a, b) { return a > b });
                         BDSVis.makePlot(data, request, vm, d3.merge([leftright, topbottom]));
