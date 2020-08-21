@@ -201,24 +201,24 @@ BDSVis.ViewModel = function (model) {
                     AddSelectorWOptions(varr, true);
                 };
 
-                if (varr.aslegend) { //Add the 'Compare' button
+                //if (varr.aslegend) { //Add the 'Compare' button
 
-                    var cbut = selectors.append("button")
-                        .on("click", function () { vm.setcvar(varr.code); })
-                        .classed("activebutton", vm.multiple(varr.code))
-                        .property("disabled", (vm.geomap() || (vm.xvar === varr.code) || (vm.cvar === varr.code)))
-                        .text("Compare " + varr.name + "s");
-                    if (vm.model.IsGroup(varr.code))
-                        cbut.text("Compare " + vm.model.NameLookUp(vm.SelectedOpts[varr.code][0], 'var') + "s")
-                };
+                //    var cbut = selectors.append("button")
+                //        .on("click", function () { vm.setcvar(varr.code); })
+                //        .classed("activebutton", vm.multiple(varr.code))
+                //        .property("disabled", (vm.geomap() || (vm.xvar === varr.code) || (vm.cvar === varr.code)))
+                //        .text("Compare " + varr.name + "s");
+                //    if (vm.model.IsGroup(varr.code))
+                //        cbut.text("Compare " + vm.model.NameLookUp(vm.SelectedOpts[varr.code][0], 'var') + "s")
+                //};
 
-                if (varr.asaxis) //Add the 'Make X' button
-                    selectors.append("button")
-                        .on("click", function () { vm.setxvar(varr.code); })
-                        .classed("activebutton", vm.xvar === varr.code)
-                        .property("disabled", (!vm.model.IsGeomapvar(varr)) && ((vm.xvar === varr.code) || (vm.cvar === varr.code)))
-                        .text(vm.model.IsGeomapvar(varr) ? "See Map" : "Make X-axis");
-                selectors.append("br");
+                //if (varr.asaxis) //Add the 'Make X' button
+                //    selectors.append("button")
+                //        .on("click", function () { vm.setxvar(varr.code); })
+                //        .classed("activebutton", vm.xvar === varr.code)
+                //        .property("disabled", (!vm.model.IsGeomapvar(varr)) && ((vm.xvar === varr.code) || (vm.cvar === varr.code)))
+                //        .text(vm.model.IsGeomapvar(varr) ? "See Map" : "Make X-axis");
+                //selectors.append("br");
             }
             else {
                 AddSelectorMOptions(varr, false); //Add the selector for the variable
@@ -229,23 +229,23 @@ BDSVis.ViewModel = function (model) {
                     AddSelectorMOptions(varr, true);
                 };
 
-                if (varr.aslegend) { //Add the 'Compare' button
-                    //var sbut = selectorm.append("button")
-                    //    .attr("class","selectorbut")
-                    //    .on("click", function () {
-                    //        var modal = document.getElementById("Measure_modal");
-                    //        modal.style.display = "block";
-                    //    })
-                    //    .text(varr.name);
+                //if (varr.aslegend) { //Add the 'Compare' button
+                //    //var sbut = selectorm.append("button")
+                //    //    .attr("class","selectorbut")
+                //    //    .on("click", function () {
+                //    //        var modal = document.getElementById("Measure_modal");
+                //    //        modal.style.display = "block";
+                //    //    })
+                //    //    .text(varr.name);
 
-                    var cbut = selectorm.append("button")
-                        .on("click", function () { vm.setcvar(varr.code); })
-                        .classed("activebutton", vm.multiple(varr.code))
-                        .property("disabled", (vm.geomap() || (vm.xvar === varr.code) || (vm.cvar === varr.code)))
-                        .text("Compare " + varr.name + "s");
-                    if (vm.model.IsGroup(varr.code))
-                        cbut.text("Compare " + vm.model.NameLookUp(vm.SelectedOpts[varr.code][0], 'var') + "s")
-                };
+                //    var cbut = selectorm.append("button")
+                //        .on("click", function () { vm.setcvar(varr.code); })
+                //        .classed("activebutton", vm.multiple(varr.code))
+                //        .property("disabled", (vm.geomap() || (vm.xvar === varr.code) || (vm.cvar === varr.code)))
+                //        .text("Compare " + varr.name + "s");
+                //    if (vm.model.IsGroup(varr.code))
+                //        cbut.text("Compare " + vm.model.NameLookUp(vm.SelectedOpts[varr.code][0], 'var') + "s")
+                //};
 
                 if (varr.asaxis) //Add the 'Make X' button
                     selectorm.append("button")
@@ -410,12 +410,11 @@ BDSVis.ViewModel = function (model) {
     var lmetro = localStorage.getItem("metro");
     var lyear = localStorage.getItem("year");
     var lfage = localStorage.getItem("fage");
+    var lfchar = localStorage.getItem("fchar");
     var lfsize = localStorage.getItem("fsize");
     var lifsize = localStorage.getItem("ifsize");
+    console.log(lfchar);
 
-
-    console.log(lmeas);
-    console.log(vm.SelectedOpts["measure"]);
     if (lregi != null & lregi != "") {
         tmod.regimex = lregi;
     }
@@ -447,6 +446,9 @@ BDSVis.ViewModel = function (model) {
     }
     if (lfage != null & lfage != "") {
         vm.SelectedOpts["fage4"] = lfage.split(',');
+    }
+    if (lfchar != null & lfchar != "") {
+        vm.SelectedOpts["fchar"] = lfchar.split(',');
     }
     if (lfsize != null & lfsize != "") {
         vm.SelectedOpts["fsize"] = lfsize.split(',');

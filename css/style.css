@@ -74,7 +74,6 @@ rect.zoom {
     display: flex;
 }
 
-#
 
 
 #xvarselector button {
@@ -148,9 +147,12 @@ rect.zoom {
 }
 
 .xbtn {
-    background-color: #4CAF50; /* Green */
-    border: none;
-    color: white;
+    background-color: white; /* Green */
+    border-top: none;
+    border-bottom: 1px solid red;
+    border-right: 1px solid red;
+    border-left: 1px solid red;
+    color: black;
     padding: 15px 32px;
     text-align: center;
     text-decoration: none;
