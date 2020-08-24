@@ -1,3 +1,50 @@
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, font, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, caption {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    font-size: 100%;
+    vertical-align: baseline;
+    background: transparent;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+
+#ltitle {
+    font-size: 30px;
+}
+
+#bcontainer {
+    display: block;
+    margin: auto;
+    width: 50%;
+    padding: 10px;
+}
+
+
+#sherebox {
+    margin-bottom: 15px;
+    margin-left: 0px;
+    font: 12px sans-serif;
+    border-radius: 5px;
+    border: 2px solid blue;
+}
+#scontent{
+    padding: 5px;
+}
+
+#nherebox {
+    margin-bottom: 15px;
+    margin-left: 0px;
+    font: 12px sans-serif;
+    border-radius: 5px;
+    border: 2px solid blue;
+}
+
+#ncontent {
+    padding: 5px;
+}
+
 .axis text {
     font: 10px sans-serif;
 }
@@ -50,24 +97,34 @@ rect.zoom {
     margin-left: 0px;
     font: 12px sans-serif;
     background: lightblue;
-    border-radius: 25px;
+    border-radius: 5px;
     border: 2px solid blue;
 }
 
 #headbanner {
-    background-color: darkblue;
+    min-height: 2em;
+    background: url(/css/webbanner.png) no-repeat left center #004076;
+    width: 100%;
     color: white;
+    font-family: Arial, Helvetica, sans-serif;
+    display: flex;
+    justify-content: left;
+    align-items: center;
 }
 
 #footbanner {
-    display: block;
-    text-align: center;
+    display: flex;
     font-size: 0.75em;
     bottom: 0;
-    width: 10%;
-    height: 30px;
+    width: 100%;
+    min-height: 2em;
     position: fixed;
-    background-color: #efefef;
+    background-color: #004076;
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #keybuttons {
@@ -142,7 +199,7 @@ rect.zoom {
     margin-bottom: 15px;
     margin-left: 0px;
     background: lightblue;
-    border-radius: 25px;
+    border-radius: 5px;
     border: 2px solid blue;
 }
 
@@ -160,19 +217,52 @@ rect.zoom {
     font-size: 16px;
 }
 
-.active {
-        background-color: darkblue;
-        border: none;
-        color: white;
-        padding: 15px 32px;
-        text-align: center;
-        text-decoration: none;
-        display: inline-block;
-        font-size: 16px;
+.xbtnsd {
+    background-color: white; /* Green */
+    width: 100%;
+    border-top: none;
+    border-bottom: 1px solid red;
+    border-right: 1px solid red;
+    border-left: 1px solid red;
+    color: black;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
 }
+
+.active {
+    background-color: darkblue;
+    border-bottom: 1px solid red;
+    border-right: 1px solid red;
+    border-left: 1px solid red;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+}
+
+.act {
+    background-color: darkblue;
+    border-bottom: 1px solid red;
+    border-right: 1px solid red;
+    border-left: 1px solid red;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+}
+
 .xbtn:hover {
     background-color: #005500;
-
+}
+.xbtnsd:hover {
+    background-color: #005500;
 }
 
 

@@ -15,9 +15,11 @@ BDSVis.ViewModel = function (model) {
     this.DrawUI = function () {
 
         var rgb = d3.select("#regimebuttons");
+        var rgbsd = d3.select("#rshowdata");
         var bug = d3.select("#buttonsundergraph");
         bug.selectAll('*').remove();
         rgb.selectAll('*').remove();
+        rgbsd.selectAll('*').remove();
 
         //UI elements for plotting regime switching: cartograms/map, heatchart/plot
         //set x selector to year
@@ -42,6 +44,11 @@ BDSVis.ViewModel = function (model) {
         //        console.log(tmod.regimeselector[0][0].value);
         //    }
         //}
+
+        function shdCheck() {
+                vm.toggleshowdata;
+        }
+
         function CreateButtonSelector(selector, name, value) {
             var btn = document.createElement("Button");
 
@@ -49,13 +56,13 @@ BDSVis.ViewModel = function (model) {
             btn.value = value;
             btn.className = xclass;
             if (value == 2) {
-                btn.onclick = function () { !vm.heatchart; vm.heatchart = +this.value; vm.getBDSdata(); vm.regimeselector[0][0].value = this.value; selectElement("xelector1", "year2"); tmod.regimex = this.value; };
+                btn.onclick = function () { !vm.heatchart; vm.heatchart = +this.value; vm.getBDSdata(); vm.regimeselector[0][0].value = this.value; selectElement("xelector1", "year2"); tmod.regimex = this.value; shdCheck();};
             }
             if (value == 0) {
-                btn.onclick = function () { vm.heatchart; vm.heatchart = +this.value; vm.getBDSdata(); vm.regimeselector[0][0].value = this.value; tmod.regimex = this.value; tmod.regimex = this.value; };
+                btn.onclick = function () { vm.heatchart; vm.heatchart = +this.value; vm.getBDSdata(); vm.regimeselector[0][0].value = this.value; tmod.regimex = this.value; tmod.regimex = this.value; shdCheck();};
             }
             if (value == 1) {
-                btn.onclick = function () { !vm.heatchart; vm.heatchart = +this.value; vm.getBDSdata(); vm.regimeselector[0][0].value = this.value; selectElement("xelector1", "geo"); tmod.regimex = this.value; };
+                btn.onclick = function () { !vm.heatchart; vm.heatchart = +this.value; vm.getBDSdata(); vm.regimeselector[0][0].value = this.value; selectElement("xelector1", "geo"); tmod.regimex = this.value; shdCheck();};
             }
 
             selector[0][0].appendChild(btn);
@@ -97,9 +104,14 @@ BDSVis.ViewModel = function (model) {
         var btnt = document.createElement("Button");
         btnt.id = "showdatabtn";
         btnt.innerHTML = "Show Data";
-        btnt.className = "xbtn";
-        btnt.onclick = vm.toggleshowdata;;
-        rgb[0][0].appendChild(btnt);
+        if (vm.ShowData) {
+            btnt.className = "xbtnsd act";
+        } else {
+            btnt.className = "xbtnsd";
+        }
+        
+        btnt.onclick = vm.toggleshowdata;
+        rgbsd[0][0].appendChild(btnt);
         //rgb.append("button").text("Show Data").on("click", vm.toggleshowdata);
         if (!vm.timelapse) {
             bug.append("button").text("Save SVG").on("click", function () { BDSVis.util.savesvg('svg'); });
@@ -166,7 +178,7 @@ BDSVis.ViewModel = function (model) {
             var varr1code = isundergroupvar ? vm.SelectedOpts[varr.code][0] : varr.code;
             var multiple = vm.multiple(varr.code) && (!vm.model.IsGroup(varr) || isundergroupvar);
             selectorm.append("select")//Add the selector
-            //CreateModal(varr, varr1code, isundergroupvar);
+                //CreateModal(varr, varr1code, isundergroupvar);
                 //.attr("style","display:none")
                 .attr("id", "mselect")
                 //Add the selector
@@ -280,7 +292,12 @@ BDSVis.ViewModel = function (model) {
     this.ShowData = false; //Initial value
     this.toggleshowdata = function () {
         //This function executes in click to 'Show Data' button.
+        console.log(vm.ShowData);
         vm.ShowData = !vm.ShowData;
+        this.className += " act";
+        console.log(this.className += " act");
+
+
 
         var section = document.getElementById("regimebuttons");
         var btns = section.getElementsByClassName("xbtn");
