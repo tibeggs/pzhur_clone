@@ -27,6 +27,7 @@ BDSVis.PlotView = {
 
         //d3.select("#buttonsundergraph").style("width", this.width + margin.left + "px");
         d3.select("#plotarea").style("width", this.width + margin.left + margin.right + this.legendwidth + "px");
+        d3.select("#keybuttons").style("width", this.width + margin.left + margin.right + this.legendwidth + "px");
 
         this.xvarselector = d3.select("#xvarselector");
         this.cvarselector = d3.select("#cvarselector");

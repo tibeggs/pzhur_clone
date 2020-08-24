@@ -45,6 +45,19 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
     padding: 5px;
 }
 
+#regimesection {
+    display: flex;
+}
+
+#regimeholder {
+    margin-left: 0px;
+    font: 12px sans-serif;
+}
+
+#regimebuttons{
+
+}
+
 .axis text {
     font: 10px sans-serif;
 }
@@ -129,6 +142,8 @@ rect.zoom {
 
 #keybuttons {
     display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 
@@ -176,6 +191,7 @@ rect.zoom {
 #buttonsundergraph {
     font: 12px sans-serif;
     text-align: center;
+    padding: 5px;
 }
 
     #buttonsundergraph h4 {
@@ -215,6 +231,7 @@ rect.zoom {
     text-decoration: none;
     display: inline-block;
     font-size: 16px;
+    margin: 1px;
 }
 
 .xbtnsd {
@@ -230,10 +247,11 @@ rect.zoom {
     text-decoration: none;
     display: inline-block;
     font-size: 16px;
+    margin: 1px;
 }
 
 .active {
-    background-color: darkblue;
+    background-color: darkgray;
     border-bottom: 1px solid red;
     border-right: 1px solid red;
     border-left: 1px solid red;
@@ -246,7 +264,7 @@ rect.zoom {
 }
 
 .act {
-    background-color: darkblue;
+    background-color: darkgray;
     border-bottom: 1px solid red;
     border-right: 1px solid red;
     border-left: 1px solid red;
@@ -259,10 +277,10 @@ rect.zoom {
 }
 
 .xbtn:hover {
-    background-color: #005500;
+    background-color: lightgray;
 }
 .xbtnsd:hover {
-    background-color: #005500;
+    background-color: lightgray;
 }
 
 
