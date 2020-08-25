@@ -46,13 +46,39 @@ BDSVis.ViewModel = function (model) {
         //}
 
         function shdCheck() {
-                vm.toggleshowdata;
+            if (vm.ShowData) {
+                vm.ShowData = !vm.ShowData;
+                this.className += " act";
+                console.log(this.className += " act");
+
+
+
+                var section = document.getElementById("regimebuttons");
+                var btns = section.getElementsByClassName("xbtn");
+                for (var i = 0; i < btns.length; i++) {
+                    btns[i].addEventListener("click", function () {
+                        var current = document.getElementsByClassName("active");
+                        current[0].className = current[0].className.replace(" active", "");
+                        this.className += " active";
+                    });
+                };
+
+                d3.select("#showdata").style("display", vm.ShowData ? "block" : "none");
+                d3.select("#chartsvg").style("display", vm.ShowData ? "none" : "");
+                d3.select("#cvarselector").style("display", vm.ShowData ? "none" : "");
+                d3.select("#logbutton").style("display", vm.ShowData ? "none" : "");
+                //d3.select("#showdata").style("display", vm.ShowData ? "block" : "none");
+                vm.TableView.SetLowerHeadersWidth();
+                vm.getBDSdata();
+
+                console.log("shdCheck");
+            } 
         }
 
-        function CreateButtonSelector(selector, name, value) {
+        function CreateButtonSelector(selector, name, value, image) {
             var btn = document.createElement("Button");
-
-            btn.innerHTML = name;
+            nameedit = "</br>"+name;
+            btn.innerHTML = image + nameedit;
             btn.value = value;
             btn.className = xclass;
             if (value == 2) {
@@ -71,17 +97,18 @@ BDSVis.ViewModel = function (model) {
             for (i in varvalues) {
                 name = varvalues[i].name;
                 value = varvalues[i].code;
+                image = varvalues[i].image;
 
                 if (tmod.regimex == value) {
                     xclass = "xbtn active";
                 } else {
                     xclass = "xbtn";
                 }
-                CreateButtonSelector(selector, name, value, xclass)
+                CreateButtonSelector(selector, name, value, image, xclass)
             };
         }
 
-        var rkey = [{ name: "Barchart", code: 0 }, { name: "LineChart", code: 2 }, { name: "Map", code: 1 }];
+        var rkey = [{ name: "Barchart", code: 0, image: "<img src='images/bar_chart.png'>" }, { name: "LineChart", code: 2, image: "<img src='images/line_graph.png'>" }, { name: "Map", code: 1, image: "<img src='images/globe_icon.png'>"  }];
         vm.regimeselector = [[{ value: 0 }]]
 
         if (vm.geomap() & tmod.regimex != 0) {
@@ -98,12 +125,13 @@ BDSVis.ViewModel = function (model) {
             //vm.regimeselector.append("option").text("Linechart").attr("value", 2).property("selected", function (d) { return vm.heatchart; });
 
         };
+        bug.append("br");
         bug.append("h4").text(" ");
 
         //UI elements for Save and Show Data and
         var btnt = document.createElement("Button");
         btnt.id = "showdatabtn";
-        btnt.innerHTML = "Show Data";
+        btnt.innerHTML = "<img src='images/table.png'></br>Show Data";
         if (vm.ShowData) {
             btnt.className = "xbtnsd act";
         } else {
@@ -203,6 +231,7 @@ BDSVis.ViewModel = function (model) {
         vm.model.variables.forEach(function (varr) { //For each variable create selector and buttons
             //console.log(varr);
             if (varr.name != "Measure") { //Exception for measure
+                selectors.append("br");
                 selectors.append("h4").text(varr.name + ":"); //Add the title for selector
 
                 AddSelectorWOptions(varr, false); //Add the selector for the variable
@@ -292,7 +321,7 @@ BDSVis.ViewModel = function (model) {
     this.ShowData = false; //Initial value
     this.toggleshowdata = function () {
         //This function executes in click to 'Show Data' button.
-        console.log(vm.ShowData);
+        console.log('showdata ran');
         vm.ShowData = !vm.ShowData;
         this.className += " act";
         console.log(this.className += " act");
@@ -479,7 +508,8 @@ BDSVis.ViewModel = function (model) {
     this.PlotView.Init();
 
     this.PlotView.DisplayWaitingMessage();
-    //this.DrawUI();
+
+    this.DrawUI();
 
     //Call initial plot
     vm.getBDSdata();

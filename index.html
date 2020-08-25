@@ -13,22 +13,25 @@
     </header>
 
     <div id="bcontainer">
-        <h1 id="ltitle">Start Here</h1>
+        <h1 id="stitle">Start Here</h1>
         <div id="sherebox">
             <div id="scontent">
                 <a href="app.html">Go to App</a>
                 <br />
+                <br />
+                <p>We can also have more text in here</p>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
             </div>
         </div>
 
         <h1 id="ltitle">Not Sure? Try one of these recommended options:</h1>
         <div id="nherebox">
             <div id="ncontent">
-                <a href="app.html" onclick="pushInput('year2','measure','2','firms,estabs','','','','','m','','','')">Go to App With Preset Firms and Estabs Comparison as Line Graph</a>
+                <a href="app.html" class="nslink" onclick="pushInput('year2','measure','2','firms,estabs','','','','','m','','','')"><span class="isymbol">&#9755;</span> <span class="linktext">Go to App With Preset Firms and Estabs Comparison as Line Graph</span></a>
                 <br />
-                <a href="app.html" onclick="pushInput('year2','geo','2','job_creation','','31,47','','2008','m','','','')">Go to App With Preset State Comparison as Line Graph</a>
+                <a href="app.html" class="nslink" onclick="pushInput('year2','geo','2','job_creation','','31,47','','2008','m','','','')"><span class="isymbol">&#9755;</span>Go to App With Preset State Comparison as Line Graph</a>
                 <br />
-                <a href="app.html" onclick="pushInput('geo','','1','job_destruction','','','','2008','m','','','')">Go to App With Preset Job Creation as Map</a>
+                <a href="app.html" class="nslink" onclick="pushInput('geo','','1','job_destruction','','','','2008','m','','','')"><span class="isymbol">&#9755;</span>Go to App With Preset Job Creation as Map</a>
                 <br />
             </div>
         </div>
@@ -86,9 +89,10 @@
     <button onclick="grabinput()">Submit</button>-->
 
     <script src="js/landing.js"></script>
+    <footer id="footbanner">
+        <p>Placeholder v2</p>
+    </footer>
 </body>
 
-<footer id="footbanner">
-    <p>Placeholder v2</p>
-</footer>
+
 </html>

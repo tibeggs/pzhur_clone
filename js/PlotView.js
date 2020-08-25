@@ -28,6 +28,7 @@ BDSVis.PlotView = {
         //d3.select("#buttonsundergraph").style("width", this.width + margin.left + "px");
         d3.select("#plotarea").style("width", this.width + margin.left + margin.right + this.legendwidth + "px");
         d3.select("#keybuttons").style("width", this.width + margin.left + margin.right + this.legendwidth + "px");
+        d3.select("#buttonsundergraph").style("width", this.width + margin.left + margin.right + this.legendwidth + "px");
 
         this.xvarselector = d3.select("#xvarselector");
         this.cvarselector = d3.select("#cvarselector");
@@ -232,7 +233,7 @@ BDSVis.PlotView = {
                 selector.on("change", function () { vm.region = this.value; vm.getBDSdata(); });
             };
         };
-        
+
 
         this.AdjustUIElements();
     },
@@ -334,18 +335,24 @@ BDSVis.PlotView = {
             //.style("top", (chartrect.top + wsY-75) + "px");
             //.style("top",(xaxlrect.top+wsY)+"px");
             ;
+        console.log("key start");
+        console.log(document.getElementById('plotarea').offsetTop);
+        console.log(chartrect.top);
+        console.log(wsY);
+        console.log(this.margin.top);
+        console.log("key end");
         this.cvarselector
             .style("position", "absolute")
             .style("left", (chartrect.left + wsX + this.width + this.margin.left + this.margin.right) + "px")
-            .style("top", (pa + bug + this.margin.top * 3) + "px");
-        //.style("top", (chartrect.top + wsY + this.margin.top) + "px");
+            //.style("top", (pa + bug + this.margin.top) + "px");
+            .style("top", (chartrect.top + wsY + this.margin.top) + "px");
 
         this.scaleui
             .style("position", "absolute")
             .style("left", "10px")
             //.style("top", (pa + bug + this.margin.top * 30) + "px");
-            //.style("top", (xaxlrect.top + wsY) + "px");
-            .style("top", "700px");
+            .style("top", (xaxlrect.top + wsY) + "px");
+            //.style("top", "700px");
     },
 
     wrap: function (text, width) {

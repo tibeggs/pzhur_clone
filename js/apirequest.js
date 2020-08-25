@@ -116,7 +116,9 @@ BDSVis.processAPIdata = function(data,request,vm) {
 
 	if (tmod.regimex == 1/*vm.geomap()*/) {
 		BDSVis.makeMap(data, request, vm);
-		document.getElementById("xelector1").disabled = true;
+		if (document.getElementById("xelector1") != null) {
+			document.getElementById("xelector1").disabled = false;
+		}
     }
 		
 	//else if ((vm.heatchart) && !(vm.model.IsContinuous(request.xvar)))

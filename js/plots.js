@@ -288,9 +288,9 @@ BDSVis.makePlot = function (data, request, vm, limits) {
             .append("title").text(Tooltiptext);
 
     } else {
-        document.getElementById("xelector1").disabled = false;
-        console.log(tmod.regimex);
-        console.log("bad");
+        if (document.getElementById("xelector1") != null) {
+            document.getElementById("xelector1").disabled = false;
+        }
         //Make a bar chart if x-variable is categorical		
         //Number of bars is number of categories in the legend, and barwidth is determined from that
         var nbars = cvarlist.length;
