@@ -216,7 +216,7 @@ rect.zoom {
 #buttonsundergraph {
     font: 12px sans-serif;
     text-align: center;
-    padding:5px;
+    padding: 5px;
 }
 
     #buttonsundergraph h4 {
@@ -360,6 +360,14 @@ rect.zoom {
 .graph-title {
     fill: black;
     font: 20px sans-serif;
+}
+
+.hlabel{
+    padding:5px;
+    margin-bottom:5px;
+    border-bottom: 2px solid grey;
+    font-weight: bold;
+
 }
 
 .leglabel {

@@ -94,8 +94,10 @@ BDSVis.makePlot = function (data, request, vm, limits) {
     };
 
     //Adding axes
+    console.log(vm.model.IsGeomapvar(xvar));
 
     var xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickFormat(function (d) { return vm.model.NameLookUp(d, xvar) });
+
 
     if (vm.model.IsContinuous(xvarr) & tmod.regimex == 2) xAxis.tickFormat(d3.format("d"));
 
@@ -110,11 +112,14 @@ BDSVis.makePlot = function (data, request, vm, limits) {
         .attr("transform", "translate(0," + yScale(y0) + ")")
         .call(xAxis0);
 
+
     var xAxisLabels = svg.append("g")
         .attr("class", "x axis")
         .attr("transform", "translate(0," + height + ")")
         .call(xAxis)
-        .selectAll(".tick text");
+        .selectAll(".tick text")
+    //.attr("transform", "translate(12,10) rotate(90)")
+    //.style("text-anchor", "start");
 
     if (vm.model.IsCategorical(xvarr))
         xAxisLabels.call(pv.wrap, xScale.rangeBand());
@@ -253,8 +258,6 @@ BDSVis.makePlot = function (data, request, vm, limits) {
     //if (vm.model.IsContinuous(xvarr) || regimex == 2)
     {
         document.getElementById("xelector1").disabled = true;
-        console.log(vm.ActualVarCode(vm.xvar));
-        console.log(xvar);
 
         //xvar = "year2";
         //Make a scatter plot if x-variable is continuous
@@ -357,6 +360,10 @@ BDSVis.makePlot = function (data, request, vm, limits) {
 
 
     //Split long labels into multiple lines
+    if (vm.model.IsGeomapvar(xvar)) {
+
+    }
+
     legendlabels.call(pv.wrap, pv.legendwidth - (symbolsize + 5));
     legendlabels.selectAll("tspan").attr("x", (symbolsize + 5));
     var numlines = legendsvg.selectAll(".leglabel").selectAll("tspan").map(function (d) { return d.length; }); //Number of lines in each label

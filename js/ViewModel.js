@@ -125,7 +125,6 @@ BDSVis.ViewModel = function (model) {
             //vm.regimeselector.append("option").text("Linechart").attr("value", 2).property("selected", function (d) { return vm.heatchart; });
 
         };
-        bug.append("br");
         bug.append("h4").text(" ");
 
         //UI elements for Save and Show Data and
@@ -385,7 +384,13 @@ BDSVis.ViewModel = function (model) {
 
     //Geo Map regime
     this.geomap = function () {
-        return vm.model.IsGeomapvar(vm.xvar);
+        if (vm.model.IsGeomapvar(vm.xvar) & tmod.regimex == 1) {
+            return true;
+        } else {
+            return false;
+        }
+
+        
     };
 
     this.region = "US";

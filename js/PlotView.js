@@ -134,7 +134,7 @@ BDSVis.PlotView = {
                 // if (!vm.geomap())
                 // 	BDSVis.makePlot(data,request,vm);
             });
-
+            console.log("geomap test " + vm.geomap())
             //Reset Zoom button
             this.resetzoom = this.scaleui
                 .append("span").text("\u00A0\u00A0").append("button").text("Reset Zoom").on("click", function () {
@@ -335,12 +335,6 @@ BDSVis.PlotView = {
             //.style("top", (chartrect.top + wsY-75) + "px");
             //.style("top",(xaxlrect.top+wsY)+"px");
             ;
-        console.log("key start");
-        console.log(document.getElementById('plotarea').offsetTop);
-        console.log(chartrect.top);
-        console.log(wsY);
-        console.log(this.margin.top);
-        console.log("key end");
         this.cvarselector
             .style("position", "absolute")
             .style("left", (chartrect.left + wsX + this.width + this.margin.left + this.margin.right) + "px")

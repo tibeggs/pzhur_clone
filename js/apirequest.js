@@ -124,7 +124,6 @@ BDSVis.processAPIdata = function(data,request,vm) {
 	//else if ((vm.heatchart) && !(vm.model.IsContinuous(request.xvar)))
 	//	BDSVis.makeHeatChart(data,request,vm);
 	else {
-		console.log(tmod.regimex);
 		BDSVis.makePlot(data, request, vm);
     }
 		
