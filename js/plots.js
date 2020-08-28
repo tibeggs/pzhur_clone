@@ -259,6 +259,7 @@ BDSVis.makePlot = function (data, request, vm, limits) {
     {
         document.getElementById("xelector1").disabled = true;
 
+
         //xvar = "year2";
         //Make a scatter plot if x-variable is continuous
 

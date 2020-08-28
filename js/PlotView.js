@@ -134,7 +134,6 @@ BDSVis.PlotView = {
                 // if (!vm.geomap())
                 // 	BDSVis.makePlot(data,request,vm);
             });
-            console.log("geomap test " + vm.geomap())
             //Reset Zoom button
             this.resetzoom = this.scaleui
                 .append("span").text("\u00A0\u00A0").append("button").text("Reset Zoom").on("click", function () {

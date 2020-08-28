@@ -82,13 +82,13 @@ BDSVis.ViewModel = function (model) {
             btn.value = value;
             btn.className = xclass;
             if (value == 2) {
-                btn.onclick = function () { !vm.heatchart; vm.heatchart = +this.value; vm.getBDSdata(); vm.regimeselector[0][0].value = this.value; selectElement("xelector1", "year2"); tmod.regimex = this.value; shdCheck();};
+                btn.onclick = function () { !vm.heatchart; vm.heatchart = +this.value; selectElement("xelector1", "year2"); vm.getBDSdata(); vm.regimeselector[0][0].value = this.value;  tmod.regimex = this.value; shdCheck();};
             }
             if (value == 0) {
                 btn.onclick = function () { vm.heatchart; vm.heatchart = +this.value; vm.getBDSdata(); vm.regimeselector[0][0].value = this.value; tmod.regimex = this.value; tmod.regimex = this.value; shdCheck();};
             }
             if (value == 1) {
-                btn.onclick = function () { !vm.heatchart; vm.heatchart = +this.value; vm.getBDSdata(); vm.regimeselector[0][0].value = this.value; selectElement("xelector1", "geo"); tmod.regimex = this.value; shdCheck();};
+                btn.onclick = function () { !vm.heatchart; vm.heatchart = +this.value; selectElement("xelector1", "geo"); vm.getBDSdata(); vm.regimeselector[0][0].value = this.value; tmod.regimex = this.value; shdCheck();};
             }
 
             selector[0][0].appendChild(btn);
