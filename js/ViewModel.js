@@ -75,6 +75,10 @@ BDSVis.ViewModel = function (model) {
             } 
         }
 
+        function xvardisplay(option) {
+            document.getElementById("xvarselector").style.display = option;
+        }
+
         function CreateButtonSelector(selector, name, value, image) {
             var btn = document.createElement("Button");
             nameedit = "</br>"+name;
@@ -82,13 +86,13 @@ BDSVis.ViewModel = function (model) {
             btn.value = value;
             btn.className = xclass;
             if (value == 2) {
-                btn.onclick = function () { !vm.heatchart; vm.heatchart = +this.value; selectElement("xelector1", "year2"); vm.getBDSdata(); vm.regimeselector[0][0].value = this.value;  tmod.regimex = this.value; shdCheck();};
+                btn.onclick = function () { xvardisplay("block"); !vm.heatchart; vm.heatchart = +this.value; selectElement("xelector1", "year2"); vm.getBDSdata(); vm.regimeselector[0][0].value = this.value;  tmod.regimex = this.value; shdCheck();};
             }
             if (value == 0) {
-                btn.onclick = function () { vm.heatchart; vm.heatchart = +this.value; vm.getBDSdata(); vm.regimeselector[0][0].value = this.value; tmod.regimex = this.value; tmod.regimex = this.value; shdCheck();};
+                btn.onclick = function () { xvardisplay("block"); vm.heatchart; vm.heatchart = +this.value; vm.getBDSdata(); vm.regimeselector[0][0].value = this.value; tmod.regimex = this.value; tmod.regimex = this.value; shdCheck();};
             }
             if (value == 1) {
-                btn.onclick = function () { !vm.heatchart; vm.heatchart = +this.value; selectElement("xelector1", "geo"); vm.getBDSdata(); vm.regimeselector[0][0].value = this.value; tmod.regimex = this.value; shdCheck();};
+                btn.onclick = function () { xvardisplay("none"); !vm.heatchart; vm.heatchart = +this.value; selectElement("xelector1", "geo"); vm.getBDSdata(); vm.regimeselector[0][0].value = this.value; tmod.regimex = this.value; shdCheck();};
             }
 
             selector[0][0].appendChild(btn);
