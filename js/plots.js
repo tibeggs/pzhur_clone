@@ -11,12 +11,22 @@ BDSVis.makePlot = function (data, request, vm, limits) {
 
     var svg = pv.svg;
     var width = pv.width;
+
     var height = pv.height;
 
     var cvar = request.cvar;
     var cvarr = vm.model.LookUpVar(cvar);
     var xvar = request.xvar;
     var xvarr = vm.model.LookUpVar(xvar);
+
+    if (vm.model.IsGeomapvar(xvar)) {
+        height -= 90;
+    } else {
+        height = pv.height;
+    }
+
+    console.log(xvar);
+    console.log(height);
 
     var YvarsAsLegend = (cvar === vm.model.yvars);
 
@@ -113,15 +123,28 @@ BDSVis.makePlot = function (data, request, vm, limits) {
         .call(xAxis0);
 
 
-    var xAxisLabels = svg.append("g")
-        .attr("class", "x axis")
-        .attr("transform", "translate(0," + height + ")")
-        .call(xAxis)
-        .selectAll(".tick text")
+
+
     //.attr("transform", "translate(12,10) rotate(90)")
     //.style("text-anchor", "start");
 
-    if (vm.model.IsCategorical(xvarr))
+    if (vm.model.IsGeomapvar(xvarr)) {
+        var xAxisLabels = svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis)
+            .selectAll(".tick text")
+            .attr("transform", "translate(12,10) rotate(90)")
+            .style("text-anchor", "start");
+    } else {
+        var xAxisLabels = svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis)
+            .selectAll(".tick text")
+    }
+
+    if (vm.model.IsCategorical(xvarr) & !vm.model.IsGeomapvar(xvarr))
         xAxisLabels.call(pv.wrap, xScale.rangeBand());
 
     svg.append("g")
@@ -361,15 +384,15 @@ BDSVis.makePlot = function (data, request, vm, limits) {
 
 
     //Split long labels into multiple lines
-    if (vm.model.IsGeomapvar(xvar)) {
-
-    }
 
     legendlabels.call(pv.wrap, pv.legendwidth - (symbolsize + 5));
     legendlabels.selectAll("tspan").attr("x", (symbolsize + 5));
+
+
     var numlines = legendsvg.selectAll(".leglabel").selectAll("tspan").map(function (d) { return d.length; }); //Number of lines in each label
     tspany = []; //"y" attributes for tspans
     for (var i in numlines) {
+        console.log(i);
         for (var j = 0; j < numlines[i]; j++)
             tspany.push((i > 0) ? (numlines[i - 1] + i * .75) : 0);
         if (i > 0)
