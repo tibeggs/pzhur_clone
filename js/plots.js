@@ -167,7 +167,7 @@ BDSVis.makePlot = function (data, request, vm, limits) {
     };
 
     function refreshBars() {
-        var t = "translate(" + d3.event.translate + ")" + " scale(" + d3.event.scale + ")";
+        var t = "translate(" + d3.event.translate + ")"; //+ " scale(" + d3.event.scale + ")";
         var t1 = t.substring(t.indexOf("(") + 1, t.indexOf(")")).split(",");
         svg.select(".y.axis").call(yAxis);
         //console.log(t1);
