@@ -167,17 +167,19 @@ BDSVis.makePlot = function (data, request, vm, limits) {
     };
 
     function refreshBars() {
-        //var t="translate(" + d3.event.translate + ")"+" scale(" + d3.event.scale + ")";
-
+        var t = "translate(" + d3.event.translate + ")" + " scale(" + d3.event.scale + ")";
+        var t1 = t.substring(t.indexOf("(") + 1, t.indexOf(")")).split(",");
         svg.select(".y.axis").call(yAxis);
+        //console.log(t1);
         // xScale.rangeRoundBands([d3.event.translate[0], d3.event.translate[0]+width*d3.event.scale], .1);
         // //debugger;
-        // svg.select(".x.axis").call(xAxis);
-        svg.select(".x0.axis").attr("transform", "translate(0," + yScale(y0) + ")").call(xAxis0);
 
-        //d3.selectAll("rect.plotbar").attr("transform", t);
+        svg.select(".x.axis").attr("transform", "translate(" + t1[0] + ", " + height + ")").call(xAxis);
+        svg.select(".x0.axis").attr("transform", "translate(" + t1[0] + ", " + yScale(y0) + ")").call(xAxis0);
+
+        d3.selectAll("rect.plotbar").attr("transform", t);
         d3.selectAll("rect.plotbar")
-            .attr("y", function (d) { return yScale(Math.max(0, +d[yvar])) })
+            //.attr("y", function (d) { return yScale(Math.max(0, +d[yvar])) })
             .attr("height", function (d) { return Math.abs(yScale(y0) - yScale(+d[yvar])) });
         var uptri = chart.selectAll(".offlimitis").data(data.filter(function (d) { return (xScale.domain().indexOf(d[xvar]) > -1) && (yScale(d[yvar]) < 0) }));
         uptri.exit().remove()
@@ -186,7 +188,7 @@ BDSVis.makePlot = function (data, request, vm, limits) {
             .attr("d", d3.svg.symbol().type("triangle-up"))
             .attr("fill", "red")
         uptri
-            .attr("transform", function (d) { return "translate(" + (xScale(d[xvar]) + xScale.rangeBand() / 2.) + "," + 0 + ")"; });
+            .attr("transform", function (d) { return "translate(" + (parseFloat(t1[0]) + parseFloat(xScale(d[xvar]) + xScale.rangeBand() / 2.)) + "," + 0 + ")"; });
 
         var downtri = chart.selectAll(".downofflimitis").data(data.filter(function (d) { return (xScale.domain().indexOf(d[xvar]) > -1) && (yScale(0) > height) }));
         downtri.exit().remove()
@@ -195,7 +197,8 @@ BDSVis.makePlot = function (data, request, vm, limits) {
             .attr("d", d3.svg.symbol().type("triangle-down"))
             .attr("fill", "red")
         downtri
-            .attr("transform", function (d) { return "translate(" + (xScale(d[xvar]) + xScale.rangeBand() / 2.) + "," + height * .98 + ")"; });
+            .attr("transform", function (d) { return "translate(" + (parseFloat(t1[0]) + parseFloat(xScale(d[xvar]) + xScale.rangeBand() / 2.)) + "," + height * .98 + ")"; });
+       
     };
 
     if (vm.model.IsContinuous(xvarr) & tmod.regimex == 2)
@@ -205,7 +208,7 @@ BDSVis.makePlot = function (data, request, vm, limits) {
 
 
     if ((!vm.zoombyrect) && !(vm.timelapse)) {
-        svg.call(pv.zoom);
+        svg.call(pv.zoom).on("wheel", function () { d3.event.preventDefault(); });
     }
 
     // //Clipping lines and dots outside the plot area
