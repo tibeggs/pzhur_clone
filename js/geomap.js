@@ -11,7 +11,8 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	height=pv.height;
 	
 	var yvar=request[vm.model.yvars];
-	var xvar=request.xvar;
+	var xvar = request.xvar;
+	var cvar = request.cvar;
 
 	var LUName = function(d) {return vm.model.NameLookUp(d[xvar],xvar);} //Returns full name of the variable value by its value returned by IP (aka code), and varname
 
@@ -28,7 +29,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	data = data.filter(function(d1){
 		return vm.model[xvar][vm.model[xvar].map(function(d) {return d.code}).indexOf(d1[xvar])].regions.indexOf(vm.region)>-1;
 	})
-	vm.TableView.makeDataTable(data,request.cvar,request.xvar,vm); 
+	vm.TableView.makeDataTable(data,cvar,request.xvar,vm); 
 	
 	
 	//Plot the map	
