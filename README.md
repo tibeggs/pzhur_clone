@@ -14,7 +14,8 @@ The project includes a landing page which can direct users to graphics of intere
   - most recent version https://d3js.org/
 - topojson the project currently uses static version 1.6.24 of topjson as topjson.v1.min.js
   - most recent version https://github.com/topojson/topojson
-- excellentexport.min.js the project currently uses a static version of excellentexport as excellentexport.min.js
+- excellentexport.min.js the project currently uses a static version 1.5 of excellentexport as excellentexport.min.js
+  - used version is stored at https://github.com/jmaister/excellentexport/releases/tag/v1.5
   - most recent version https://github.com/jmaister/excellentexport
 
 ## Installing BDS Visualization Page
