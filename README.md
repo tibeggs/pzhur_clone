@@ -30,20 +30,29 @@ Additional for sharing a live version over the web we are currently using github
 - Details on how to set up a github Page can be found at https://pages.github.com/
 ### Final Deployment
 The final deployment will be based largely on how Census desires to host the project. This should probably through a provider.
+## Landing Page Link Function
+To set up a link for a predefined graphics use the pushInput function defined on Landing.js
+- function pushInput(xvar,cvar,regi,meas,sic,state,metro,year,fage,fchar,fsize,ifsize)
+  - each of the inputs need to be in qoutes you can use the json in model.js to see valid options
+  - The regi input sets what type of graphic to display
+    - 0 : Bar Graph
+    - 1 : Map
+    - 2 : Line Graph
+  - You can create invalid options using this method that are not accessible through the standard visualization tool (such as a line graph with sector as the x-axis)
 ## List of known issues
-- Excess Pushes into console.log
+- Excess Pushes into console.log: This is mostly for testing and will be parsed down before final version
 - Bar Chart does not allow for horizontal zooming (we may not have enough time to address this issue)
-- Some of the elements of the bar graph are not tied correctly to the clipping box and do not dissapear when draged off the graph
+- Some of the elements of the bar graph are not tied correctly to the clipping box and do not dissapear when draged off the graph: this has to due with the defined boundries of the clipping box as well as the redefining graph region when switching tick label rotations
 - No data warning does not wrap correctly
 - clicking quickly between buttons causes invalid graphics to temporarily appear
-- selecting too many legends lists them outside the bounding box
+- selecting too many legends lists them outside the bounding box: nothing is set up to handle this at the moment
 - When updating a map after a zoom results in fill and border lines not lining up
 - Bar chart tick marks become unreadable with certain combinations
-  - MSA
-  - Year
+  - MSA : no easy fix available at the moment may eliminate this option
+  - Year : plan to implement rotation for ticks much like state labels
 - Tick marks for line graph should have more detail
 - Table view is too small and has inconsistent surrounding border rules
-- Internet Explorer is not currently supported
+- Internet Explorer is not currently supported: this is due to internet explorer not being updated in recent years with new internet standards it technically runs but will not scale well
 - Zooming on line graph occasionally creates an extra "x0-axis"
 - some functions end up being run multiple times while not project breaking it is not efficient
 ## Contributers
