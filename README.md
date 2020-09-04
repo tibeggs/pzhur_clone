@@ -43,6 +43,7 @@ The final deployment will be based largely on how Census desires to host the pro
 - Table view is too small and has inconsistent surrounding border rules
 - Internet Explorer is not currently supported
 - Zooming on line graph occasionally creates an extra "x0-axis"
+- some functions end up being run multiple times while not project breaking it is not efficient
 ## Contributers
 - Pavel Zhuravlev
 - Timothy Beggs
