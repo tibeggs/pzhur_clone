@@ -29,7 +29,7 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	data = data.filter(function(d1){
 		return vm.model[xvar][vm.model[xvar].map(function(d) {return d.code}).indexOf(d1[xvar])].regions.indexOf(vm.region)>-1;
 	})
-	vm.TableView.makeDataTable(data,cvar,request.xvar,vm); 
+	vm.TableView.makeDataTable(data,cvar,xvar,vm); 
 	
 	
 	//Plot the map	
