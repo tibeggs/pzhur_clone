@@ -44,7 +44,7 @@ The final deployment will be based largely on how Census desires to host the pro
 - Internet Explorer is not currently supported
 - Zooming on line graph occasionally creates an extra "x0-axis"
 ## Contributers
-Pavel Zhuravlev
-Timothy Beggs
-Jerome Davis
-Craig Corl
+- Pavel Zhuravlev
+- Timothy Beggs
+- Jerome Davis
+- Craig Corl
