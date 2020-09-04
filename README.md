@@ -9,6 +9,14 @@ The project includes a landing page which can direct users to graphics of intere
   - The majority of testing has been in chrome I do not have a method for testing it in Safari
 - The project can be run on internet explorer but there are scaling issues
 
+## Dependants
+- D3 the project currently uses static version 3.5.12 of D3 saved as d3.min.js
+  - most recent version https://d3js.org/
+- topojson the project currently uses static version 1.6.24 of topjson as topjson.v1.min.js
+  - most recent version https://github.com/topojson/topojson
+- excellentexport.min.js the project currently uses a static version of excellentexport as excellentexport.min.js
+  - most recent version https://github.com/jmaister/excellentexport
+
 ## Installing BDS Visualization Page
 This will be dependent on how Census desires to host the project the current method used for testing is listed below.
 ### Running Locally:
@@ -34,4 +42,9 @@ The final deployment will be based largely on how Census desires to host the pro
 - Tick marks for line graph should have more detail
 - Table view is too small and has inconsistent surrounding border rules
 - Internet Explorer is not currently supported
-##Contributers
+- Zooming on line graph occasionally creates an extra "x0-axis"
+## Contributers
+Pavel Zhuravlev
+Timothy Beggs
+Jerome Davis
+Craig Corl
