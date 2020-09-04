@@ -34,7 +34,9 @@ The final deployment will be based largely on how Census desires to host the pro
 - Excess Pushes into console.log
 - Bar Chart does not allow for horizontal zooming (we may not have enough time to address this issue)
 - Some of the elements of the bar graph are not tied correctly to the clipping box and do not dissapear when draged off the graph
-- There are some combinations of options that present broken graphics
+- No data warning does not wrap correctly
+- clicking quickly between buttons causes invalid graphics to temporarily appear
+- selecting too many legends lists them outside the bounding box
 - When updating a map after a zoom results in fill and border lines not lining up
 - Bar chart tick marks become unreadable with certain combinations
   - MSA
