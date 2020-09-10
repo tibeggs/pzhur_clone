@@ -46,6 +46,16 @@ BDSVis.PlotView = {
         var margin = this.margin;
         var width = this.width;
         var height = this.height;
+        var tmod = vm.model;
+        if (vm.model.IsGeomapvar(request.xvar)) {
+            height1 = height-90;
+        }
+        else if (request.xvar == "year2" & tmod.regimex == 0) {
+            height1 = height-15;
+
+        } else {
+            height1 = height;
+        }
 
         //remove old drawings,  add grouping element for the chart, refresh UI elements, 
         this.svgcont.selectAll("g").remove();
@@ -62,12 +72,8 @@ BDSVis.PlotView = {
             .attr("x", "0")
             .attr("y", "-5")
             .attr("width", width + 5)
-            .attr("height", height + 5);
-        this.svg.append("defs").append("svg:clipPath")
-            .attr("id", "clip2")
-            .append("svg:polygon")
-            .attr("id", "clip-rect1")
-            .attr("points", "0,-5 0," + (height + 5) + " " + (width + 5) + ",.5 " + (width + 5) + "," + (height + 5));
+            .attr("height", height1 + 5);
+     
 
         //Clear legend, set size
         this.legendx = width + margin.left + margin.right;
