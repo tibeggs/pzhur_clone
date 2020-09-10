@@ -46,8 +46,6 @@ BDSVis.TableView = {
 		d3.select('#graphdata').selectAll('tr').style("background-color",function(d,i) {return (i%2)?"#fff":"#eee";});
 		this.SetLowerHeadersWidth();
 		d3.select("#datashowarea").attr("style", "height: "+(document.getElementById("graphdata").offsetHeight+12)+"px");
-		console.log(d3.select("#datashowarea"));
-		console.log(document.getElementById("graphdata").offsetHeight);
 	},
 
 	SetLowerHeadersWidth : function() {
