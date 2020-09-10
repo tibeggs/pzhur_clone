@@ -261,7 +261,7 @@ BDSVis.PlotView = {
                 }
             };
             this.svgcont.append("g").append("text").attr("class", "graphtitle").attr("x", .2 * this.width0).attr("y", .66 * this.height0).style("font-size", "18px")
-                .text(ptitle.replace(" in "," in \n "));
+                .text(ptitle);
         }
     },
 
