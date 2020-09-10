@@ -63,6 +63,11 @@ BDSVis.PlotView = {
             .attr("y", "-5")
             .attr("width", width + 5)
             .attr("height", height + 5);
+        this.svg.append("defs").append("svg:clipPath")
+            .attr("id", "clip2")
+            .append("svg:polygon")
+            .attr("id", "clip-rect1")
+            .attr("points", "0,-5 0," + (height + 5) + " " + (width + 5) + ",.5 " + (width + 5) + "," + (height + 5));
 
         //Clear legend, set size
         this.legendx = width + margin.left + margin.right;
@@ -345,7 +350,7 @@ BDSVis.PlotView = {
             .style("left", "10px")
             //.style("top", (pa + bug + this.margin.top * 30) + "px");
             .style("top", (xaxlrect.top + wsY) + "px");
-            //.style("top", "700px");
+        //.style("top", "700px");
     },
 
     wrap: function (text, width) {

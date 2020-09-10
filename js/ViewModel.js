@@ -92,7 +92,7 @@ BDSVis.ViewModel = function (model) {
                 btn.onclick = function () { xvardisplay("block"); vm.heatchart; vm.heatchart = +this.value; vm.getBDSdata(); vm.regimeselector[0][0].value = this.value; tmod.regimex = this.value; tmod.regimex = this.value; shdCheck();};
             }
             if (value == 1) {
-                btn.onclick = function () { xvardisplay("none"); !vm.heatchart; vm.heatchart = +this.value; selectElement("xelector1", "geo"); vm.regimeselector[0][0].value = this.value; tmod.regimex = this.value; vm.getBDSdata();  shdCheck(); };
+                btn.onclick = function () { xvardisplay("none"); vm.cvar = "measure"; !vm.heatchart; vm.heatchart = +this.value; selectElement("xelector1", "geo"); vm.regimeselector[0][0].value = this.value; tmod.regimex = this.value; vm.getBDSdata();  shdCheck(); };
             }
 
             selector[0][0].appendChild(btn);
@@ -324,12 +324,8 @@ BDSVis.ViewModel = function (model) {
     this.ShowData = false; //Initial value
     this.toggleshowdata = function () {
         //This function executes in click to 'Show Data' button.
-        console.log('showdata ran');
         vm.ShowData = !vm.ShowData;
         this.className += " act";
-        console.log(this.className += " act");
-
-
 
         var section = document.getElementById("regimebuttons");
         var btns = section.getElementsByClassName("xbtn");

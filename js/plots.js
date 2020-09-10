@@ -21,12 +21,13 @@ BDSVis.makePlot = function (data, request, vm, limits) {
 
     if (vm.model.IsGeomapvar(xvar)) {
         height -= 90;
+    }
+    else if (xvar == "year2" & tmod.regimex==0) {
+        height -= 15;
+
     } else {
         height = pv.height;
     }
-
-    console.log(xvar);
-    console.log(height);
 
     var YvarsAsLegend = (cvar === vm.model.yvars);
 
@@ -118,6 +119,7 @@ BDSVis.makePlot = function (data, request, vm, limits) {
     if (vm.logscale) yAxis.ticks(5, d3.format(",d"));
 
     svg.append("g")
+        .attr("clip-path", "url(#clip)")
         .attr("class", "x0 axis")
         .attr("transform", "translate(0," + yScale(y0) + ")")
         .call(xAxis0);
@@ -127,8 +129,7 @@ BDSVis.makePlot = function (data, request, vm, limits) {
 
     //.attr("transform", "translate(12,10) rotate(90)")
     //.style("text-anchor", "start");
-
-    if (vm.model.IsGeomapvar(xvarr)) {
+    if (vm.model.IsGeomapvar(xvarr) | (xvar == 'year2' & tmod.regimex == 0)) {
         var xAxisLabels = svg.append("g")
             .attr("class", "x axis")
             .attr("transform", "translate(0," + height + ")")
@@ -392,7 +393,6 @@ BDSVis.makePlot = function (data, request, vm, limits) {
     var numlines = legendsvg.selectAll(".leglabel").selectAll("tspan").map(function (d) { return d.length; }); //Number of lines in each label
     tspany = []; //"y" attributes for tspans
     for (var i in numlines) {
-        console.log(i);
         for (var j = 0; j < numlines[i]; j++)
             tspany.push((i > 0) ? (numlines[i - 1] + i * .75) : 0);
         if (i > 0)

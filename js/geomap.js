@@ -13,6 +13,10 @@ BDSVis.makeMap = function (data,request,vm,dataunfiltered) {
 	var yvar=request[vm.model.yvars];
 	var xvar = request.xvar;
 	var cvar = request.cvar;
+	console.log("update");
+	console.log(yvar);
+	console.log(cvar);
+	console.log(xvar);
 
 	var LUName = function(d) {return vm.model.NameLookUp(d[xvar],xvar);} //Returns full name of the variable value by its value returned by IP (aka code), and varname
 
