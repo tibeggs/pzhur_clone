@@ -1,5 +1,5 @@
 var BDSVis = BDSVis || {};
-
+//#fordeletion!!
 BDSVis.makeHeatChart = function (data,request,vm,dataunfiltered) {
 	var pv=vm.PlotView;
 	pv.Refresh(data,request,vm);

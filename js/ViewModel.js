@@ -120,14 +120,9 @@ BDSVis.ViewModel = function (model) {
             vm.regimeselector.append("option").text("Map").attr("value", 0).property("selected", function (d) { return vm.cartogram === 0; });
             vm.regimeselector.append("option").text("Non-cont Cartogram").attr("value", 1).property("selected", function (d) { return vm.cartogram === 1; });
             AddButtonToVarSelector(rgb, rkey);
-        } else //if (!vm.model.IsContinuous(vm.ActualVarCode(vm.xvar))) {
+        } else 
         {
             AddButtonToVarSelector(rgb, rkey);
-            //vm.regimeselector=bug.append("select").on("change", function() {vm.heatchart=+this.value; vm.getBDSdata();});
-            //vm.regimeselector.append("option").text("Barchart").attr("value", 0).property("selected", function (d) { return (!vm.heatchart);});
-            ////vm.regimeselector.append("option").text("Spotchart").attr("value", 1).property("selected", function (d) { return vm.heatchart; });
-            //vm.regimeselector.append("option").text("Linechart").attr("value", 2).property("selected", function (d) { return vm.heatchart; });
-
         };
         bug.append("h4").text(" ");
 
@@ -209,11 +204,8 @@ BDSVis.ViewModel = function (model) {
             var varr1code = isundergroupvar ? vm.SelectedOpts[varr.code][0] : varr.code;
             var multiple = vm.multiple(varr.code) && (!vm.model.IsGroup(varr) || isundergroupvar);
             selectorm.append("select")//Add the selector
-                //CreateModal(varr, varr1code, isundergroupvar);
-                //.attr("style","display:none")
                 .attr("id", "mselect")
                 //Add the selector
-                //.attr("class", "modal")//setup as modal
                 .on("change", function () {
                     vm.SelectedOpts[varr1code] = d3.selectAll(this.childNodes)[0].filter(function (d) { return d.selected }).map(function (d) { return d.value });
                     vm.getBDSdata();
@@ -244,25 +236,6 @@ BDSVis.ViewModel = function (model) {
                     selectors.append("h4");
                     AddSelectorWOptions(varr, true);
                 };
-
-                //if (varr.aslegend) { //Add the 'Compare' button
-
-                //    var cbut = selectors.append("button")
-                //        .on("click", function () { vm.setcvar(varr.code); })
-                //        .classed("activebutton", vm.multiple(varr.code))
-                //        .property("disabled", (vm.geomap() || (vm.xvar === varr.code) || (vm.cvar === varr.code)))
-                //        .text("Compare " + varr.name + "s");
-                //    if (vm.model.IsGroup(varr.code))
-                //        cbut.text("Compare " + vm.model.NameLookUp(vm.SelectedOpts[varr.code][0], 'var') + "s")
-                //};
-
-                //if (varr.asaxis) //Add the 'Make X' button
-                //    selectors.append("button")
-                //        .on("click", function () { vm.setxvar(varr.code); })
-                //        .classed("activebutton", vm.xvar === varr.code)
-                //        .property("disabled", (!vm.model.IsGeomapvar(varr)) && ((vm.xvar === varr.code) || (vm.cvar === varr.code)))
-                //        .text(vm.model.IsGeomapvar(varr) ? "See Map" : "Make X-axis");
-                //selectors.append("br");
             }
             else {
                 AddSelectorMOptions(varr, false); //Add the selector for the variable
@@ -273,23 +246,6 @@ BDSVis.ViewModel = function (model) {
                     AddSelectorMOptions(varr, true);
                 };
 
-                //if (varr.aslegend) { //Add the 'Compare' button
-                //    //var sbut = selectorm.append("button")
-                //    //    .attr("class","selectorbut")
-                //    //    .on("click", function () {
-                //    //        var modal = document.getElementById("Measure_modal");
-                //    //        modal.style.display = "block";
-                //    //    })
-                //    //    .text(varr.name);
-
-                //    var cbut = selectorm.append("button")
-                //        .on("click", function () { vm.setcvar(varr.code); })
-                //        .classed("activebutton", vm.multiple(varr.code))
-                //        .property("disabled", (vm.geomap() || (vm.xvar === varr.code) || (vm.cvar === varr.code)))
-                //        .text("Compare " + varr.name + "s");
-                //    if (vm.model.IsGroup(varr.code))
-                //        cbut.text("Compare " + vm.model.NameLookUp(vm.SelectedOpts[varr.code][0], 'var') + "s")
-                //};
 
                 if (varr.asaxis) //Add the 'Make X' button
                     selectorm.append("button")
@@ -337,12 +293,6 @@ BDSVis.ViewModel = function (model) {
             });
         };
 
-        //if (vm.ShowData) {
-        //    document.getElementById("#showdatabtn")/*.className("xbtn active")*/;
-        //}
-        //else {
-        //    document.getElementById("#showdatabtn").className("xbtn");
-        //}
 
         d3.select("#showdata").style("display", vm.ShowData ? "block" : "none");
         d3.select("#chartsvg").style("display", vm.ShowData ? "none" : "");

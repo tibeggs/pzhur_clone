@@ -53,7 +53,7 @@ To set up a link for a predefined graphics use the pushInput function defined on
   - MSA : no easy fix available at the moment may eliminate this option
   - ~~Year : plan to implement rotation for ticks much like state labels~~ (fixed)
 - Tick marks for line graph should have more detail
-- Table view is too small and has inconsistent surrounding border rules
+- ~~Table view is too small and has inconsistent surrounding border rules~~ (fixed)
 - Internet Explorer is not currently supported: this is due to internet explorer not being updated in recent years with new internet standards it technically runs but will not scale well
 - Zooming on line graph occasionally creates an extra "x0-axis"
 - some functions end up being run multiple times while not project breaking it is not efficient

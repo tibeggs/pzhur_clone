@@ -194,7 +194,7 @@ rect.zoom {
 #datashowarea {
     display: block;
     overflow: auto;
-    height: 250px;
+    height: 500px;
     padding: 0px;
 }
 
@@ -210,7 +210,7 @@ rect.zoom {
 #datashowareatable {
     display: block;
     overflow: auto;
-    height: 200px;
+    /*height: 200px;*/
 }
 
 #buttonsundergraph {
