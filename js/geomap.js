@@ -31,15 +31,10 @@ BDSVis.makeMap = function (data, request, vm, dataunfiltered) {
 
     //Filter by region creating a problem
     data = data.filter(function (d1) {
-        return vm.model[xvar][vm.model[xvar].map(function (d) { return d.code }).indexOf(d1[xvar])].regions.indexOf(vm.region) > -1;
-    })
-    console.log(vm.model[xvar]);
-    console.log(vm.region);
-    console.log(vm.model[xvar].filter(function (d) {
-        return d.code;
-    }
-    ));
+        return vm.model[xvar][vm.model[xvar].map(function (d) { return d.code }).indexOf(d1[xvar])].regions.indexOf(vm.region) > -1;});
     vm.TableView.makeDataTable(data, cvar, xvar, vm);
+    console.log(vm.model[xvar].filter(function (d) { return d.regions.indexOf(vm.region) != -1 }).map(function (d1) { return d1.name }));
+    var regiona = vm.model[xvar].filter(function (d) { return d.regions.indexOf(vm.region) != -1 }).map(function (d1) { return d1.name });
 
 
     //Plot the map	
@@ -139,7 +134,10 @@ BDSVis.makeMap = function (data, request, vm, dataunfiltered) {
 
 
     //Plot state outlines for all states
-    mapg.selectAll('path.outlines').data(vm.model.geo_data.state)
+    console.log(vm.model.geo_data.state.filter(function (d) { return regiona.indexOf(d.properties.name) != -1 }));
+    var georegiond = vm.model.geo_data.state.filter(function (d) { return regiona.indexOf(d.properties.name) != -1 })
+    console.log(mapg);
+    mapg.selectAll('path.outlines').data(georegiond)
         .enter()
         .append('path')
         .attr('class', 'outlines')
@@ -159,7 +157,7 @@ BDSVis.makeMap = function (data, request, vm, dataunfiltered) {
 
         .style('fill', "white")
         .attr('fill-opacity', 0)
-        .style('stroke', 'black')
+        .style('stroke', 'white') //change this to black to change back to entire map drawn
         .style('stroke-width', 0.3)
         .on("dblclick", function (d) { //Add the state/MSA to the data set upon double-click to its outline
             var xvcode = vm.model[xvar].filter(function (d1) { return d1.name === d.properties.name; })[0].code;
