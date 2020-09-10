@@ -47,7 +47,7 @@ BDSVis.PlotView = {
         var width = this.width;
         var height = this.height;
         var tmod = vm.model;
-        if (vm.model.IsGeomapvar(request.xvar)) {
+        if (vm.model.IsGeomapvar(request.xvar) & tmod.regimex == 0) {
             height1 = height-90;
         }
         else if (request.xvar == "year2" & tmod.regimex == 0) {
@@ -261,7 +261,7 @@ BDSVis.PlotView = {
                 }
             };
             this.svgcont.append("g").append("text").attr("class", "graphtitle").attr("x", .2 * this.width0).attr("y", .66 * this.height0).style("font-size", "18px")
-                .text(ptitle);
+                .text(ptitle.replace(" in "," in \n "));
         }
     },
 
