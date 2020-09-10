@@ -120,6 +120,7 @@ BDSVis.ViewModel = function (model) {
             vm.regimeselector.append("option").text("Map").attr("value", 0).property("selected", function (d) { return vm.cartogram === 0; });
             vm.regimeselector.append("option").text("Non-cont Cartogram").attr("value", 1).property("selected", function (d) { return vm.cartogram === 1; });
             AddButtonToVarSelector(rgb, rkey);
+            xvardisplay("none");
         } else 
         {
             AddButtonToVarSelector(rgb, rkey);
