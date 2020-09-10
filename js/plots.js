@@ -117,9 +117,14 @@ BDSVis.makePlot = function (data, request, vm, limits) {
     var yAxis = d3.svg.axis().scale(yScale1).orient("left");
 
     if (vm.logscale) yAxis.ticks(5, d3.format(",d"));
-
-    svg.append("g")
-        .attr("clip-path", "url(#clip)")
+    //fordeletion!!
+    //svg.append("g")
+    //    .attr("clip-path", "url(#clip)")
+    //    .attr("class", "x0 axis")
+    //    .attr("transform", "translate(0," + yScale(y0) + ")")
+    //    .call(xAxis0);
+    var x0line = svg.append("g").attr("clip-path", "url(#clip)")
+    x0line.append("g")
         .attr("class", "x0 axis")
         .attr("transform", "translate(0," + yScale(y0) + ")")
         .call(xAxis0);

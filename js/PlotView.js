@@ -57,8 +57,8 @@ BDSVis.PlotView = {
         //Clipping lines and dots outside the plot area
         this.svg.append("defs").append("svg:clipPath")
             .attr("id", "clip")
-            .append("svg:rect")
-            .attr("id", "clip-rect")
+            .append("rect")
+            .attr("id", "rect")
             .attr("x", "0")
             .attr("y", "-5")
             .attr("width", width + 5)
