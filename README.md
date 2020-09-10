@@ -44,7 +44,7 @@ To set up a link for a predefined graphics use the pushInput function defined on
 - Excess Pushes into console.log: This is mostly for testing and will be parsed down before final version
 - *Remove excess/commented out code* (In Progress look for #fordelection!!)
 - Bar Chart does not allow for horizontal zooming (we may not have enough time to address this issue)
-- Some of the elements of the bar graph are not tied correctly to the clipping box and do not dissapear when draged off the graph: this has to due with the defined boundries of the clipping box as well as the redefining graph region when switching tick label rotations
+- ~~Some of the elements of the bar graph are not tied correctly to the clipping box and do not dissapear when draged off the graph: this has to due with the defined boundries of the clipping box as well as the redefining graph region when switching tick label rotations~~ (fixed)
 - No data warning does not wrap correctly
 - clicking quickly between buttons causes invalid graphics to temporarily appear
 - selecting too many legends lists them outside the bounding box: nothing is set up to handle this at the moment
