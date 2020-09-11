@@ -1,5 +1,5 @@
 var BDSVis = BDSVis || {};
-//#fordeletion!!
+//#modulefordeletion!! no longer used it was for the spot charts
 BDSVis.makeHeatChart = function (data,request,vm,dataunfiltered) {
 	var pv=vm.PlotView;
 	pv.Refresh(data,request,vm);

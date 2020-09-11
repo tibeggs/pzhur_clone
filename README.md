@@ -41,8 +41,9 @@ To set up a link for a predefined graphics use the pushInput function defined on
     - 2 : Line Graph
   - You can create invalid options using this method that are not accessible through the standard visualization tool (such as a line graph with sector as the x-axis)
 ## List of known issues
+- MSA for all fsize does not seem to be returning expected data seems to be driven by both fage and fsize both being "ALL" may not have be calculated in API
 - Excess Pushes into console.log: This is mostly for testing and will be parsed down before final version
-- *Remove excess/commented out code* (In Progress look for #fordelection!!)
+- *Remove excess/commented out code* (In Progress look for #fordelection!! or #modulefordeletion!! main target is heatchart)
 - Bar Chart does not allow for horizontal zooming (we may not have enough time to address this issue)
 - ~~Some of the elements of the bar graph are not tied correctly to the clipping box and do not dissapear when draged off the graph: this has to due with the defined boundries of the clipping box as well as the redefining graph region when switching tick label rotations~~ (fixed)
 - No data warning does not wrap correctly
