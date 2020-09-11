@@ -105,8 +105,6 @@ BDSVis.makePlot = function (data, request, vm, limits) {
     };
 
     //Adding axes
-    console.log(vm.model.IsGeomapvar(xvar));
-
     var xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickFormat(function (d) { return vm.model.NameLookUp(d, xvar) });
 
 

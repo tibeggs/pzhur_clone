@@ -13,10 +13,6 @@ BDSVis.makeMap = function (data, request, vm, dataunfiltered) {
     var yvar = request[vm.model.yvars];
     var xvar = request.xvar;
     var cvar = request.cvar;
-    console.log("update");
-    console.log(yvar);
-    console.log(cvar);
-    console.log(xvar);
 
     var LUName = function (d) { return vm.model.NameLookUp(d[xvar], xvar); } //Returns full name of the variable value by its value returned by IP (aka code), and varname
 
@@ -33,7 +29,6 @@ BDSVis.makeMap = function (data, request, vm, dataunfiltered) {
     data = data.filter(function (d1) {
         return vm.model[xvar][vm.model[xvar].map(function (d) { return d.code }).indexOf(d1[xvar])].regions.indexOf(vm.region) > -1;});
     vm.TableView.makeDataTable(data, cvar, xvar, vm);
-    console.log(vm.model[xvar].filter(function (d) { return d.regions.indexOf(vm.region) != -1 }).map(function (d1) { return d1.name }));
     var regiona = vm.model[xvar].filter(function (d) { return d.regions.indexOf(vm.region) != -1 }).map(function (d1) { return d1.name });
 
 
@@ -134,9 +129,12 @@ BDSVis.makeMap = function (data, request, vm, dataunfiltered) {
 
 
     //Plot state outlines for all states
-    console.log(vm.model.geo_data.state.filter(function (d) { return regiona.indexOf(d.properties.name) != -1 }));
     var georegiond = vm.model.geo_data.state.filter(function (d) { return regiona.indexOf(d.properties.name) != -1 })
-    console.log(mapg);
+    if (xvar == 'state') {
+        georegiond = vm.model.geo_data.state.filter(function (d) { return regiona.indexOf(d.properties.name) != -1 })
+    } else {
+        georegiond = vm.model.geo_data.state;
+    }
     mapg.selectAll('path.outlines').data(georegiond)
         .enter()
         .append('path')
@@ -147,6 +145,12 @@ BDSVis.makeMap = function (data, request, vm, dataunfiltered) {
         .attr('d', path)
         .attr("transform", (vm.cartogram !== 1) ? ("translate(" + pv.translate + ")" + "scale(" + pv.scale + ")") : "");
     //.attr("transform","translate(" + pv.translate + ")"+"scale(" + pv.scale + ")");
+    var xvarcolor = 'black';
+    if (xvar != 'state') {
+        xvarcolor = 'black'
+    } else {
+        xvarcolor = 'white';
+    }
 
     var map = mapg.selectAll('path.datacontour')
         .data(geo_data1)
@@ -157,7 +161,7 @@ BDSVis.makeMap = function (data, request, vm, dataunfiltered) {
 
         .style('fill', "white")
         .attr('fill-opacity', 0)
-        .style('stroke', 'white') //change this to black to change back to entire map drawn
+        .style('stroke', xvarcolor) //change this to black to change back to entire map drawn
         .style('stroke-width', 0.3)
         .on("dblclick", function (d) { //Add the state/MSA to the data set upon double-click to its outline
             var xvcode = vm.model[xvar].filter(function (d1) { return d1.name === d.properties.name; })[0].code;
