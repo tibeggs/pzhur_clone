@@ -60,6 +60,7 @@ To set up a link for a predefined graphics use the pushInput function defined on
 - Zooming on line graph occasionally creates an extra "x0-axis"
 - some functions end up being run multiple times while not project breaking it is not efficient
 - ~~When selecting map from pushinput x-axis lable does not get hidden~~ (fixed)
+- ~~Text on map only references States not MSA~~ (fixed)
 ## Contributers
 - Pavel Zhuravlev
 - Timothy Beggs

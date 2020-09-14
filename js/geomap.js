@@ -349,10 +349,16 @@ BDSVis.makeMap = function (data, request, vm, dataunfiltered) {
         .attr("y", function (d) { return .4 * colorbar.fontsize + hScale(d); })
         .text(legNumFormat);
 
-    legendsvg.append("text").attr("y", 1.2 * colorbar.fontsize + colorbar.height).style("font-size", "10px").text("Zoom over the colorbar to change color scale");
+    legendsvg.append("text").attr("y", 1.2 * colorbar.fontsize + colorbar.height).style("font-size", "10px").text("Scroll over the colorbar to change color scale");
+
+    if (xvar == "state") {
+        gtext = "Double-click on states to toggle";
+    } else {
+        gtext = "Double-click on MSA to toggle";
+    }
 
     pv.SetPlotTitle(ptitle);
-    pv.lowerrightcornertext.style("font-size", "10px").text("Double-click on states to toggle");
+    pv.lowerrightcornertext.style("font-size", "10px").text(gtext);
     pv.SetXaxisLabel(".", 30);
 
     // Timelapse animation
