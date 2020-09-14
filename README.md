@@ -49,7 +49,7 @@ To set up a link for a predefined graphics use the pushInput function defined on
 - No data warning does not wrap correctly
 - clicking quickly between buttons causes invalid graphics to temporarily appear
 - selecting too many legends lists them outside the bounding box: nothing is set up to handle this at the moment
-- When updating a map after a zoom results in fill and border lines not lining up
+- ~~When updating a map after a zoom results in fill and border lines not lining up~~ (fixed)
 - ~~Certain combinations will create invalid map option tied to having multiple cvars passed into the mapping options~~ (fixed)
 - Bar chart tick marks become unreadable with certain combinations
   - MSA : no easy fix available at the moment may eliminate this option
