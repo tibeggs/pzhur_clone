@@ -51,8 +51,8 @@ To set up a link for a predefined graphics use the pushInput function defined on
 - selecting too many legends lists them outside the bounding box: nothing is set up to handle this at the moment
 - ~~When updating a map after a zoom results in fill and border lines not lining up~~ (fixed)
 - ~~Certain combinations will create invalid map option tied to having multiple cvars passed into the mapping options~~ (fixed)
-- Bar chart tick marks become unreadable with certain combinations
-  - MSA : no easy fix available at the moment may eliminate this option
+- ~~Bar chart tick marks become unreadable with certain combinations~~ (fixed via elinination)
+  - ~~MSA : no easy fix available at the moment may eliminate this option~~ (fixed via elimination)
   - ~~Year : plan to implement rotation for ticks much like state labels~~ (fixed)
 - Tick marks for line graph should have more detail
 - ~~Table view is too small and has inconsistent surrounding border rules~~ (fixed)
