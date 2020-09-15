@@ -165,8 +165,6 @@ BDSVis.ViewModel = function (model) {
             if (document.getElementById(idname)) {
                 idname = "selector" + varr.code+"sub";
             }
-            console.log(vm.SelectedOpts);
-            console.log(varr1code);
             selectors.append("select")//Add the selector
                 .on("change", function () {
                     vm.SelectedOpts[varr1code] = d3.selectAll(this.childNodes)[0].filter(function (d) { return d.selected }).map(function (d) { return d.value });
