@@ -74,7 +74,7 @@ BDSVis.ViewModel = function (model) {
                 btn.onclick = function () { xvardisplay("block"); !vm.heatchart; vm.heatchart = +this.value; selectElement("xelector1", "year2"); vm.getBDSdata(); vm.regimeselector[0][0].value = this.value; tmod.regimex = this.value; shdCheck(); };
             }
             if (value == 0) {
-                btn.onclick = function () { xvardisplay("block"); vm.heatchart; vm.heatchart = +this.value; vm.getBDSdata(); vm.regimeselector[0][0].value = this.value; tmod.regimex = this.value; tmod.regimex = this.value; shdCheck(); };
+                btn.onclick = function () {selectElementS('selectorgeo', "state"); vm.SelectedOpts['geo'] = ['state']; xvardisplay("block"); vm.heatchart; vm.heatchart = +this.value; vm.getBDSdata(); vm.regimeselector[0][0].value = this.value; tmod.regimex = this.value; tmod.regimex = this.value; shdCheck(); };
             }
             if (value == 1) {
                 btn.onclick = function () { xvardisplay("none"); vm.cvar = "measure"; !vm.heatchart; vm.heatchart = +this.value; selectElement("xelector1", "geo"); vm.regimeselector[0][0].value = this.value; tmod.regimex = this.value; vm.getBDSdata(); shdCheck(); };
@@ -173,7 +173,7 @@ BDSVis.ViewModel = function (model) {
                 .attr("id", idname)
                 .property("multiple", multiple)
                 .classed("tallselector", multiple)
-                .property("disabled", ((vm.xvar === varr.code) && (!vm.model.IsGroup(varr) || isundergroupvar)) || (varr.code == 'geo' && vm.xvar == 'geo'))
+                .property("disabled", ((vm.xvar === varr.code) && (!vm.model.IsGroup(varr) || isundergroupvar)) || (varr.code == 'geo' && vm.xvar == 'geo' && tmod.regimex==0))
                 .selectAll("option").data(vm.model[varr1code]).enter()
                 .append("option")
                 .property("selected", function (d) {
@@ -247,7 +247,10 @@ BDSVis.ViewModel = function (model) {
         });
     };
 
-
+    function selectElementS(id, valueToSelect) {
+        let element = document.getElementById(id);
+        element.value = valueToSelect;
+    }
     this.ActualVarCode = function (varcode) {
         //Checks if the varname is group variable, then returns code of the variable selected. 
         //If not group variable just returns the input (supposedly the variable code)

@@ -215,7 +215,7 @@ BDSVis.PlotView = {
             AddOptionsToVarSelector(selector, vm.model.variables.filter(function (d) { return (d.asaxis && d.code !== vm.cvar) }), "xvar", false);
             selector.on("change", function () {
                 console.log(this.value);
-                if (this.value == 'geo') {
+                if (this.value == 'geo' && tmod.regimex==0) {
                     if (document.getElementById("xelector2")) {
                         selectElementS('xelector2', "state");
                     }
