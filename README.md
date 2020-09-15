@@ -67,6 +67,7 @@ To set up a link for a predefined graphics use the pushInput function defined on
 - log button does not change the values of the colorscale end values
 - some invalid results we would expec ["Number of establishments", "Retail Trade" and "NY MSA"] may be api issue
 - reset to defaults option would be useful
+- geo category variable presenting random selection under sub selection
 ## Contributers
 - Pavel Zhuravlev
 - Timothy Beggs
