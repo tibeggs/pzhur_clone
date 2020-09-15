@@ -48,10 +48,10 @@ BDSVis.PlotView = {
         var height = this.height;
         var tmod = vm.model;
         if (vm.model.IsGeomapvar(request.xvar) & tmod.regimex == 0) {
-            height1 = height-90;
+            height1 = height - 90;
         }
         else if (request.xvar == "year2" & tmod.regimex == 0) {
-            height1 = height-15;
+            height1 = height - 15;
 
         } else {
             height1 = height;
@@ -73,7 +73,7 @@ BDSVis.PlotView = {
             .attr("y", "-5")
             .attr("width", width + 5)
             .attr("height", height1 + 5);
-     
+
 
         //Clear legend, set size
         this.legendx = width + margin.left + margin.right;
@@ -206,16 +206,32 @@ BDSVis.PlotView = {
             };
             //X-axis variable selector		
             var selector = this.xvarselector;
-
+            function selectElementS(id, valueToSelect) {
+                let element = document.getElementById(id);
+                element.value = valueToSelect;
+            }
             //AddButtonToVarSelector(selector, vm.model.variables.filter(function (d) { return (d.asaxis /*&& d.code !== vm.cvar*/) }), "xvar", false);
             var selector = this.xvarselector.append("select");
             AddOptionsToVarSelector(selector, vm.model.variables.filter(function (d) { return (d.asaxis && d.code !== vm.cvar) }), "xvar", false);
-            selector.on("change", function () { vm.setxvar(this.value); });
+            selector.on("change", function () {
+                console.log(this.value);
+                if (this.value == 'geo') {
+                    if (document.getElementById("xelector2")) {
+                        selectElementS('xelector2', "state");
+                    }
+                    selectElementS('selectorgeo', "state");
+                    vm.SelectedOpts['geo'] = ['state']
+                };
+                vm.setxvar(this.value);
+            });
             selector[0][0].id = "xelector1"
-            if (vm.model.IsGroup(vm.xvar)) {
+            if (vm.model.IsGroup(vm.xvar) && vm.xvar != 'geo') {
                 var groupselector = this.xvarselector.append("select");
                 AddOptionsToVarSelector(groupselector, vm.model[vm.xvar], "xvar", true);
-                groupselector.on("change", function () { vm.SelectedOpts[vm.xvar] = [this.value]; vm.getBDSdata(); });
+                groupselector.on("change", function () {
+                    vm.SelectedOpts[vm.xvar] = [this.value];
+                    vm.getBDSdata();
+                });
                 groupselector[0][0].id = "xelector2";
             };
 

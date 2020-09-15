@@ -26,24 +26,9 @@ BDSVis.ViewModel = function (model) {
         function selectElement(id, valueToSelect) {
             let element = document.getElementById(id);
             element.value = valueToSelect;
-            //vm.setxvar(valueToSelect);
-            //vm.heatchart;
-            //vm.heatchart = +2;
             vm.setxvar(valueToSelect);
-            //console.log(tmod.regimeselector[0][0].value);
-            //!vm.heatchart; vm.heatchart = +this.value; vm.getBDSdata();
-            //tmod.regimeselector[0][0].value = this.value;
-
-            //tmod.regimeselector[0][0].value = this.value
         }
-        //if (tmod.regimeselector != undefined) {
-        //    if (tmod.regimeselector[0][0].value == 2) {
-        //        selectElement("xelector1", "year2");
-        //        console.log("ran");
-        //        //vm.getBDSdata();
-        //        console.log(tmod.regimeselector[0][0].value);
-        //    }
-        //}
+
 
         function shdCheck() {
             if (vm.ShowData) {
@@ -72,7 +57,7 @@ BDSVis.ViewModel = function (model) {
                 vm.getBDSdata();
 
                 console.log("shdCheck");
-            } 
+            }
         }
 
         function xvardisplay(option) {
@@ -81,18 +66,18 @@ BDSVis.ViewModel = function (model) {
 
         function CreateButtonSelector(selector, name, value, image) {
             var btn = document.createElement("Button");
-            nameedit = "</br>"+name;
+            nameedit = "</br>" + name;
             btn.innerHTML = image + nameedit;
             btn.value = value;
             btn.className = xclass;
             if (value == 2) {
-                btn.onclick = function () { xvardisplay("block"); !vm.heatchart; vm.heatchart = +this.value; selectElement("xelector1", "year2"); vm.getBDSdata(); vm.regimeselector[0][0].value = this.value;  tmod.regimex = this.value; shdCheck();};
+                btn.onclick = function () { xvardisplay("block"); !vm.heatchart; vm.heatchart = +this.value; selectElement("xelector1", "year2"); vm.getBDSdata(); vm.regimeselector[0][0].value = this.value; tmod.regimex = this.value; shdCheck(); };
             }
             if (value == 0) {
-                btn.onclick = function () { xvardisplay("block"); vm.heatchart; vm.heatchart = +this.value; vm.getBDSdata(); vm.regimeselector[0][0].value = this.value; tmod.regimex = this.value; tmod.regimex = this.value; shdCheck();};
+                btn.onclick = function () { xvardisplay("block"); vm.heatchart; vm.heatchart = +this.value; vm.getBDSdata(); vm.regimeselector[0][0].value = this.value; tmod.regimex = this.value; tmod.regimex = this.value; shdCheck(); };
             }
             if (value == 1) {
-                btn.onclick = function () { xvardisplay("none"); vm.cvar = "measure"; !vm.heatchart; vm.heatchart = +this.value; selectElement("xelector1", "geo"); vm.regimeselector[0][0].value = this.value; tmod.regimex = this.value; vm.getBDSdata();  shdCheck(); };
+                btn.onclick = function () { xvardisplay("none"); vm.cvar = "measure"; !vm.heatchart; vm.heatchart = +this.value; selectElement("xelector1", "geo"); vm.regimeselector[0][0].value = this.value; tmod.regimex = this.value; vm.getBDSdata(); shdCheck(); };
             }
 
             selector[0][0].appendChild(btn);
@@ -112,7 +97,7 @@ BDSVis.ViewModel = function (model) {
             };
         }
 
-        var rkey = [{ name: "Barchart", code: 0, image: "<img src='images/bar_chart.png'>" }, { name: "LineChart", code: 2, image: "<img src='images/line_graph.png'>" }, { name: "Map", code: 1, image: "<img src='images/globe_icon.png'>"  }];
+        var rkey = [{ name: "Barchart", code: 0, image: "<img src='images/bar_chart.png'>" }, { name: "LineChart", code: 2, image: "<img src='images/line_graph.png'>" }, { name: "Map", code: 1, image: "<img src='images/globe_icon.png'>" }];
         vm.regimeselector = [[{ value: 0 }]]
 
         if (vm.geomap() & tmod.regimex != 0) {
@@ -121,8 +106,7 @@ BDSVis.ViewModel = function (model) {
             vm.regimeselector.append("option").text("Non-cont Cartogram").attr("value", 1).property("selected", function (d) { return vm.cartogram === 1; });
             AddButtonToVarSelector(rgb, rkey);
             xvardisplay("none");
-        } else 
-        {
+        } else {
             AddButtonToVarSelector(rgb, rkey);
         };
         bug.append("h4").text(" ");
@@ -136,7 +120,7 @@ BDSVis.ViewModel = function (model) {
         } else {
             btnt.className = "xbtnsd";
         }
-        
+
         btnt.onclick = vm.toggleshowdata;
         rgbsd[0][0].appendChild(btnt);
         //rgb.append("button").text("Show Data").on("click", vm.toggleshowdata);
@@ -174,19 +158,24 @@ BDSVis.ViewModel = function (model) {
         //UI elements for measure selection
         var selectors = d3.select('.selectors');
         selectors.selectAll('*').remove();
-
         function AddSelectorWOptions(varr, isundergroupvar) {
             var varr1code = isundergroupvar ? vm.SelectedOpts[varr.code][0] : varr.code;
             var multiple = vm.multiple(varr.code) && (!vm.model.IsGroup(varr) || isundergroupvar);
+            var idname = "selector" + varr.code;
+            if (document.getElementById(idname)) {
+                idname = "selector" + varr.code+"sub";
+            }
+            console.log(vm.SelectedOpts);
+            console.log(varr1code);
             selectors.append("select")//Add the selector
                 .on("change", function () {
                     vm.SelectedOpts[varr1code] = d3.selectAll(this.childNodes)[0].filter(function (d) { return d.selected }).map(function (d) { return d.value });
                     vm.getBDSdata();
-                    console.log(vm.SelectedOpts);
                 })
+                .attr("id", idname)
                 .property("multiple", multiple)
                 .classed("tallselector", multiple)
-                .property("disabled", (vm.xvar === varr.code) && (!vm.model.IsGroup(varr) || isundergroupvar))
+                .property("disabled", ((vm.xvar === varr.code) && (!vm.model.IsGroup(varr) || isundergroupvar)) || (varr.code == 'geo' && vm.xvar == 'geo'))
                 .selectAll("option").data(vm.model[varr1code]).enter()
                 .append("option")
                 .property("selected", function (d) {
@@ -223,9 +212,7 @@ BDSVis.ViewModel = function (model) {
                 .text(function (d) { return vm.model.IsContinuous(varr1code) ? d : d.name; })
                 .attr("value", function (d) { return vm.model.IsContinuous(varr1code) ? d : d.code; });
         };
-
         vm.model.variables.forEach(function (varr) { //For each variable create selector and buttons
-            //console.log(varr);
             if (varr.name != "Measure") { //Exception for measure
                 selectors.append("br");
                 selectors.append("h4").text(varr.name + ":"); //Add the title for selector
@@ -255,8 +242,10 @@ BDSVis.ViewModel = function (model) {
                         .property("disabled", (!vm.model.IsGeomapvar(varr)) && ((vm.xvar === varr.code) || (vm.cvar === varr.code)))
                         .text(vm.model.IsGeomapvar(varr) ? "See Map" : "Make X-axis");
                 selectorm.append("br");
-
             }
+            //if (vm.xvar == 'geo') {
+            //    selectElementS('selectorgeosub', "state");
+            //}
         });
     };
 
@@ -341,7 +330,7 @@ BDSVis.ViewModel = function (model) {
             return false;
         }
 
-        
+
     };
 
     this.region = "US";
