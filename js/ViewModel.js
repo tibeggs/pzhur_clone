@@ -34,7 +34,6 @@ BDSVis.ViewModel = function (model) {
             if (vm.ShowData) {
                 vm.ShowData = !vm.ShowData;
                 this.className += " act";
-                console.log(this.className += " act");
 
 
 
@@ -55,8 +54,6 @@ BDSVis.ViewModel = function (model) {
                 //d3.select("#showdata").style("display", vm.ShowData ? "block" : "none");
                 vm.TableView.SetLowerHeadersWidth();
                 vm.getBDSdata();
-
-                console.log("shdCheck");
             }
         }
 
@@ -77,7 +74,7 @@ BDSVis.ViewModel = function (model) {
                 btn.onclick = function () {selectElementS('selectorgeo', "state"); vm.SelectedOpts['geo'] = ['state']; xvardisplay("block"); vm.heatchart; vm.heatchart = +this.value; vm.getBDSdata(); vm.regimeselector[0][0].value = this.value; tmod.regimex = this.value; tmod.regimex = this.value; shdCheck(); };
             }
             if (value == 1) {
-                btn.onclick = function () { xvardisplay("none"); vm.cvar = "measure"; !vm.heatchart; vm.heatchart = +this.value; selectElement("xelector1", "geo"); vm.regimeselector[0][0].value = this.value; tmod.regimex = this.value; vm.getBDSdata(); shdCheck(); };
+                btn.onclick = function () { xvardisplay("none"); vm.cvar = "measure"; !vm.heatchart; vm.heatchart = +this.value; vm.SelectedOpts['state'] = ['00']; vm.SelectedOpts['metropolitan statistical area'] = ['00']; selectElement("xelector1", "geo"); vm.regimeselector[0][0].value = this.value; tmod.regimex = this.value; vm.getBDSdata(); shdCheck(); };
             }
 
             selector[0][0].appendChild(btn);
@@ -187,7 +184,6 @@ BDSVis.ViewModel = function (model) {
         //UI elements for variable selection
         var selectorm = d3.select('.selectorm');
         selectorm.selectAll('*').remove();
-
         function AddSelectorMOptions(varr, isundergroupvar) {
             var varr1code = isundergroupvar ? vm.SelectedOpts[varr.code][0] : varr.code;
             var multiple = vm.multiple(varr.code) && (!vm.model.IsGroup(varr) || isundergroupvar);
@@ -405,7 +401,6 @@ BDSVis.ViewModel = function (model) {
     var lfchar = localStorage.getItem("fchar");
     var lfsize = localStorage.getItem("fsize");
     var lifsize = localStorage.getItem("ifsize");
-    console.log(lfchar);
 
     if (lregi != null & lregi != "") {
         tmod.regimex = lregi;

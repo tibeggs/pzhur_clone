@@ -114,12 +114,15 @@ BDSVis.PlotView = {
 
             this.logbutton.on("click", function () {
                 vm.logscale = !vm.logscale;
-                if (vm.geomap())
+                if (vm.geomap()) {
+                    console.log("read correctly");
                     BDSVis.makeMap(data, request, vm);
-                //else if ((!vm.heatchart) && (regimeselector[0][0].value != 2)) /*!(vm.model.IsContinuous(request.xvar)))*/
-                //    BDSVis.makeHeatChart(data, request, vm);
-                else
+                }
+
+                else {
                     BDSVis.makePlot(data, request, vm);
+                }
+                    
             });
 
             //Rectangular zoom checkbox

@@ -62,12 +62,11 @@ To set up a link for a predefined graphics use the pushInput function defined on
 - ~~When selecting map from pushinput x-axis lable does not get hidden~~ (fixed)
 - ~~Text on map only references States not MSA~~ (fixed)
 - Remove Metro/Non-Metro from map it has no valid selections
-- fix no msa option on map
+- ~~fix no msa option on map~~ (fixed)
 - more instructions on graphics
-- log button does not change the values of the colorscale end values
-- some invalid results we would expec ["Number of establishments", "Retail Trade" and "NY MSA"] may be api issue
+- some invalid results we would expect ["Number of establishments", "Retail Trade" and "NY MSA"] may be api issue
 - reset to defaults option would be useful
-- geo category variable presenting random selection under sub selection
+- ~~geo category variable presenting random selection under sub selection~~ (fixed)
 ## Contributers
 - Pavel Zhuravlev
 - Timothy Beggs
