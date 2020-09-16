@@ -110,7 +110,7 @@ BDSVis.PlotView = {
 
             this.logbutton = this.scaleui.append("input").attr("type", "Checkbox")
                 .property("checked", function (d) { return vm.logscale; })
-            this.scaleui.append("span").text("Log")
+            this.scaleui.append("span").text("Log Interpolation")
 
             this.logbutton.on("click", function () {
                 vm.logscale = !vm.logscale;
