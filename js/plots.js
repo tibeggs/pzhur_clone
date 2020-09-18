@@ -343,13 +343,13 @@ BDSVis.makePlot = function (data, request, vm, limits) {
             .attr("x", function (d) { return xScale(d[xvar]) + barwidth * cvarlist.indexOf(d[cvar]) })
             .attr("y", function (d) { return yScale(Math.max(0, +d[yvar])) })
             .attr("height", function (d) { return Math.abs(yScale(y0) - yScale(+d[yvar])) })
-            .on("dblclick", function (d) {
+            //.on("dblclick", function (d) {//double click to remove function
 
-                //if(!vm.zoombyrect) return;
-                var ind = vm.IncludedXvarValues[xvar].indexOf(d[xvar]);
-                vm.IncludedXvarValues[xvar].splice(ind, 1);
-                BDSVis.processAPIdata(data, request, vm);
-            })
+            //    //if(!vm.zoombyrect) return;
+            //    var ind = vm.IncludedXvarValues[xvar].indexOf(d[xvar]);
+            //    vm.IncludedXvarValues[xvar].splice(ind, 1);
+            //    BDSVis.processAPIdata(data, request, vm);
+            //})
             // .on('mouseover', tip.show)
             //    		.on('mouseout', tip.hide)
             .append("title").text(Tooltiptext);

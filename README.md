@@ -64,7 +64,7 @@ To set up a link for a predefined graphics use the pushInput function defined on
 - ~~Text on map only references States not MSA~~ (fixed)
 - Remove Metro/Non-Metro from map it has no valid selections
 - ~~fix no msa option on map~~ (fixed)
-- more instructions on graphics
+- more instructions on graphics (REMOVE DOUBLE CLICK FEATURE TO REMOVE ON BAR GRAPH AS MATT REQUEST)
 - some invalid results we would expect ["Number of establishments", "Retail Trade" and "NY MSA"] may be api issue
 - reset to defaults option would be useful
 - ~~geo category variable presenting random selection under sub selection~~ (fixed)
