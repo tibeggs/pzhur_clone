@@ -252,7 +252,6 @@ BDSVis.makePlot = function (data, request, vm, limits) {
                 m[0] = Math.max(0, Math.min(width, m[0]));
                 m[1] = Math.max(0, Math.min(height, m[1]));
                 rect.remove();
-                console.log("______")
                 if (m[1] > origin[1]) {
                     var tempm = m;
                     m = origin;
