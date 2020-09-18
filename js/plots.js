@@ -252,6 +252,12 @@ BDSVis.makePlot = function (data, request, vm, limits) {
                 m[0] = Math.max(0, Math.min(width, m[0]));
                 m[1] = Math.max(0, Math.min(height, m[1]));
                 rect.remove();
+                console.log("______")
+                if (m[1] > origin[1]) {
+                    var tempm = m;
+                    m = origin;
+                    origin = tempm;
+                }
                 if (m[0] !== origin[0] && m[1] !== origin[1]) {
                     //Find new extents/limits of the plot from the rectangle size and call the plot function with them as argument
                     if (vm.model.IsContinuous(xvarr) & tmod.regimex == 2) {

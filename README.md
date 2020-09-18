@@ -58,7 +58,7 @@ To set up a link for a predefined graphics use the pushInput function defined on
 - ~~Table view is too small and has inconsistent surrounding border rules~~ (fixed)
 - Internet Explorer is not currently supported: this is due to internet explorer not being updated in recent years with new internet standards it technically runs but will not scale well
 - Zooming on line graph occasionally creates an extra "x0-axis"
-- drawing box on line graph can flip the axis
+- ~~drawing box on line graph can flip the axis~~ (fixed)
 - some functions end up being run multiple times while not project breaking it is not efficient
 - ~~When selecting map from pushinput x-axis lable does not get hidden~~ (fixed)
 - ~~Text on map only references States not MSA~~ (fixed)
@@ -68,6 +68,7 @@ To set up a link for a predefined graphics use the pushInput function defined on
 - some invalid results we would expect ["Number of establishments", "Retail Trade" and "NY MSA"] may be api issue
 - reset to defaults option would be useful
 - ~~geo category variable presenting random selection under sub selection~~ (fixed)
+- non-relative paths to needed json and file (fixed? waiting for census testing)
 ## Contributers
 - Pavel Zhuravlev
 - Timothy Beggs
