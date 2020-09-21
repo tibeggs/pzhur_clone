@@ -67,7 +67,7 @@ To set up a link for a predefined graphics use the pushInput function defined on
 - more instructions on graphics
 - ~~remove double click feature on graph~~ (removed) [plots.js: 324]
 - some invalid results we would expect ["Number of establishments", "Retail Trade" and "NY MSA"] may be api issue
--~~reset to defaults option would be useful~~ (added)
+- ~~reset to defaults option would be useful~~ (added)
 - ~~geo category variable presenting random selection under sub selection~~ (fixed)
 - non-relative paths to needed json and file (fixed? waiting for census testing)
 ## Contributers
