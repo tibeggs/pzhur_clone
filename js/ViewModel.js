@@ -77,7 +77,6 @@ BDSVis.ViewModel = function (model) {
             if (value == 1) {
                 btn.onclick = function () { xvardisplay("none"); vm.cvar = "measure"; !vm.heatchart; vm.heatchart = +this.value; vm.SelectedOpts['state'] = ['00']; vm.SelectedOpts['metropolitan statistical area'] = ['00']; selectElement("xelector1", "geo"); vm.regimeselector[0][0].value = this.value; tmod.regimex = this.value; vm.getBDSdata(); shdCheck(); };
             }
-
             selector[0][0].appendChild(btn);
         }
         function AddButtonToVarSelector(selector, varvalues, whichvar, group) {

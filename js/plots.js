@@ -212,16 +212,6 @@ BDSVis.makePlot = function (data, request, vm, limits) {
         svg.call(pv.zoom);
     }
 
-    // //Clipping lines and dots outside the plot area
-    // svg.append("defs").append("svg:clipPath")
-    //         .attr("id", "clip")
-    //         .append("svg:rect")
-    //         .attr("id", "clip-rect")
-    //         .attr("x", "0")
-    //         .attr("y", "-5")
-    //         .attr("width", width+5)
-    //         .attr("height", height+5);
-
     var chart = svg.append("g").attr("clip-path", "url(#clip)");
 
     //Zoom-by-rectangle procedure adopted from https://gist.github.com/jasondavies/3689931 and changed to redraw the whole plot and to work with bar charts
@@ -275,19 +265,7 @@ BDSVis.makePlot = function (data, request, vm, limits) {
         d3.event.stopPropagation();
     });
 
-    // var tip = d3.tip()
-    // 	.attr('class', 'd3-tip')
-    // 	.offset(function(d) {return [-10, yScale(d[yvar]/2.)];})
-    // 	.html(Tooltiptext);
-    // svg.call(tip);
-    var vegimexdfv;
-    //var tmod.regimex = (vm.regimeselector == undefined) ? vegimexdfv : 9;
-    // ||vm.regimeselector[0][0].value==2
-    //if (vm.regimeselector != undefined) {
-    //	tmod.regimex = vm.regimeselector[0][0].value;
-    //   }
     if (tmod.regimex == 2)
-    //if (vm.model.IsContinuous(xvarr) || regimex == 2)
     {
         document.getElementById("xelector1").disabled = true;
 
@@ -350,8 +328,6 @@ BDSVis.makePlot = function (data, request, vm, limits) {
             //    vm.IncludedXvarValues[xvar].splice(ind, 1);
             //    BDSVis.processAPIdata(data, request, vm);
             //})
-            // .on('mouseover', tip.show)
-            //    		.on('mouseout', tip.hide)
             .append("title").text(Tooltiptext);
 
         chart.selectAll(".offlimitis").data(data.filter(function (d) { return (xScale.domain().indexOf(d[xvar]) > -1) && (yScale(d[yvar]) < 0) }))

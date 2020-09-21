@@ -41,32 +41,33 @@ To set up a link for a predefined graphics use the pushInput function defined on
     - 2 : Line Graph
   - You can create invalid options using this method that are not accessible through the standard visualization tool (such as a line graph with sector as the x-axis)
 ## List of known issues
-- MSA for all fsize does not seem to be returning expected data seems to be driven by both fage and fsize both being "ALL" may not have be calculated in API
+- MSA for all fsize does not seem to be returning expected data seems to be driven by both fage and fsize both being "ALL" may not have be calculated in API [apirequests.js: 52]
 - Excess Pushes into console.log: This is mostly for testing and will be parsed down before final version
 - *Remove excess/commented out code* (In Progress look for #fordelection!! or #modulefordeletion!! main target is heatchart)
-- Bar Chart does not allow for horizontal zooming (we may not have enough time to address this issue)
+- Bar Chart does not allow for horizontal zooming (we may not have enough time to address this issue) [plots.js: 53 (consider work in BarDrag Branch)]
 - ~~Some of the elements of the bar graph are not tied correctly to the clipping box and do not dissapear when draged off the graph: this has to due with the defined boundries of the clipping box as well as the redefining graph region when switching tick label rotations~~ (fixed)
-- No data warning does not wrap correctly
-- clicking quickly between buttons causes invalid graphics to temporarily appear
-- selecting too many legends lists them outside the bounding box: nothing is set up to handle this at the moment
+- No data warning does not wrap correctly [PortView.js: 270]
+- clicking quickly between buttons causes invalid graphics to temporarily appear [ViewModel.js: 68]
+- selecting too many legends lists them outside the bounding box: nothing is set up to handle this at the moment [PlotView.js: 78-97]
 - ~~When updating a map after a zoom results in fill and border lines not lining up~~ (fixed)
 - ~~Certain combinations will create invalid map option tied to having multiple cvars passed into the mapping options~~ (fixed)
-- ~~Bar chart tick marks become unreadable with certain combinations~~ (fixed via elinination)
+- ~~Bar chart tick marks become unreadable with certain combinations~~ (fixed via elinination) [Plots.js: 22 & 135]
   - ~~MSA : no easy fix available at the moment may eliminate this option~~ (fixed via elimination)
   - ~~Year : plan to implement rotation for ticks much like state labels~~ (fixed)
-- Tick marks for line graph should have more detail
+- Tick marks for line graph should have more detail [plots.js: 38]
 - ~~Table view is too small and has inconsistent surrounding border rules~~ (fixed)
-- Internet Explorer is not currently supported: this is due to internet explorer not being updated in recent years with new internet standards it technically runs but will not scale well
-- Zooming on line graph occasionally creates an extra "x0-axis"
+- Internet Explorer is not currently supported: this is due to internet explorer not being updated in recent years with new internet standards it technically runs but will not scale well [particular issue with "let" statements]
+- ~~Zooming on line graph occasionally creates an extra "x0-axis"~~ (fixed)
 - ~~drawing box on line graph can flip the axis~~ (fixed)
-- some functions end up being run multiple times while not project breaking it is not efficient
+- some functions end up being run multiple times while not project breaking it is not efficient [multiple locations consider how viewmodel.js (getBDSdata): 257 is called]
 - ~~When selecting map from pushinput x-axis lable does not get hidden~~ (fixed)
 - ~~Text on map only references States not MSA~~ (fixed)
-- Remove Metro/Non-Metro from map it has no valid selections
+- Remove Metro/Non-Metro from map it has no valid selections [consider how ViewModel.js handles similar issue with diables in AddSelectorWOptions: 158]
 - ~~fix no msa option on map~~ (fixed)
-- more instructions on graphics (REMOVE DOUBLE CLICK FEATURE TO REMOVE ON BAR GRAPH AS MATT REQUEST)
+- more instructions on graphics
+- ~~remove double click feature on graph~~ (removed) [plots.js: 324]
 - some invalid results we would expect ["Number of establishments", "Retail Trade" and "NY MSA"] may be api issue
-- reset to defaults option would be useful
+-~~reset to defaults option would be useful~~ (added)
 - ~~geo category variable presenting random selection under sub selection~~ (fixed)
 - non-relative paths to needed json and file (fixed? waiting for census testing)
 ## Contributers
