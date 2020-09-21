@@ -48,6 +48,7 @@ BDSVis.ViewModel = function (model) {
                 };
 
                 d3.select("#showdata").style("display", vm.ShowData ? "block" : "none");
+                d3.select("#resetHolder").style("display", vm.ShowData ? "none" : "");
                 d3.select("#chartsvg").style("display", vm.ShowData ? "none" : "");
                 d3.select("#cvarselector").style("display", vm.ShowData ? "none" : "");
                 d3.select("#logbutton").style("display", vm.ShowData ? "none" : "");
@@ -71,7 +72,7 @@ BDSVis.ViewModel = function (model) {
                 btn.onclick = function () { xvardisplay("block"); !vm.heatchart; vm.heatchart = +this.value; selectElement("xelector1", "year2"); vm.getBDSdata(); vm.regimeselector[0][0].value = this.value; tmod.regimex = this.value; shdCheck(); };
             }
             if (value == 0) {
-                btn.onclick = function () {selectElementS('selectorgeo', "state"); vm.SelectedOpts['geo'] = ['state']; xvardisplay("block"); vm.heatchart; vm.heatchart = +this.value; vm.getBDSdata(); vm.regimeselector[0][0].value = this.value; tmod.regimex = this.value; tmod.regimex = this.value; shdCheck(); };
+                btn.onclick = function () { selectElementS('selectorgeo', "state"); vm.SelectedOpts['geo'] = ['state']; xvardisplay("block"); vm.heatchart; vm.heatchart = +this.value; vm.getBDSdata(); vm.regimeselector[0][0].value = this.value; tmod.regimex = this.value; tmod.regimex = this.value; shdCheck(); };
             }
             if (value == 1) {
                 btn.onclick = function () { xvardisplay("none"); vm.cvar = "measure"; !vm.heatchart; vm.heatchart = +this.value; vm.SelectedOpts['state'] = ['00']; vm.SelectedOpts['metropolitan statistical area'] = ['00']; selectElement("xelector1", "geo"); vm.regimeselector[0][0].value = this.value; tmod.regimex = this.value; vm.getBDSdata(); shdCheck(); };
@@ -160,7 +161,7 @@ BDSVis.ViewModel = function (model) {
             var multiple = vm.multiple(varr.code) && (!vm.model.IsGroup(varr) || isundergroupvar);
             var idname = "selector" + varr.code;
             if (document.getElementById(idname)) {
-                idname = "selector" + varr.code+"sub";
+                idname = "selector" + varr.code + "sub";
             }
             selectors.append("select")//Add the selector
                 .on("change", function () {
@@ -170,7 +171,7 @@ BDSVis.ViewModel = function (model) {
                 .attr("id", idname)
                 .property("multiple", multiple)
                 .classed("tallselector", multiple)
-                .property("disabled", ((vm.xvar === varr.code) && (!vm.model.IsGroup(varr) || isundergroupvar)) || (varr.code == 'geo' && vm.xvar == 'geo' && tmod.regimex==0))
+                .property("disabled", ((vm.xvar === varr.code) && (!vm.model.IsGroup(varr) || isundergroupvar)) || (varr.code == 'geo' && vm.xvar == 'geo' && tmod.regimex == 0))
                 .selectAll("option").data(vm.model[varr1code]).enter()
                 .append("option")
                 .property("selected", function (d) {
@@ -282,6 +283,7 @@ BDSVis.ViewModel = function (model) {
 
 
         d3.select("#showdata").style("display", vm.ShowData ? "block" : "none");
+        d3.select("#resetHolder").style("display", vm.ShowData ? "none" : "");
         d3.select("#chartsvg").style("display", vm.ShowData ? "none" : "");
         d3.select("#cvarselector").style("display", vm.ShowData ? "none" : "");
         d3.select("#logbutton").style("display", vm.ShowData ? "none" : "");
@@ -387,6 +389,22 @@ BDSVis.ViewModel = function (model) {
             });
     });
 
+    //reset button to defaults button
+    var resetHolder = document.getElementById("resetHolder");
+    var btn = document.createElement("Button");
+    btn.innerHTML = "Reset to Defaults";
+    btn.className = "resetBut";
+    btn.onclick = function () {
+        getDefaults();
+        vm.PlotView.DisplayWaitingMessage();
+        vm.regimeselector[0][0].value = lregi;
+        tmod.regimex = lregi;
+        vm.getBDSdata();
+        //vm.shdCheck();
+    }
+    resetHolder.appendChild(btn);
+
+
     //Initial values of X-axis variable and C- variable
     var lxvar = localStorage.getItem("xvar");
     var lcvar = localStorage.getItem("cvar");
@@ -402,48 +420,51 @@ BDSVis.ViewModel = function (model) {
     var lfsize = localStorage.getItem("fsize");
     var lifsize = localStorage.getItem("ifsize");
 
-    if (lregi != null & lregi != "") {
-        tmod.regimex = lregi;
-    }
-    if (lxvar == null || lxvar == "") {
-        this.xvar = "fage4";
-    } else {
-        this.xvar = lxvar;
-    }
-    if (lcvar == null || lcvar == "") {
-        this.cvar = "sic1";
-    }
-    else {
-        this.cvar = lcvar;
-    }
-    if (lmeas != null & lmeas != "") {
-        vm.SelectedOpts["measure"] = lmeas.split(',');
-    }
-    if (lsic != null & lsic != "") {
-        vm.SelectedOpts["sic1"] = lsic.split(',');
-    }
-    if (lstate != null & lstate != "") {
-        vm.SelectedOpts["state"] = lstate.split(',');
-    }
-    if (lmetro != null & lmetro != "") {
-        vm.SelectedOpts["metro"] = lmetro.split(',');
-    }
-    if (lyear != null & lyear != "") {
-        vm.SelectedOpts["year2"] = lyear.split(',');
-    }
-    if (lfage != null & lfage != "") {
-        vm.SelectedOpts["fage4"] = lfage.split(',');
-    }
-    if (lfchar != null & lfchar != "") {
-        vm.SelectedOpts["fchar"] = lfchar.split(',');
-    }
-    if (lfsize != null & lfsize != "") {
-        vm.SelectedOpts["fsize"] = lfsize.split(',');
-    }
-    if (lifsize != null & lifsize != "") {
-        vm.SelectedOpts["ifsize"] = lifsize.split(',');
+    function getDefaults() {
+        if (lregi != null & lregi != "") {
+            tmod.regimex = lregi;
+        }
+        if (lxvar == null || lxvar == "") {
+            vm.xvar = "fage4";
+        } else {
+            vm.xvar = lxvar;
+        }
+        if (lcvar == null || lcvar == "") {
+            vm.cvar = "sic1";
+        }
+        else {
+            vm.cvar = lcvar;
+        }
+        if (lmeas != null & lmeas != "") {
+            vm.SelectedOpts["measure"] = lmeas.split(',');
+        }
+        if (lsic != null & lsic != "") {
+            vm.SelectedOpts["sic1"] = lsic.split(',');
+        }
+        if (lstate != null & lstate != "") {
+            vm.SelectedOpts["state"] = lstate.split(',');
+        }
+        if (lmetro != null & lmetro != "") {
+            vm.SelectedOpts["metro"] = lmetro.split(',');
+        }
+        if (lyear != null & lyear != "") {
+            vm.SelectedOpts["year2"] = lyear.split(',');
+        }
+        if (lfage != null & lfage != "") {
+            vm.SelectedOpts["fage4"] = lfage.split(',');
+        }
+        if (lfchar != null & lfchar != "") {
+            vm.SelectedOpts["fchar"] = lfchar.split(',');
+        }
+        if (lfsize != null & lfsize != "") {
+            vm.SelectedOpts["fsize"] = lfsize.split(',');
+        }
+        if (lifsize != null & lifsize != "") {
+            vm.SelectedOpts["ifsize"] = lifsize.split(',');
+        }
     }
 
+    getDefaults();
 
 
     this.PlotView.Init();
