@@ -20,17 +20,21 @@ The project includes a landing page which can direct users to graphics of intere
 
 ## Installing BDS Visualization Page
 This will be dependent on how Census desires to host the project the current method used for testing is listed below.
+
 ### Running Locally:
 For testing Purposes the website has been run locally using http-server for node.js on **Windows** 
 - To install http-server node.js and npm are required
   - Node.js https://nodejs.org/en/
   - http-server https://www.npmjs.com/package/http-server
 - After npm is setup navigate to where the project is stored and on the top level folder where index.html is stored run http-server from a command line this will provide access to the projects features locally
+
 ### Running over github.io
 Additional for sharing a live version over the web we are currently using github's Pages feature to host the website
 - Details on how to set up a github Page can be found at https://pages.github.com/
+
 ### Final Deployment
 The final deployment will be based largely on how Census desires to host the project. This should probably through a provider.
+
 ## Landing Page Link Function
 To set up a link for a predefined graphics use the pushInput function defined on Landing.js
 - function pushInput(xvar,cvar,regi,meas,sic,state,metro,year,fage,fchar,fsize,ifsize)
@@ -71,6 +75,7 @@ To set up a link for a predefined graphics use the pushInput function defined on
 - ~~reset to defaults option would be useful~~ (added)
 - ~~geo category variable presenting random selection under sub selection~~ (fixed)
 - non-relative paths to needed json and file (fixed? waiting for census testing)
+
 ## Contributers
 - Pavel Zhuravlev
 - Timothy Beggs
