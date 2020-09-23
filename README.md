@@ -49,6 +49,7 @@ To set up a link for a predefined graphics use the pushInput function defined on
 - No data warning does not wrap correctly [PortView.js: 270]
 - clicking quickly between buttons causes invalid graphics to temporarily appear [ViewModel.js: 68]
 - selecting too many legends lists them outside the bounding box: nothing is set up to handle this at the moment [PlotView.js: 78-97]
+ - this also causes the show data box to malfunction by having the lower legend move outside clipping area
 - ~~When updating a map after a zoom results in fill and border lines not lining up~~ (fixed)
 - ~~Certain combinations will create invalid map option tied to having multiple cvars passed into the mapping options~~ (fixed)
 - ~~Bar chart tick marks become unreadable with certain combinations~~ (fixed via elinination) [Plots.js: 22 & 135]
