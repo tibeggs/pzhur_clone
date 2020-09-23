@@ -394,10 +394,11 @@ BDSVis.ViewModel = function (model) {
     btn.innerHTML = "Reset to Defaults";
     btn.className = "resetBut";
     btn.onclick = function () {
-        getDefaults();
+
         vm.PlotView.DisplayWaitingMessage();
         vm.regimeselector[0][0].value = lregi;
         tmod.regimex = lregi;
+        getDefaults();
         vm.getBDSdata();
         //vm.shdCheck();
     }
@@ -461,6 +462,19 @@ BDSVis.ViewModel = function (model) {
         if (lifsize != null & lifsize != "") {
             vm.SelectedOpts["ifsize"] = lifsize.split(',');
         }
+
+        lregi = tmod.regimex;
+        lxvar = vm.xvar;
+        lcvar = vm.cvar;
+        lmeas = vm.SelectedOpts["measure"].join(',');
+        lsic = vm.SelectedOpts["sic1"].join(',');
+        lstate = vm.SelectedOpts["state"].join(',');
+        lmetro = vm.SelectedOpts["metro"].join(',');
+        lyear = vm.SelectedOpts["year2"].join(',');
+        lfage = vm.SelectedOpts["fage4"].join(',');
+        lfchar = vm.SelectedOpts["fchar"].join(',');
+        lfsize = vm.SelectedOpts["fsize"].join(',');
+        lifsize = vm.SelectedOpts["ifsize"].join(',');
     }
 
     getDefaults();

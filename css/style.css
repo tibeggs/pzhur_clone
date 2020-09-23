@@ -224,6 +224,11 @@ rect.zoom {
         font-weight: normal;
         /*padding: 5px;*/
     }
+#resetHolder {
+    font: 12px sans-serif;
+    text-align: center;
+    padding: 5px;
+}
 
 .toolContainer {
     margin-top: 10px;
