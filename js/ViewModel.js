@@ -29,7 +29,7 @@ BDSVis.ViewModel = function (model) {
             vm.setxvar(valueToSelect);
         }
 
-
+        //Check to see if table view is on for regime buttons
         function shdCheck() {
             if (vm.ShowData) {
                 vm.ShowData = !vm.ShowData;
@@ -57,11 +57,11 @@ BDSVis.ViewModel = function (model) {
                 vm.getBDSdata();
             }
         }
-
+        //turn on and of xvariable selection
         function xvardisplay(option) {
             document.getElementById("xvarselector").style.display = option;
         }
-
+        //create regime buttons function
         function CreateButtonSelector(selector, name, value, image) {
             var btn = document.createElement("Button");
             nameedit = "</br>" + name;
@@ -79,6 +79,7 @@ BDSVis.ViewModel = function (model) {
             }
             selector[0][0].appendChild(btn);
         }
+        //create regime buttons
         function AddButtonToVarSelector(selector, varvalues, whichvar, group) {
             for (i in varvalues) {
                 name = varvalues[i].name;
@@ -93,7 +94,7 @@ BDSVis.ViewModel = function (model) {
                 CreateButtonSelector(selector, name, value, image, xclass)
             };
         }
-
+        //data for regime buttons
         var rkey = [{ name: "Barchart", code: 0, image: "<img src='images/bar_chart.png'>" }, { name: "LineChart", code: 2, image: "<img src='images/line_graph.png'>" }, { name: "Map", code: 1, image: "<img src='images/globe_icon.png'>" }];
         vm.regimeselector = [[{ value: 0 }]]
 
@@ -420,6 +421,7 @@ BDSVis.ViewModel = function (model) {
     var lfsize = localStorage.getItem("fsize");
     var lifsize = localStorage.getItem("ifsize");
 
+    //set defaults from index
     function getDefaults() {
         if (lregi != null & lregi != "") {
             tmod.regimex = lregi;
